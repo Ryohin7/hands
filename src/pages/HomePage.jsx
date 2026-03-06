@@ -180,9 +180,6 @@ function HomePage() {
                     {/* 置頂公告區塊 */}
                     {pinnedPosts.length > 0 && currentPage === 1 && (
                         <div className="pinned-section">
-                            <div className="pinned-label">
-                                置頂
-                            </div>
                             <div className="pinned-list">
                                 {pinnedPosts.map((post, index) => (
                                     <Link

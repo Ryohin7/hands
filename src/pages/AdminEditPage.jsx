@@ -1,173 +1,24 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, addDoc, updateDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
-
-// 動態載入 React Quill
-let ReactQuill = null;
+import TiptapEditor from '../components/TiptapEditor';
 
 function AdminEditPage() {
     const navigate = useNavigate();
     const { id } = useParams();
     const isEdit = Boolean(id);
-    const quillRef = useRef(null);
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [category, setCategory] = useState('公告');
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [quillLoaded, setQuillLoaded] = useState(false);
     const [scheduledAt, setScheduledAt] = useState('');
     const [useSchedule, setUseSchedule] = useState(false);
     const [pinned, setPinned] = useState(false);
 
     const categories = ['公告', '活動', '新聞稿'];
-
-    // 動態載入 Quill
-    useEffect(() => {
-        async function loadQuill() {
-            const mod = await import('react-quill-new');
-            ReactQuill = mod.default;
-            await import('react-quill-new/dist/quill.snow.css');
-            setQuillLoaded(true);
-        }
-        loadQuill();
-    }, []);
-
-    // 圖片縮放功能
-    useEffect(() => {
-        if (!quillLoaded || !quillRef.current) return;
-
-        // 延遲綁定，確保 Quill 編輯器已完全渲染
-        const timer = setTimeout(() => {
-            const editor = quillRef.current?.getEditor?.();
-            if (!editor) return;
-
-            const editorEl = editor.root;
-            if (!editorEl) return;
-
-            let resizing = null;
-            let startX = 0;
-            let startWidth = 0;
-
-            function isNearRightEdge(img, clientX) {
-                const rect = img.getBoundingClientRect();
-                return clientX > rect.right - 15;
-            }
-
-            function onMouseDown(e) {
-                if (e.target.tagName === 'IMG' && isNearRightEdge(e.target, e.clientX)) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    resizing = e.target;
-                    startX = e.clientX;
-                    startWidth = resizing.offsetWidth;
-                    resizing.style.cursor = 'col-resize';
-                    resizing.classList.add('resizing');
-                    showSizeTooltip(resizing);
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                }
-            }
-
-            function onMouseMove(e) {
-                if (!resizing) {
-                    // 當滑鼠在圖片右邊緣時改變游標
-                    const imgs = editorEl.querySelectorAll('img');
-                    imgs.forEach(img => {
-                        if (isNearRightEdge(img, e.clientX)) {
-                            img.style.cursor = 'col-resize';
-                        } else {
-                            img.style.cursor = '';
-                        }
-                    });
-                    return;
-                }
-                e.preventDefault();
-                const diff = e.clientX - startX;
-                const newWidth = Math.max(50, startWidth + diff);
-                resizing.style.width = newWidth + 'px';
-                resizing.style.height = 'auto';
-                updateSizeTooltip(resizing, newWidth);
-            }
-
-            function onMouseUp() {
-                if (resizing) {
-                    resizing.style.cursor = '';
-                    resizing.classList.remove('resizing');
-                    removeSizeTooltip();
-                    resizing = null;
-                }
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
-
-            function onDblClick(e) {
-                if (e.target.tagName === 'IMG') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showImageSizeDialog(e.target);
-                }
-            }
-
-            editorEl.addEventListener('mousedown', onMouseDown);
-            editorEl.addEventListener('mousemove', onMouseMove);
-            editorEl.addEventListener('dblclick', onDblClick);
-
-            // 存到 ref 以便清理
-            quillRef.current._cleanupResize = () => {
-                editorEl.removeEventListener('mousedown', onMouseDown);
-                editorEl.removeEventListener('mousemove', onMouseMove);
-                editorEl.removeEventListener('dblclick', onDblClick);
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            };
-        }, 500);
-
-        return () => {
-            clearTimeout(timer);
-            if (quillRef.current?._cleanupResize) {
-                quillRef.current._cleanupResize();
-            }
-        };
-    }, [quillLoaded]);
-
-    function showSizeTooltip(img) {
-        removeSizeTooltip();
-        const tooltip = document.createElement('div');
-        tooltip.className = 'img-size-tooltip';
-        tooltip.textContent = `${Math.round(img.offsetWidth)}px`;
-        img.parentNode.style.position = 'relative';
-        img.parentNode.appendChild(tooltip);
-        const rect = img.getBoundingClientRect();
-        const parentRect = img.parentNode.getBoundingClientRect();
-        tooltip.style.left = (rect.left - parentRect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
-        tooltip.style.top = (rect.top - parentRect.top - 30) + 'px';
-    }
-
-    function updateSizeTooltip(img, width) {
-        const tooltip = img.parentNode.querySelector('.img-size-tooltip');
-        if (tooltip) {
-            tooltip.textContent = `${Math.round(width)}px`;
-        }
-    }
-
-    function removeSizeTooltip() {
-        document.querySelectorAll('.img-size-tooltip').forEach(el => el.remove());
-    }
-
-    function showImageSizeDialog(img) {
-        const currentWidth = img.offsetWidth;
-        const input = prompt('請輸入圖片寬度 (px)：', currentWidth);
-        if (input !== null) {
-            const newWidth = parseInt(input, 10);
-            if (!isNaN(newWidth) && newWidth > 0) {
-                img.style.width = newWidth + 'px';
-                img.style.height = 'auto';
-            }
-        }
-    }
 
     useEffect(() => {
         if (isEdit) {
@@ -192,7 +43,6 @@ function AdminEditPage() {
                 if (data.scheduledAt) {
                     setUseSchedule(true);
                     const d = data.scheduledAt.toDate ? data.scheduledAt.toDate() : new Date(data.scheduledAt);
-                    // 轉成 datetime-local 格式
                     const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
                     setScheduledAt(local);
                 }
@@ -224,7 +74,6 @@ function AdminEditPage() {
                 updatedAt: serverTimestamp(),
             };
 
-            // 排程
             if (useSchedule && scheduledAt) {
                 postData.scheduledAt = Timestamp.fromDate(new Date(scheduledAt));
             } else {
@@ -246,53 +95,6 @@ function AdminEditPage() {
             setSaving(false);
         }
     }
-
-    // 插入表格
-    function insertTable() {
-        const quill = quillRef.current?.getEditor();
-        if (!quill) return;
-
-        const rows = prompt('請輸入表格列數：', '3');
-        const cols = prompt('請輸入表格欄數：', '3');
-        if (!rows || !cols) return;
-
-        const r = parseInt(rows, 10);
-        const c = parseInt(cols, 10);
-        if (isNaN(r) || isNaN(c) || r < 1 || c < 1) return;
-
-        let tableHtml = '<table style="border-collapse:collapse;width:100%;"><tbody>';
-        for (let i = 0; i < r; i++) {
-            tableHtml += '<tr>';
-            for (let j = 0; j < c; j++) {
-                const style = 'border:1px solid #ccc;padding:8px;min-width:60px;';
-                if (i === 0) {
-                    tableHtml += `<th style="${style}font-weight:bold;background:#f5f5f5;">標題</th>`;
-                } else {
-                    tableHtml += `<td style="${style}">內容</td>`;
-                }
-            }
-            tableHtml += '</tr>';
-        }
-        tableHtml += '</tbody></table><p><br></p>';
-
-        const range = quill.getSelection(true);
-        quill.clipboard.dangerouslyPasteHTML(range.index, tableHtml);
-    }
-
-    const quillModules = {
-        toolbar: {
-            container: [
-                [{ header: [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ color: [] }, { background: [] }],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                [{ align: [] }],
-                ['blockquote', 'code-block'],
-                ['link', 'image'],
-                ['clean'],
-            ],
-        },
-    };
 
     if (loading) {
         return (
@@ -337,7 +139,6 @@ function AdminEditPage() {
                     </select>
                 </div>
 
-                {/* 置頂功能 */}
                 <div className="form-group">
                     <div className="schedule-toggle">
                         <label className="toggle-label">
@@ -354,7 +155,6 @@ function AdminEditPage() {
                     </div>
                 </div>
 
-                {/* 排程功能 */}
                 <div className="form-group">
                     <div className="schedule-toggle">
                         <label className="toggle-label">
@@ -383,42 +183,12 @@ function AdminEditPage() {
                 </div>
 
                 <div className="form-group">
-                    <div className="editor-toolbar-extra">
-                        <label>內容</label>
-                        <button
-                            type="button"
-                            className="btn-table-insert"
-                            onClick={insertTable}
-                            title="插入表格"
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <line x1="3" y1="9" x2="21" y2="9" />
-                                <line x1="3" y1="15" x2="21" y2="15" />
-                                <line x1="9" y1="3" x2="9" y2="21" />
-                                <line x1="15" y1="3" x2="15" y2="21" />
-                            </svg>
-                            插入表格
-                        </button>
-                    </div>
-                    <div className="editor-wrapper">
-                        {quillLoaded && ReactQuill ? (
-                            <ReactQuill
-                                ref={quillRef}
-                                theme="snow"
-                                value={content}
-                                onChange={setContent}
-                                modules={quillModules}
-                                placeholder="請輸入公告內容..."
-                            />
-                        ) : (
-                            <div className="editor-loading">
-                                <div className="loading-spinner" />
-                                <p>載入編輯器中...</p>
-                            </div>
-                        )}
-                    </div>
-                    <p className="editor-hint">💡 拖曳圖片邊緣可調整大小，雙擊圖片可輸入精確寬度</p>
+                    <label>內容詳情</label>
+                    <TiptapEditor 
+                        content={content} 
+                        onChange={setContent} 
+                        placeholder="請輸入公告詳情..."
+                    />
                 </div>
 
                 <div className="edit-actions">

@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
-
-// 動態載入 React Quill
-let ReactQuill = null;
+import TiptapEditor from '../components/TiptapEditor';
 
 function CustomPageEditPage() {
     const navigate = useNavigate();
     const { id } = useParams();
     const isEdit = Boolean(id);
-    const quillRef = useRef(null);
 
     const [title, setTitle] = useState('');
     const [pathId, setPathId] = useState(''); // 即 Document ID
@@ -18,18 +15,6 @@ function CustomPageEditPage() {
     const [status, setStatus] = useState('published');
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [quillLoaded, setQuillLoaded] = useState(false);
-
-    // 動態載入 Quill
-    useEffect(() => {
-        async function loadQuill() {
-            const mod = await import('react-quill-new');
-            ReactQuill = mod.default;
-            await import('react-quill-new/dist/quill.snow.css');
-            setQuillLoaded(true);
-        }
-        loadQuill();
-    }, []);
 
     useEffect(() => {
         if (isEdit) {
@@ -60,7 +45,6 @@ function CustomPageEditPage() {
         if (!title.trim()) return alert('請輸入標題');
         if (!pathId.trim()) return alert('請輸入頁面路徑ID');
         
-        // 驗證 ID 格式 (不允許特殊字元)
         if (!/^[a-zA-Z0-9_-]+$/.test(pathId)) {
             return alert('頁面路徑ID 僅允許英文、數字、底線或破折號');
         }
@@ -74,21 +58,17 @@ function CustomPageEditPage() {
                 updatedAt: serverTimestamp(),
             };
 
-            // 如果是編輯且 ID 改變了
             if (isEdit && pathId !== id) {
-                // 檢查新 ID 是否已存在
                 const checkNew = await getDoc(doc(db, 'custom_pages', pathId));
                 if (checkNew.exists()) {
                     setSaving(false);
                     return alert('此頁面路徑ID已被使用，請更換一個');
                 }
-                // 先刪除舊的，再用新的 ID 儲存
                 const oldDoc = await getDoc(doc(db, 'custom_pages', id));
                 const oldData = oldDoc.data();
                 await deleteDoc(doc(db, 'custom_pages', id));
                 await setDoc(doc(db, 'custom_pages', pathId), { ...oldData, ...pageData });
             } else if (!isEdit) {
-                // 新增模式
                 const checkNew = await getDoc(doc(db, 'custom_pages', pathId));
                 if (checkNew.exists()) {
                     setSaving(false);
@@ -97,7 +77,6 @@ function CustomPageEditPage() {
                 pageData.createdAt = serverTimestamp();
                 await setDoc(doc(db, 'custom_pages', pathId), pageData);
             } else {
-                // 一般更新
                 await setDoc(doc(db, 'custom_pages', id), pageData, { merge: true });
             }
             
@@ -109,34 +88,6 @@ function CustomPageEditPage() {
             setSaving(false);
         }
     }
-
-    // 自訂插入圖片功能 (URL)
-    const imageHandler = () => {
-        const url = prompt('請輸入圖片網址 (URL):');
-        if (url) {
-            const quill = quillRef.current.getEditor();
-            const range = quill.getSelection();
-            quill.insertEmbed(range ? range.index : 0, 'image', url);
-        }
-    };
-
-    const quillModules = useMemo(() => ({
-        toolbar: {
-            container: [
-                [{ header: [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ color: [] }, { background: [] }],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                [{ align: [] }],
-                ['blockquote', 'code-block'],
-                ['link', 'image'],
-                ['clean'],
-            ],
-            handlers: {
-                image: imageHandler
-            }
-        },
-    }), [quillLoaded]);
 
     if (loading) return <div className="admin-page-content">載入中...</div>;
 
@@ -184,20 +135,11 @@ function CustomPageEditPage() {
 
                 <div className="form-group">
                     <label>內容詳情</label>
-                    <div className="editor-wrapper">
-                        {quillLoaded && ReactQuill ? (
-                            <ReactQuill
-                                ref={quillRef}
-                                theme="snow"
-                                value={content}
-                                onChange={setContent}
-                                modules={quillModules}
-                                placeholder="請輸入頁面詳情內容... (可點擊圖片圖標輸入 URL)"
-                            />
-                        ) : (
-                            <div className="editor-loading">載入編輯器中...</div>
-                        )}
-                    </div>
+                    <TiptapEditor 
+                        content={content} 
+                        onChange={setContent} 
+                        placeholder="請輸入頁面詳情內容..."
+                    />
                 </div>
 
                 <div className="edit-actions">

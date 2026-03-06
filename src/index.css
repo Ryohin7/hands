@@ -368,13 +368,16 @@ img {
 }
 
 .post-detail-content {
-  padding: 2rem 0;
+  padding: 2.5rem 0;
   font-size: 0.9375rem;
-  line-height: 1.6;
+  line-height: 1.8;
   color: var(--text);
   word-break: break-word;
   line-break: strict;
   text-wrap: pretty;
+  text-autospace: ideograph-alpha ideograph-numeric !important; /* 最新：中西文自動間距 */
+  text-spacing: ideograph-alpha ideograph-numeric; /* 舊版/Safari */
+  letter-spacing: 0.025em; /* 優化閱讀感 */
 }
 
 .post-detail-content img {
