@@ -20,6 +20,7 @@ import CustomPageEditPage from './pages/CustomPageEditPage';
 import CustomPageView from './pages/CustomPageView';
 import GlobalSettingsPage from './pages/GlobalSettingsPage';
 import FontTestPage from './pages/FontTestPage';
+import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import Footer from './components/Footer';
@@ -74,6 +75,9 @@ function App() {
                         {/* 全域設定 */}
                         <Route path="settings" element={<GlobalSettingsPage />} />
                     </Route>
+
+                    {/* 404 捕獲 */}
+                    <Route path="*" element={<><Header /><main className="main-content"><NotFoundPage /></main><Footer /></>} />
                 </Routes>
             </div>
         </ErrorBoundary>

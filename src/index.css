@@ -120,12 +120,29 @@ img {
   color: var(--text);
 }
 
-.header-link-login {
-  border: 1px solid var(--border);
-}
-
 .header-link-login:hover {
   border-color: var(--text);
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 102;
+}
+
+.header-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
 }
 
 /* === Main === */
@@ -2031,6 +2048,66 @@ img {
     transform: translateX(-100%);
   }
 
+  /* 行動版導航 */
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .header-nav {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background: var(--bg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 0;
+    transition: 0.3s ease;
+    z-index: 101;
+    box-shadow: -4px 0 12px rgba(0,0,0,0.05);
+    gap: 0;
+  }
+
+  .header-nav.mobile-open {
+    right: 0;
+  }
+
+  .nav-item-wrapper {
+    width: 100%;
+  }
+
+  .header-link {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 0;
+    justify-content: space-between;
+  }
+
+  .header-dropdown {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    box-shadow: none;
+    padding-left: 1.5rem;
+    background: var(--bg-gray);
+    display: none; /* 預設在手機版隱藏，或改為可折疊 */
+  }
+
+  .nav-item-wrapper:hover .header-dropdown {
+    display: block;
+    transform: none;
+  }
+
+  .dropdown-arrow {
+    transform: rotate(-90deg);
+  }
+
+  .nav-item-wrapper:hover .dropdown-arrow {
+    transform: rotate(0deg);
+  }
+
   .admin-sidebar.open {
     transform: translateX(0);
   }
@@ -2066,15 +2143,16 @@ img {
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; /* 改為垂直排列 */
+  justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.75rem;
 }
 
 .footer-copyright {
   font-size: 0.8125rem;
   opacity: 0.9;
+  text-align: center; /* 文字置中 */
 }
 
 .footer-social {
