@@ -11,13 +11,19 @@ import { TextAlign } from '@tiptap/extension-text-align';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
-import { useCallback } from 'react';
+import { Highlight } from '@tiptap/extension-highlight';
+import { useCallback, useRef } from 'react';
 
 const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容...' }) => {
+  const fileInputRef = useRef(null);
+  
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
+      Highlight.configure({
+        multicolor: true,
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -45,6 +51,7 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
       }),
     ],
     content,
+    onHistoryStateChange: () => {},
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -61,13 +68,42 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
 
-  const addImage = useCallback(() => {
+  const changeTextColor = useCallback(() => {
     if (!editor) return;
-    const url = window.prompt('輸入圖片網址 (URL):');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+    const hex = window.prompt('請輸入 HEX 色碼 (例如: #FF0000):', '#000000');
+    if (hex && /^#[0-9A-Fa-f]{6}$/.test(hex)) {
+      editor.chain().focus().setColor(hex).run();
+    } else if (hex) {
+      alert('無效的 HEX 色碼格式');
     }
   }, [editor]);
+
+  const handleImageChoice = useCallback(() => {
+    if (!editor) return;
+    const choice = window.confirm('點擊「確定」上傳電腦圖片，點擊「取消」輸入圖片網址。');
+    if (choice) {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    } else {
+      const url = window.prompt('請輸入圖片網址 (URL):');
+      if (url) {
+        editor.chain().focus().setImage({ src: url }).run();
+      }
+    }
+  }, [editor]);
+
+  const onFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        editor.chain().focus().setImage({ src: event.target.result }).run();
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = ''; // 重置 input
+  };
 
   const addTable = useCallback(() => {
     if (!editor) return;
@@ -82,6 +118,13 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
 
   return (
     <div className="tiptap-editor">
+      <input 
+        type="file" 
+        accept="image/*" 
+        style={{ display: 'none' }} 
+        ref={fileInputRef} 
+        onChange={onFileChange}
+      />
       <div className="tiptap-toolbar">
         {/* 文字格式群組 */}
         <div className="toolbar-group">
@@ -117,11 +160,27 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h-9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
           </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+            className={editor.isActive('highlight') ? 'active' : ''}
+            title="螢光噴字 (Highlight)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18.5 4.5a2.121 2.121 0 0 1 3 3L12 17l-4 1 1-4 9.5-9.5Z"/><path d="m15 8 3 3"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={changeTextColor}
+            className={editor.isActive('textStyle', { color: editor.getAttributes('textStyle').color }) && editor.getAttributes('textStyle').color !== '#000000' ? 'active' : ''}
+            title="文字顏色 (HEX)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16"/><path d="m6 16 6-12 6 12"/><path d="M8 12h8"/></svg>
+          </button>
         </div>
         
         <div className="toolbar-separator" />
 
-        {/* 標題群組 */}
+        {/* 標題與引言群組 */}
         <div className="toolbar-group">
           <button
             type="button"
@@ -146,6 +205,22 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
             title="標題三"
           >
             H3
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            className={editor.isActive('blockquote') ? 'active' : ''}
+            title="引用區塊 (Blockquote)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 2.5 1 4 3 5"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 2.5 1 4 3 5"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            className={editor.isActive('codeBlock') ? 'active' : ''}
+            title="程式碼區塊 (Code Block)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           </button>
         </div>
 
@@ -202,7 +277,7 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
           <button type="button" onClick={setLink} className={editor.isActive('link') ? 'active' : ''} title="插入連結">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
           </button>
-          <button type="button" onClick={addImage} title="插入圖片">
+          <button type="button" onClick={handleImageChoice} title="插入圖片 (上傳或網址)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
           </button>
           <button type="button" onClick={addTable} title="插入表格">
