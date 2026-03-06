@@ -13,7 +13,7 @@ import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { useCallback } from 'react';
 
-const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入...' }) => {
+const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容...' }) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -51,6 +51,7 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入...' })
   });
 
   const setLink = useCallback(() => {
+    if (!editor) return;
     const url = window.prompt('輸入連結網址:');
     if (url === null) return;
     if (url === '') {
@@ -61,6 +62,7 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入...' })
   }, [editor]);
 
   const addImage = useCallback(() => {
+    if (!editor) return;
     const url = window.prompt('輸入圖片網址 (URL):');
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
@@ -68,8 +70,9 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入...' })
   }, [editor]);
 
   const addTable = useCallback(() => {
-    const rows = parseInt(window.prompt('列數:', '3'), 10);
-    const cols = parseInt(window.prompt('欄數:', '3'), 10);
+    if (!editor) return;
+    const rows = parseInt(window.prompt('輸入列數:', '3'), 10);
+    const cols = parseInt(window.prompt('輸入欄數:', '3'), 10);
     if (!isNaN(rows) && !isNaN(cols) && rows > 0 && cols > 0) {
       editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
     }
@@ -80,131 +83,150 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入...' })
   return (
     <div className="tiptap-editor">
       <div className="tiptap-toolbar">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'active' : ''}
-          title="粗體"
-        >
-          <b>B</b>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'active' : ''}
-          title="斜體"
-        >
-          <i>I</i>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={editor.isActive('underline') ? 'active' : ''}
-          title="底線"
-        >
-          <u>U</u>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive('strike') ? 'active' : ''}
-          title="刪除線"
-        >
-          <s>S</s>
-        </button>
+        {/* 文字格式群組 */}
+        <div className="toolbar-group">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive('bold') ? 'active' : ''}
+            title="粗體"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive('italic') ? 'active' : ''}
+            title="斜體"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={editor.isActive('underline') ? 'active' : ''}
+            title="底線"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            className={editor.isActive('strike') ? 'active' : ''}
+            title="刪除線"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h-9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+          </button>
+        </div>
         
         <div className="toolbar-separator" />
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}
-          title="標題一"
-        >
-          H1
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'active' : ''}
-          title="標題二"
-        >
-          H2
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive('heading', { level: 3 }) ? 'active' : ''}
-          title="標題三"
-        >
-          H3
-        </button>
+        {/* 標題群組 */}
+        <div className="toolbar-group">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            className={editor.isActive('heading', { level: 1 }) ? 'active' : ''}
+            title="標題一"
+          >
+            H1
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={editor.isActive('heading', { level: 2 }) ? 'active' : ''}
+            title="標題二"
+          >
+            H2
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={editor.isActive('heading', { level: 3 }) ? 'active' : ''}
+            title="標題三"
+          >
+            H3
+          </button>
+        </div>
 
         <div className="toolbar-separator" />
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          className={editor.isActive({ textAlign: 'left' }) ? 'active' : ''}
-          title="靠左"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          className={editor.isActive({ textAlign: 'center' }) ? 'active' : ''}
-          title="置中"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          className={editor.isActive({ textAlign: 'right' }) ? 'active' : ''}
-          title="靠右"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
-        </button>
+        {/* 對齊群組 */}
+        <div className="toolbar-group">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            className={editor.isActive({ textAlign: 'left' }) ? 'active' : ''}
+            title="靠左對齊"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            className={editor.isActive({ textAlign: 'center' }) ? 'active' : ''}
+            title="置中對齊"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            className={editor.isActive({ textAlign: 'right' }) ? 'active' : ''}
+            title="靠右對齊"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+          </button>
+        </div>
 
         <div className="toolbar-separator" />
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'active' : ''}
-          title="項目清單"
-        >
-          ●
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'active' : ''}
-          title="編號清單"
-        >
-          1.
-        </button>
+        {/* 清單與插入群組 */}
+        <div className="toolbar-group">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={editor.isActive('bulletList') ? 'active' : ''}
+            title="項目清單"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={editor.isActive('orderedList') ? 'active' : ''}
+            title="編號清單"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+          </button>
+          <button type="button" onClick={setLink} className={editor.isActive('link') ? 'active' : ''} title="插入連結">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+          </button>
+          <button type="button" onClick={addImage} title="插入圖片">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+          </button>
+          <button type="button" onClick={addTable} title="插入表格">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" /></svg>
+          </button>
+        </div>
 
         <div className="toolbar-separator" />
 
-        <button type="button" onClick={setLink} className={editor.isActive('link') ? 'active' : ''} title="連結">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
-        </button>
-        <button type="button" onClick={addImage} title="插入圖片">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
-        </button>
-        <button type="button" onClick={addTable} title="插入表格">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" /></svg>
-        </button>
-
-        <div className="toolbar-separator" />
-
-        <button type="button" onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} title="清除格式">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        {/* 輔助工具群組 */}
+        <div className="toolbar-group">
+          <button 
+            type="button" 
+            onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} 
+            title="清除所有格式"
+            className="btn-clear-format"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19L19 17.5L5 3.5L3.5 5L17.5 19Z"/><path d="M11 6L9.5 7.5L3 14H7L12 9L11 6Z"/><path d="M15 11L14 12V10L15 11Z"/><path d="M18.5 7.5L13.5 12.5L14.5 14.5L19.5 9.5L18.5 7.5Z"/></svg>
+          </button>
+        </div>
       </div>
-      <EditorContent editor={editor} className="editor-content-area" />
+      <div className="editor-content-area">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 };
