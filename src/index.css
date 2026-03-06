@@ -1954,7 +1954,7 @@ img {
 }
 
 /* === RWD === */
-@media (max-width: 640px) {
+@media (max-width: 745px) {
   .header-inner {
     padding: 0 1rem;
   }
@@ -2173,7 +2173,7 @@ img {
   opacity: 1;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 745px) {
   .footer-inner {
     flex-direction: column;
     text-align: center;

@@ -11,6 +11,7 @@ function DmEditPage() {
     const [formData, setFormData] = useState({
         title: '',
         period: '',
+        startDate: '', // 用於排序
         bannerUrl: '',
         dmUrl: ''
     });
@@ -76,13 +77,23 @@ function DmEditPage() {
                 </div>
 
                 <div className="form-group">
-                    <label>檔期時間</label>
+                    <label>檔期時間文字 (顯示用)</label>
                     <input
                         type="text"
                         required
                         value={formData.period}
                         onChange={e => setFormData({ ...formData, period: e.target.value })}
                         placeholder="例如：3/1 - 3/31"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>排序用日期 (最新的會排在最上方)</label>
+                    <input
+                        type="date"
+                        required
+                        value={formData.startDate}
+                        onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                     />
                 </div>
 

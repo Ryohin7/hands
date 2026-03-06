@@ -13,7 +13,7 @@ function DmAdminPage() {
 
     async function fetchDms() {
         try {
-            const q = query(collection(db, 'dms'), orderBy('createdAt', 'desc'));
+            const q = query(collection(db, 'dms'), orderBy('startDate', 'desc'));
             const querySnapshot = await getDocs(q);
             const data = querySnapshot.docs.map(doc => ({
                 id: doc.id,

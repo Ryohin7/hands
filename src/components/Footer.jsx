@@ -27,7 +27,7 @@ function Footer() {
         <footer className="footer">
             <div className="footer-inner">
                 <div className="footer-copyright">
-                    Copyright © Tailung Inc. All rights reserved.
+                    Copyright © Tailung Capital Inc. All rights reserved.
                 </div>
                 <div className="footer-social">
                     {socialLinks.fb && (
