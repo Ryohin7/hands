@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { formatDate } from '../utils';
+import { autoSpace } from '../utils/textUtils';
 import DOMPurify from 'dompurify';
 
 function PostDetailPage() {
@@ -125,7 +126,7 @@ function PostDetailPage() {
                     {post.category && (
                         <span className="post-detail-category">{post.category}</span>
                     )}
-                    <h1 className="post-detail-title">{post.title}</h1>
+                    <h1 className="post-detail-title">{autoSpace(post.title)}</h1>
                     <time className="post-detail-date">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10" />
@@ -136,7 +137,7 @@ function PostDetailPage() {
                 </div>
                 <div
                     className="post-detail-content ql-editor"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
+                    dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(post.content)) }}
                 />
             </article>
         </div>

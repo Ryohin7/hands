@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { autoSpace } from '../utils/textUtils';
 import DOMPurify from 'dompurify';
 
 function CustomPageView() {
@@ -66,11 +67,11 @@ function CustomPageView() {
         <div className="page-container">
             <article className="post-detail">
                 <div className="post-detail-header">
-                    <h1 className="post-detail-title">{page.title}</h1>
+                    <h1 className="post-detail-title">{autoSpace(page.title)}</h1>
                 </div>
                 <div
                     className="post-detail-content ql-editor"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }}
+                    dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(page.content)) }}
                 />
             </article>
         </div>

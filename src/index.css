@@ -375,9 +375,13 @@ img {
   word-break: break-word;
   line-break: strict;
   text-wrap: pretty;
-  text-autospace: ideograph-alpha ideograph-numeric !important; /* 最新：中西文自動間距 */
-  text-spacing: ideograph-alpha ideograph-numeric; /* 舊版/Safari */
-  letter-spacing: 0.025em; /* 優化閱讀感 */
+  /* 核心：中西文自動間距 */
+  text-autospace: ideograph-alpha ideograph-numeric !important;
+  text-spacing: ideograph-alpha ideograph-numeric;
+  /* 輔助排版 */
+  letter-spacing: 0.025em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .post-detail-content img {
@@ -1917,6 +1921,10 @@ img {
   line-height: 1.8;
   color: #2c3e50;
   font-size: 1rem;
+  /* 編輯器同步：中西文自動間距 */
+  text-autospace: ideograph-alpha ideograph-numeric !important;
+  text-spacing: ideograph-alpha ideograph-numeric;
+  letter-spacing: 0.025em;
 }
 
 /* Placeholder 客製化 */
