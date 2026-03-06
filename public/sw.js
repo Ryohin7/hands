@@ -1,4 +1,4 @@
-const CACHE_NAME = 'notice-v2';
+const CACHE_NAME = 'notice-v3'; // 更新版本號以強制清除舊快取
 const STATIC_ASSETS = [
     '/',
     '/manifest.json',
@@ -12,7 +12,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Activate: 清除舊快取
+// Activate: 清除舊快取並立即接管頁面
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) =>
@@ -22,36 +22,38 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch: Network-First 策略（適合動態公告內容）
+// Fetch 策略
 self.addEventListener('fetch', (event) => {
     const { request } = event;
 
-    // 只處理 http/https 請求，跳過 chrome-extension:// 等
+    // 只處理 http/https 請求
     if (!request.url.startsWith('http')) return;
 
     // 跳過非 GET 請求
     if (request.method !== 'GET') return;
 
-    // API 和 Firebase 請求使用 Network-Only
+    // API 和 Firebase 請求使用 Network-Only (不快取資料庫資料)
     if (request.url.includes('firestore.googleapis.com') ||
         request.url.includes('identitytoolkit.googleapis.com')) {
         return;
     }
 
-    // 靜態資源使用 Cache-First
+    // 靜態資源使用 Stale-While-Revalidate (先用快取，但在背景抓新的)
+    // 這樣下次進入頁面時就會是最新版，且不會卡住
     if (request.destination === 'style' ||
         request.destination === 'script' ||
         request.destination === 'font' ||
         request.destination === 'image') {
         event.respondWith(
-            caches.match(request).then((cached) => {
-                if (cached) return cached;
-                return fetch(request).then((response) => {
-                    if (response.ok) {
-                        const clone = response.clone();
-                        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-                    }
-                    return response;
+            caches.open(CACHE_NAME).then((cache) => {
+                return cache.match(request).then((cached) => {
+                    const fetchPromise = fetch(request).then((networkResponse) => {
+                        if (networkResponse.ok) {
+                            cache.put(request, networkResponse.clone());
+                        }
+                        return networkResponse;
+                    });
+                    return cached || fetchPromise;
                 });
             })
         );

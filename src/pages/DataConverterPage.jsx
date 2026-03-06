@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
@@ -168,26 +167,9 @@ function DataConverterPage() {
     }
 
     return (
-        <div className="page-container">
-            <div className="admin-header">
-                <h1 className="page-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <path d="M12 18v-6" />
-                        <path d="M9 15l3 3 3-3" />
-                    </svg>
-                    資料轉換系統
-                </h1>
-                <div className="admin-actions">
-                    <Link to="/admin" className="btn btn-outline">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="19" y1="12" x2="5" y2="12" />
-                            <polyline points="12 19 5 12 12 5" />
-                        </svg>
-                        返回管理
-                    </Link>
-                </div>
+        <div className="admin-page-content">
+            <div className="admin-content-header">
+                <h2 className="admin-content-title">資料轉換系統</h2>
             </div>
 
             {/* 上傳區域 */}
