@@ -24,7 +24,7 @@
   /* 深品牌綠 */
   --brand-light: #e6f4ec;
   /* 淺品牌綠 */
-  --text: #333333;
+  --text: #1d1d1f;
   /* 主要文字 */
   --text-secondary: #999999;
   /* 次要文字 */
@@ -377,11 +377,23 @@ img {
 }
 
 .post-detail-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.6;
+  font-size: clamp(2rem, 8vw, 3rem);
+  /* 自適應 32px ~ 48px */
+  font-weight: 700;
+  line-height: 1.2;
   color: var(--text);
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.post-detail-subtitle {
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  /* 自適應 20px ~ 24px */
+  font-weight: 700;
+  /* W6 */
+  line-height: 1.4;
+  color: var(--text);
+  /* 顏色與標題一致 */
+  margin-bottom: 1.5rem;
 }
 
 .post-detail-date {
@@ -396,7 +408,8 @@ img {
 /* === 文章內容渲染區 === */
 .post-detail-content {
   padding: 2.5rem 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
+  /* 16px */
   line-height: 1.8;
   color: var(--text);
   word-break: break-word;
@@ -405,8 +418,9 @@ img {
   /* 核心：中西文自動間距 */
   text-autospace: ideograph-alpha ideograph-numeric !important;
   text-spacing: ideograph-alpha ideograph-numeric;
-  /* 輔助排版 */
-  letter-spacing: 0.025em;
+  /* 輔助排版：還原文字間距，設定中西文相鄰間距 */
+  letter-spacing: normal;
+  text-spacing-adjacent-characters: ideograph-alpha 0.5em ideograph-numeric 0.5em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -430,7 +444,7 @@ img {
 .post-detail-content h3 {
   margin-top: 2rem;
   margin-bottom: 1rem;
-  color: #1a1a1a;
+  color: #1d1d1f;
 }
 
 /* 文章清單 */
@@ -445,7 +459,7 @@ img {
   border-left: 4px solid var(--brand);
   padding: 1.25rem 1.5rem;
   background: #f5f5f5;
-  color: #333333;
+  color: #1d1d1f;
   margin: 1.5rem 0;
   border-radius: 0 8px 8px 0;
   line-height: 1.6;
@@ -660,7 +674,7 @@ mark {
 /* 側邊欄 */
 .admin-sidebar {
   width: 240px;
-  background: #1a1a1a;
+  background: #1d1d1f;
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -793,7 +807,7 @@ mark {
   height: 40px;
   align-items: center;
   justify-content: center;
-  background: #1a1a1a;
+  background: #1d1d1f;
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
@@ -1119,7 +1133,7 @@ mark {
 .ql-editor pre.ql-syntax,
 .ql-editor pre {
   background: #F8F9FB !important;
-  color: #333333 !important;
+  color: #1d1d1f !important;
   padding: 1rem !important;
   border-radius: 4px;
   font-size: 0.875rem;
@@ -1132,7 +1146,7 @@ mark {
 .post-detail-content pre,
 .post-detail-content code {
   background: #F8F9FB;
-  color: #333333;
+  color: #1d1d1f;
   padding: 1rem;
   border-radius: 4px;
   font-size: 0.875rem;
@@ -1980,6 +1994,21 @@ mark {
   margin: 0 4px;
 }
 
+.toolbar-select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.75rem;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+}
+
+.toolbar-select:hover {
+  border-color: #bbb;
+}
+
 /* === Tiptap 編輯器內容區 (所見即所得) === */
 .editor-content-area .ProseMirror {
   min-height: 400px;
@@ -1989,10 +2018,11 @@ mark {
   line-height: 1.8;
   color: var(--text);
   font-size: 1rem;
-  /* 編輯器同步：中西文自動間距 */
+  /* 編輯器同步：中西文自動間距 (中西文相鄰時 0.5em) */
   text-autospace: ideograph-alpha ideograph-numeric !important;
   text-spacing: ideograph-alpha ideograph-numeric;
-  letter-spacing: 0.025em;
+  text-spacing-adjacent-characters: ideograph-alpha 0.5em ideograph-numeric 0.5em;
+  letter-spacing: normal;
 }
 
 /* 編輯器佔位符 (Placeholder) */
@@ -2009,7 +2039,7 @@ mark {
 .ProseMirror h1,
 .ProseMirror h2,
 .ProseMirror h3 {
-  color: #1a1a1a;
+  color: #1d1d1f;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
 }

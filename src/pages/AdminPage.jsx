@@ -176,8 +176,8 @@ function AdminPage() {
                                                     title={post.pinned ? '取消置頂' : '置頂'}
                                                 >
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill={post.pinned ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <path d="M12 2L12 22" />
-                                                        <path d="M5 5.5C5 5.5 5 12 12 12C19 12 19 5.5 19 5.5" />
+                                                        <path d="M15 5l-1.06 1.06a1.5 1.5 0 0 0-.44 1.06v5.25a2 2 0 0 0 .58 1.41l2.42 2.42v1.5h-10v-1.5l2.42-2.42a2 2 0 0 0 .58-1.41v-5.25a1.5 1.5 0 0 0-.44-1.06L8 5h7z" />
+                                                        <line x1="12" y1="18" x2="12" y2="22" />
                                                     </svg>
                                                 </button>
                                             )}

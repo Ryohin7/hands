@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, query, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
 function Header() {
@@ -9,10 +9,16 @@ function Header() {
     const [user, setUser] = useState(null);
     const [navItems, setNavItems] = useState([]);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [siteSettings, setSiteSettings] = useState({
+        siteName: 'HANDS 台隆手創館',
+        seoTitle: '台隆手創館公告',
+        seoDescription: '最新消息與通知'
+    });
 
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (u) => setUser(u));
         fetchNav();
+        fetchSettings();
         return unsub;
     }, []);
 
@@ -20,6 +26,28 @@ function Header() {
     useEffect(() => {
         setMenuOpen(false);
     }, [location.pathname]);
+
+    // 更新 SEO 標記 (若非後台頁面)
+    useEffect(() => {
+        if (!location.pathname.startsWith('/admin')) {
+            document.title = siteSettings.seoTitle;
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.setAttribute('content', siteSettings.seoDescription);
+            }
+        }
+    }, [location.pathname, siteSettings]);
+
+    async function fetchSettings() {
+        try {
+            const docSnap = await getDoc(doc(db, 'settings', 'site'));
+            if (docSnap.exists()) {
+                setSiteSettings(prev => ({ ...prev, ...docSnap.data() }));
+            }
+        } catch (err) {
+            console.error('Fetch header settings failed:', err);
+        }
+    }
 
     async function fetchNav() {
         try {
@@ -46,7 +74,7 @@ function Header() {
         <header className="header">
             <div className="header-inner">
                 <Link to="/" className="header-logo">
-                    <span>HANDS 台隆手創館</span>
+                    <span>{siteSettings.siteName}</span>
                 </Link>
 
                 {!isAdmin && (

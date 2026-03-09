@@ -127,6 +127,9 @@ function PostDetailPage() {
                         <span className="post-detail-category">{post.category}</span>
                     )}
                     <h1 className="post-detail-title">{autoSpace(post.title)}</h1>
+                    {post.subtitle && (
+                        <h2 className="post-detail-subtitle">{autoSpace(post.subtitle)}</h2>
+                    )}
                     <time className="post-detail-date">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10" />

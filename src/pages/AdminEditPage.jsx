@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { doc, getDoc, addDoc, updateDoc, collection, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import TiptapEditor from '../components/TiptapEditor';
+import { autoSpace } from '../utils/textUtils';
+import DOMPurify from 'dompurify';
 
 function AdminEditPage() {
     const navigate = useNavigate();
@@ -10,6 +12,7 @@ function AdminEditPage() {
     const isEdit = Boolean(id);
 
     const [title, setTitle] = useState('');
+    const [subtitle, setSubtitle] = useState('');
     const [content, setContent] = useState('');
     const [category, setCategory] = useState('公告');
     const [saving, setSaving] = useState(false);
@@ -17,8 +20,9 @@ function AdminEditPage() {
     const [scheduledAt, setScheduledAt] = useState('');
     const [useSchedule, setUseSchedule] = useState(false);
     const [pinned, setPinned] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
 
-    const categories = ['公告', '活動', '新聞稿'];
+    const categories = ['公告', '活動', '新聞發佈'];
 
     useEffect(() => {
         if (isEdit) {
@@ -34,10 +38,9 @@ function AdminEditPage() {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 setTitle(data.title || '');
+                setSubtitle(data.subtitle || '');
                 setContent(data.content || '');
-                // 舊分類映射到新分類
-                const oldToNew = { '一般': '公告', '重要': '公告', '緊急': '公告' };
-                setCategory(oldToNew[data.category] || data.category || '公告');
+                setCategory(data.category || '公告');
                 setPinned(!!data.pinned);
 
                 if (data.scheduledAt) {
@@ -67,6 +70,7 @@ function AdminEditPage() {
         try {
             const postData = {
                 title: title.trim(),
+                subtitle: subtitle.trim(),
                 content,
                 category,
                 status,
@@ -96,6 +100,28 @@ function AdminEditPage() {
         }
     }
 
+    // 同步 PostDetailPage 的清理邏輯
+    function sanitizeHtml(html) {
+        if (!html) return '';
+        return DOMPurify.sanitize(html, {
+            ALLOWED_TAGS: [
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'p', 'br', 'hr',
+                'strong', 'b', 'em', 'i', 'u', 's', 'strike',
+                'ul', 'ol', 'li',
+                'a', 'img',
+                'blockquote', 'pre', 'code', 'mark',
+                'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                'span', 'div', 'sub', 'sup',
+            ],
+            ALLOWED_ATTR: [
+                'href', 'target', 'rel', 'src', 'alt', 'width', 'height',
+                'style', 'class', 'colspan', 'rowspan',
+            ],
+            ALLOW_DATA_ATTR: false,
+        });
+    }
+
     if (loading) {
         return (
             <div className="admin-page-content">
@@ -111,18 +137,64 @@ function AdminEditPage() {
         <div className="admin-page-content">
             <div className="admin-content-header">
                 <h2 className="admin-content-title">{isEdit ? '編輯公告' : '新增公告'}</h2>
+                <button 
+                    onClick={() => setShowPreview(!showPreview)} 
+                    className={`btn ${showPreview ? 'btn-primary' : 'btn-outline'}`}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    {showPreview ? '返回編輯' : '預覽公告'}
+                </button>
             </div>
 
-            <div className="edit-form">
+            {showPreview ? (
+                <div className="page-container preview-mode" style={{ background: '#fff', marginTop: '1rem', borderRadius: '8px', border: '1px solid #eee' }}>
+                    <article className="post-detail">
+                        <div className="post-detail-header">
+                            {category && <span className="post-detail-category">{category}</span>}
+                            <h1 className="post-detail-title">{autoSpace(title || '（未輸入標題）')}</h1>
+                            {subtitle && <h2 className="post-detail-subtitle">{autoSpace(subtitle)}</h2>}
+                            <div className="post-detail-date">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                                預覽模式 - 尚未發布
+                            </div>
+                        </div>
+                        <div 
+                            className="post-detail-content ql-editor" 
+                            dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(content)) }} 
+                        />
+                    </article>
+                </div>
+            ) : (
+                <div className="edit-form">
                 <div className="form-group">
-                    <label htmlFor="edit-title">標題</label>
+                    <label htmlFor="edit-title">主標題</label>
                     <input
                         id="edit-title"
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="請輸入公告標題"
+                        placeholder="請輸入主標題 (48px)"
                         className="input-lg"
+                        style={{ fontSize: '1.5rem', fontWeight: 'bold' }}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="edit-subtitle">副標題</label>
+                    <input
+                        id="edit-subtitle"
+                        type="text"
+                        value={subtitle}
+                        onChange={(e) => setSubtitle(e.target.value)}
+                        placeholder="請輸入副標題 (28px)"
+                        className="input-md"
+                        style={{ fontSize: '1.1rem' }}
                     />
                 </div>
 
@@ -184,9 +256,9 @@ function AdminEditPage() {
 
                 <div className="form-group">
                     <label>內容詳情</label>
-                    <TiptapEditor 
-                        content={content} 
-                        onChange={setContent} 
+                    <TiptapEditor
+                        content={content}
+                        onChange={setContent}
                         placeholder="請輸入公告詳情..."
                     />
                 </div>
@@ -223,6 +295,7 @@ function AdminEditPage() {
                     </button>
                 </div>
             </div>
+            )}
         </div>
     );
 }

@@ -12,7 +12,43 @@ import { Placeholder } from '@tiptap/extension-placeholder';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Highlight } from '@tiptap/extension-highlight';
-import { useCallback, useRef } from 'react';
+import { Extension } from '@tiptap/core';
+import { useCallback, useRef, useEffect } from 'react';
+
+// 自定義字體大小擴展 - 使用 Global Attributes 方式綁定到 textStyle
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: element => element.style.fontSize?.replace(/['"]+/g, ''),
+            renderHTML: attributes => {
+              if (!attributes.fontSize) return {};
+              return { style: `font-size: ${attributes.fontSize}` };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setFontSize: fontSize => ({ chain }) => {
+        return chain().setMark('textStyle', { fontSize }).run();
+      },
+      unsetFontSize: () => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { fontSize: null })
+          .removeEmptyTextStyle()
+          .run();
+      },
+    };
+  },
+});
 
 const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容...' }) => {
   const fileInputRef = useRef(null);
@@ -31,6 +67,7 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
         },
       }),
       Image.configure({
+        allowBase64: true,
         HTMLAttributes: {
           class: 'editor-image',
         },
@@ -45,17 +82,25 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
         types: ['heading', 'paragraph'],
       }),
       TextStyle,
+      FontSize,
       Color,
       Placeholder.configure({
         placeholder,
       }),
     ],
     content,
-    onHistoryStateChange: () => {},
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
   });
+
+  // 強制同步父元件傳入的內容 (用於非同步載入)
+  useEffect(() => {
+    if (editor && content && editor.isEmpty) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
 
   const setLink = useCallback(() => {
     if (!editor) return;
@@ -126,6 +171,33 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
         onChange={onFileChange}
       />
       <div className="tiptap-toolbar">
+        {/* 字體大小下拉選單 */}
+        <div className="toolbar-group">
+          <select
+            onChange={(e) => {
+              const size = e.target.value;
+              if (size === 'default') {
+                editor.chain().focus().unsetFontSize().run();
+              } else {
+                editor.chain().focus().setFontSize(size).run();
+              }
+            }}
+            className="toolbar-select"
+            value={editor.getAttributes('textStyle').fontSize || 'default'}
+          >
+            <option value="default">字級</option>
+            <option value="12px">12px</option>
+            <option value="14px">14px</option>
+            <option value="17px">17px (內文)</option>
+            <option value="21px">21px</option>
+            <option value="24px">24px</option>
+            <option value="28px">28px (副標)</option>
+            <option value="48px">48px (主標)</option>
+          </select>
+        </div>
+
+        <div className="toolbar-separator" />
+
         {/* 文字格式群組 */}
         <div className="toolbar-group">
           <button
