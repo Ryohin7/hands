@@ -2,7 +2,8 @@
 @font-face {
   font-family: 'Hiragino Sans';
   src: url('./fonts/HiraginoW3.otf') format('opentype');
-  font-weight: 400; /* 代表標準 */
+  font-weight: 400;
+  /* 代表標準 */
   font-style: normal;
 }
 
@@ -10,28 +11,44 @@
 @font-face {
   font-family: 'Hiragino Sans';
   src: url('./fonts/HiraginoW6.otf') format('opentype');
-  font-weight: 700; /* 代表粗體 */
+  font-weight: 700;
+  /* 代表粗體 */
   font-style: normal;
 }
 
-/* === 設計系統 - MUJI 極簡風格 === */
+/* === 設計系統 - MUJI 極簡風格變數 === */
 :root {
   --brand: #007130;
+  /* 品牌綠 */
   --brand-dark: #005a26;
+  /* 深品牌綠 */
   --brand-light: #e6f4ec;
+  /* 淺品牌綠 */
   --text: #333333;
+  /* 主要文字 */
   --text-secondary: #999999;
+  /* 次要文字 */
   --bg: #FFFFFF;
+  /* 背景白 */
   --bg-gray: #F8F9FB;
+  /* 背景淺灰 */
   --border: #E5E7EB;
+  /* 標準邊框 */
   --border-light: #EEEEEE;
+  /* 淺色邊框 */
   --radius: 4px;
+  /* 標準圓角 */
   --radius-sm: 4px;
+  /* 小圓角 */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  /* 小陰影 */
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* 中陰影 */
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /* 大陰影 */
   --transition: 0.2s ease;
-  /* 優先使用 Hiragino Sans，備選為系統字體 */
+  /* 標準轉場動畫 */
+  /* 字體系統：優先使用 Hiragino Sans (手創館指定) */
   --font: 'Hiragino Sans', -apple-system, BlinkMacSystemFont, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
 }
 
@@ -56,6 +73,15 @@ body {
   background: var(--bg);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
+  /* 防止水平晃動 */
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 a {
@@ -67,7 +93,7 @@ img {
   max-width: 100%;
 }
 
-/* === Header === */
+/* === 前台頁首 (Header) === */
 .header {
   background: var(--bg);
   color: var(--text);
@@ -87,23 +113,25 @@ img {
   justify-content: space-between;
 }
 
+/* 品牌標誌 */
 .header-logo {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 1.5rem;
   font-weight: 800;
-  /* 加粗 */
   color: var(--brand);
   letter-spacing: 0.08em;
 }
 
+/* 導航選單 */
 .header-nav {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
+/* 導航連結項目 */
 .header-link {
   color: var(--text-secondary);
   font-size: 0.8125rem;
@@ -120,10 +148,7 @@ img {
   color: var(--text);
 }
 
-.header-link-login:hover {
-  border-color: var(--text);
-}
-
+/* 行動版選單開關 */
 .mobile-menu-toggle {
   display: none;
   background: none;
@@ -134,13 +159,14 @@ img {
   z-index: 102;
 }
 
+/* 全域遮罩層 */
 .header-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 100;
   animation: fadeIn 0.2s ease;
 }
@@ -367,6 +393,7 @@ img {
   letter-spacing: 0.05em;
 }
 
+/* === 文章內容渲染區 === */
 .post-detail-content {
   padding: 2.5rem 0;
   font-size: 0.9375rem;
@@ -384,35 +411,75 @@ img {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 文章圖片 */
 .post-detail-content img {
   max-width: 100%;
   border-radius: var(--radius-sm);
-  margin: 1rem 0;
+  margin: 1.5rem 0;
 }
 
+/* 文章連結 */
 .post-detail-content a {
   color: var(--brand);
   text-decoration: underline;
 }
 
+/* 文章標題 */
 .post-detail-content h1,
 .post-detail-content h2,
 .post-detail-content h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
 }
 
+/* 文章清單 */
 .post-detail-content ul,
 .post-detail-content ol {
   padding-left: 1.5rem;
-  margin: 0.75rem 0;
+  margin: 1rem 0;
 }
 
+/* 引言區塊 (淺灰色背景) */
 .post-detail-content blockquote {
-  border-left: 2px solid var(--text-secondary);
-  padding-left: 1rem;
-  color: var(--text-secondary);
-  margin: 1rem 0;
+  border-left: 4px solid var(--brand);
+  padding: 1.25rem 1.5rem;
+  background: #f5f5f5;
+  color: #333333;
+  margin: 1.5rem 0;
+  border-radius: 0 8px 8px 0;
+  line-height: 1.6;
+}
+
+/* 程式碼區塊 (字體與全局一致，自動換行) */
+.post-detail-content pre {
+  background: #2d3436;
+  color: #dfe6e9;
+  font-family: var(--font);
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  line-height: 1.6;
+  /* 自動換行修正 */
+  white-space: pre-wrap !important;
+  word-break: break-all;
+}
+
+.post-detail-content code {
+  color: #e83e8c;
+  background: #f1f3f5;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* 螢光筆高亮 */
+.post-detail-content mark,
+mark {
+  background-color: #ffeaa7;
+  color: #2d3436;
+  padding: 0.1em 0.2em;
+  border-radius: 2px;
 }
 
 /* === 登入頁 === */
@@ -1913,13 +1980,14 @@ img {
   margin: 0 4px;
 }
 
+/* === Tiptap 編輯器內容區 (所見即所得) === */
 .editor-content-area .ProseMirror {
   min-height: 400px;
   padding: 24px 30px;
   outline: none;
   font-family: var(--font);
   line-height: 1.8;
-  color: #2c3e50;
+  color: var(--text);
   font-size: 1rem;
   /* 編輯器同步：中西文自動間距 */
   text-autospace: ideograph-alpha ideograph-numeric !important;
@@ -1927,7 +1995,7 @@ img {
   letter-spacing: 0.025em;
 }
 
-/* Placeholder 客製化 */
+/* 編輯器佔位符 (Placeholder) */
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -1937,34 +2005,39 @@ img {
   font-style: italic;
 }
 
-/* 內容元素美化 */
-.ProseMirror h1, .ProseMirror h2, .ProseMirror h3 {
+/* 編輯器標題樣式 */
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
   color: #1a1a1a;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
 }
 
+/* 編輯器引言 (與前台一致：淺灰底) */
 .ProseMirror blockquote {
-  border-left: 4px solid #007130;
-  padding: 12px 20px;
-  background: #f3faf5;
-  margin: 1.5em 0;
+  border-left: 4px solid var(--brand);
+  padding: 1.25rem 1.5rem;
+  background: #f5f5f5;
   color: #444;
-  border-radius: 0 4px 4px 0;
+  margin: 1.5em 0;
+  border-radius: 0 8px 8px 0;
 }
 
+/* 編輯器圖片樣式 */
 .ProseMirror img {
   max-width: 100%;
   border-radius: 6px;
   margin: 1.5em 0;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .ProseMirror img.ProseMirror-selectednode {
-  outline: 3px solid #007130;
+  outline: 3px solid var(--brand);
   outline-offset: 2px;
 }
 
+/* 編輯器表格樣式 */
 .ProseMirror table {
   border-collapse: collapse;
   table-layout: fixed;
@@ -1973,7 +2046,8 @@ img {
   border: 1px solid #ddd;
 }
 
-.ProseMirror td, .ProseMirror th {
+.ProseMirror td,
+.ProseMirror th {
   border: 1px solid #ddd;
   padding: 10px 14px;
   min-width: 1em;
@@ -1985,16 +2059,18 @@ img {
   font-weight: bold;
 }
 
-/* 程式碼區塊 (Code Block) */
+/* 編輯器程式碼區塊 (字體與全局一致，自動換行) */
 .ProseMirror pre {
   background: #2d3436;
   color: #dfe6e9;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font);
   padding: 1.25rem 1.5rem;
   border-radius: 8px;
   margin: 1.5em 0;
-  overflow-x: auto;
   line-height: 1.6;
+  /* 自動換行修正 */
+  white-space: pre-wrap !important;
+  word-break: break-all;
 }
 
 .ProseMirror pre code {
@@ -2004,7 +2080,7 @@ img {
   font-size: 0.9em;
 }
 
-/* 行內程式碼 */
+/* 編輯器行內程式碼 */
 .ProseMirror code {
   background: #f1f3f5;
   color: #e83e8c;
@@ -2014,18 +2090,12 @@ img {
   font-family: monospace;
 }
 
-/* 螢光記號 (Highlight) */
+/* 編輯器螢光記號 (所見即所得) */
 .ProseMirror mark {
   background-color: #ffeaa7;
   color: #2d3436;
   padding: 0.1em 0.2em;
   border-radius: 2px;
-}
-
-/* 清除格式按鈕特殊樣式 */
-.btn-clear-format:hover {
-  background: #fff5f5 !important;
-  color: #ff7675 !important;
 }
 
 /* === Header Dropdown === */
@@ -2149,15 +2219,18 @@ img {
 /* === RWD === */
 @media (max-width: 745px) {
   .header-inner {
-    padding: 0 1rem;
+    padding: 0 1.5rem;
   }
 
   .page-container {
-    padding: 1.5rem 1rem 2.5rem;
+    padding: 1.5rem 1.5rem 2.5rem;
+    overflow-x: hidden;
+    /* 防止內容撐開導致左右不均 */
   }
 
   .page-title {
     font-size: 1.125rem;
+    padding: 0 0.25rem;
   }
 
   .month-group {
@@ -2170,6 +2243,12 @@ img {
     padding-top: 1.25rem;
   }
 
+  .post-detail {
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .post-card {
     padding: 1.25rem 0;
   }
@@ -2178,12 +2257,34 @@ img {
     font-size: 0.8125rem;
   }
 
-  .post-detail-title {
-    font-size: 1.125rem;
+  .post-detail-header {
+    padding: 0 0 1.25rem;
+    margin: 0;
   }
 
   .post-detail-content {
-    padding: 1.5rem 0;
+    padding: 1rem 0;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-break: break-all;
+    /* 核心修正：開啟兩端對齊，讓左右邊隙視覺對稱 */
+    text-align: justify;
+    text-justify: inter-ideograph;
+    /* 最佳化中日文字排版 */
+    text-wrap: normal;
+    /* 避免 pretty 導致提前換行 */
+  }
+
+  .post-detail-content p,
+  .post-detail-content div,
+  .post-detail-content h1,
+  .post-detail-content h2,
+  .post-detail-content h3 {
+    max-width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   .admin-header {
@@ -2258,7 +2359,7 @@ img {
     padding: 1rem 0;
     transition: 0.3s ease;
     z-index: 101;
-    box-shadow: -4px 0 12px rgba(0,0,0,0.05);
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
     gap: 0;
   }
 
@@ -2285,7 +2386,8 @@ img {
     box-shadow: none;
     padding-left: 1.5rem;
     background: var(--bg-gray);
-    display: none; /* 預設在手機版隱藏，或改為可折疊 */
+    display: none;
+    /* 預設在手機版隱藏，或改為可折疊 */
   }
 
   .nav-item-wrapper:hover .header-dropdown {
@@ -2336,7 +2438,8 @@ img {
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
-  flex-direction: column; /* 改為垂直排列 */
+  flex-direction: column;
+  /* 改為垂直排列 */
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
@@ -2345,7 +2448,8 @@ img {
 .footer-copyright {
   font-size: 0.8125rem;
   opacity: 0.9;
-  text-align: center; /* 文字置中 */
+  text-align: center;
+  /* 文字置中 */
 }
 
 .footer-social {

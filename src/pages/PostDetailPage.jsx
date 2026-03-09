@@ -63,7 +63,7 @@ function PostDetailPage() {
                 'strong', 'b', 'em', 'i', 'u', 's', 'strike',
                 'ul', 'ol', 'li',
                 'a', 'img',
-                'blockquote', 'pre', 'code',
+                'blockquote', 'pre', 'code', 'mark',
                 'table', 'thead', 'tbody', 'tr', 'th', 'td',
                 'span', 'div', 'sub', 'sup',
             ],
