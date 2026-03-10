@@ -1,8 +1,8 @@
 {
-    "name": "公告系統",
-    "short_name": "公告",
-    "description": "公告系統 - 最新消息與通知",
-    "start_url": "/",
+    "name": "手創館員工系統",
+    "short_name": "員工系統",
+    "description": "台隆手創館員工作業門戶",
+    "start_url": "/staff",
     "scope": "/",
     "display": "standalone",
     "orientation": "portrait-primary",

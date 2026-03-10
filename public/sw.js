@@ -1,4 +1,4 @@
-const CACHE_NAME = 'notice-v3'; // 更新版本號以強制清除舊快取
+const CACHE_NAME = 'notice-v4'; // 更新版本號以強制套用新的 Manifest 設定
 const STATIC_ASSETS = [
     '/',
     '/manifest.json',
