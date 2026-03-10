@@ -10,11 +10,15 @@ function CustomPageEditPage() {
     const isEdit = Boolean(id);
 
     const [title, setTitle] = useState('');
+    const [subtitle, setSubtitle] = useState(''); // 新增
+    const [category, setCategory] = useState(''); // 新增
     const [pathId, setPathId] = useState(''); // 即 Document ID
     const [content, setContent] = useState('');
     const [status, setStatus] = useState('published');
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    const categories = ['公告', '活動', '新聞發佈', '頁面']; // 可選
 
     useEffect(() => {
         if (isEdit) {
@@ -31,6 +35,8 @@ function CustomPageEditPage() {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 setTitle(data.title || '');
+                setSubtitle(data.subtitle || '');
+                setCategory(data.category || '');
                 setContent(data.content || '');
                 setStatus(data.status || 'published');
             }
@@ -53,6 +59,8 @@ function CustomPageEditPage() {
         try {
             const pageData = {
                 title: title.trim(),
+                subtitle: subtitle.trim(),
+                category: category,
                 content,
                 status,
                 updatedAt: serverTimestamp(),
@@ -104,8 +112,21 @@ function CustomPageEditPage() {
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="請輸入頁面標題"
+                        placeholder="請輸入頁面標題 (48px)"
                         className="input-lg"
+                        style={{ fontSize: '1.5rem', fontWeight: 'bold' }}
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>副標題 (可選)</label>
+                    <input
+                        type="text"
+                        value={subtitle}
+                        onChange={(e) => setSubtitle(e.target.value)}
+                        placeholder="請輸入副標題 (28px)"
+                        className="input-md"
+                        style={{ fontSize: '1.1rem' }}
                     />
                 </div>
 
@@ -123,6 +144,16 @@ function CustomPageEditPage() {
                         />
                     </div>
                     <p className="editor-hint">⚠️ 修改此 ID 會導致原本連向此頁面的鏈結失效</p>
+                </div>
+
+                <div className="form-group">
+                    <label>分類 (可選)</label>
+                    <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                        <option value="">（不設定分類）</option>
+                        {categories.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="form-group">

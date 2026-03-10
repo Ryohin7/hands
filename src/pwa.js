@@ -16,12 +16,8 @@ export async function registerSW() {
                 if (newWorker) {
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // 有新版本可用，立即執行 skipWaiting 並重新整理
-                            newWorker.postMessage({ type: 'SKIP_WAITING' });
-                            // 延遲一下讓 SW 接管後再重新整理，確保抓到的是最新版
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 500);
+                            // 發送自定義事件通知 UI 有新版本
+                            window.dispatchEvent(new CustomEvent('swUpdated', { detail: registration }));
                         }
                     });
                 }

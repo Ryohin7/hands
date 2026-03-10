@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { formatDate } from '../utils'; // 新增
 import { autoSpace } from '../utils/textUtils';
 import DOMPurify from 'dompurify';
 
@@ -26,6 +27,16 @@ function CustomPageView() {
         }
         fetchPage();
     }, [id]);
+
+    // 動態更新頁面標題（SEO）
+    useEffect(() => {
+        if (page) {
+            document.title = `${page.title} — 台隆手創館`;
+        }
+        return () => {
+            document.title = '台隆手創館公告';
+        };
+    }, [page]);
 
     function sanitizeHtml(html) {
         if (!html) return '';
@@ -65,9 +76,31 @@ function CustomPageView() {
 
     return (
         <div className="page-container">
+            {/* 新增返回連結，與公告詳情一致 */}
+            <Link to="/" className="back-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+                返回公告列表
+            </Link>
+
             <article className="post-detail">
                 <div className="post-detail-header">
+                    {/* 若有分類或日期，則一併顯示以與公告一致 */}
+                    {page.category && (
+                        <span className="post-detail-category">{page.category}</span>
+                    )}
                     <h1 className="post-detail-title">{autoSpace(page.title)}</h1>
+                    {page.subtitle && (
+                        <h2 className="post-detail-subtitle">{autoSpace(page.subtitle)}</h2>
+                    )}
+                    <time className="post-detail-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        {formatDate(page.createdAt)}
+                    </time>
                 </div>
                 <div
                     className="post-detail-content ql-editor"

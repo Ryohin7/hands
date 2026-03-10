@@ -60,8 +60,10 @@ function Header() {
                 setNavItems([
                     { id: '1', label: '首頁', path: '/' },
                     { id: '2', label: '門市資訊', path: '/stores' },
-                    { id: '3', label: '最新 DM', path: '/dm' }
+                    { id: '3', label: '最新 DM', path: '/dm' },
+                    { id: '4', label: '員工入口', path: '/staff' }
                 ]);
+
             }
         } catch (err) {
             console.error('Fetch nav failed:', err);
