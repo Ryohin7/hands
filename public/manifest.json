@@ -1,7 +1,7 @@
 {
-    "name": "手創館員工系統",
-    "short_name": "員工系統",
-    "description": "台隆手創館員工作業門戶",
+    "name": "HANDS",
+    "short_name": "員工入口",
+    "description": "門市作業",
     "start_url": "/staff",
     "scope": "/",
     "display": "standalone",

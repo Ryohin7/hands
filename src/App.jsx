@@ -87,8 +87,8 @@ function PWAUpdateHandler() {
         }} className="pwa-update-toast">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '6px', borderRadius: '50%' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 2v6h-6m-9 10H2v-6h6m8-11.41a10 10 0 1 1-13.07 4.5l3.07-3.09" />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                     </svg>
                 </div>
                 <div style={{ fontWeight: '600', fontSize: '1rem' }}>發現新版本！</div>
@@ -96,7 +96,7 @@ function PWAUpdateHandler() {
             <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>
                 我們已準備好最新的系統更新，請立即套用以獲得最佳體驗。
             </div>
-            <button 
+            <button
                 onClick={onUpdate}
                 style={{
                     background: 'white',
@@ -110,7 +110,7 @@ function PWAUpdateHandler() {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }}
             >
-                立即更新並重啟
+                立即更新
             </button>
             <style>{`
                 @keyframes pwa-slide-up {
