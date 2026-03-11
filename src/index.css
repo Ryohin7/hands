@@ -441,12 +441,8 @@ img {
   word-break: break-word;
   line-break: strict;
   text-wrap: pretty;
-  /* 核心：中西文自動間距 */
-  text-autospace: ideograph-alpha ideograph-numeric !important;
-  text-spacing: ideograph-alpha ideograph-numeric;
-  /* 輔助排版：還原文字間距，設定中西文相鄰間距 */
-  letter-spacing: normal;
-  text-spacing-adjacent-characters: ideograph-alpha 0.5em ideograph-numeric 0.5em;
+  /* 標準排版設定 */
+  letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
