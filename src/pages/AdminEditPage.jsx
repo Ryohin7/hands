@@ -21,8 +21,21 @@ function AdminEditPage() {
     const [useSchedule, setUseSchedule] = useState(false);
     const [pinned, setPinned] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
+    const [formDeadline, setFormDeadline] = useState('');
 
-    const categories = ['公告', '活動', '新聞發佈'];
+    const categories = ['公告', '活動', '新聞發佈', '中獎名單公告'];
+
+    // 處理分類切換
+    const handleCategoryChange = (e) => {
+        const selected = e.target.value;
+        setCategory(selected);
+        if (selected === '中獎名單公告' && !formDeadline && !isEdit) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+            setFormDeadline(`${currentYear}-${currentMonth}-01T23:59:59`);
+        }
+    };
 
     useEffect(() => {
         if (isEdit) {
@@ -49,6 +62,12 @@ function AdminEditPage() {
                     const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
                     setScheduledAt(local);
                 }
+
+                if (data.formDeadline) {
+                    const d = data.formDeadline.toDate ? data.formDeadline.toDate() : new Date(data.formDeadline);
+                    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                    setFormDeadline(local);
+                }
             }
         } catch (err) {
             console.error('取得公告失敗:', err);
@@ -64,6 +83,10 @@ function AdminEditPage() {
         }
         if (useSchedule && !scheduledAt) {
             alert('請選擇排程時間');
+            return;
+        }
+        if (category === '中獎名單公告' && !formDeadline) {
+            alert('請選擇表單填寫截止時間');
             return;
         }
         setSaving(true);
@@ -82,6 +105,12 @@ function AdminEditPage() {
                 postData.scheduledAt = Timestamp.fromDate(new Date(scheduledAt));
             } else {
                 postData.scheduledAt = null;
+            }
+
+            if (category === '中獎名單公告' && formDeadline) {
+                postData.formDeadline = Timestamp.fromDate(new Date(formDeadline));
+            } else {
+                postData.formDeadline = null;
             }
 
             if (isEdit) {
@@ -203,13 +232,28 @@ function AdminEditPage() {
                     <select
                         id="edit-category"
                         value={category}
-                        onChange={(e) => setCategory(e.target.value)}
+                        onChange={handleCategoryChange}
                     >
                         {categories.map((c) => (
                             <option key={c} value={c}>{c}</option>
                         ))}
                     </select>
                 </div>
+
+                {category === '中獎名單公告' && (
+                    <div className="form-group">
+                        <label htmlFor="edit-form-deadline" style={{ color: '#d32f2f' }}>表單填寫截止時間</label>
+                        <input
+                            id="edit-form-deadline"
+                            type="datetime-local"
+                            step="1"
+                            value={formDeadline}
+                            onChange={(e) => setFormDeadline(e.target.value)}
+                            className="schedule-input"
+                        />
+                        <span className="schedule-hint" style={{ marginTop: '0.5rem', display: 'block' }}>設定填寫截止時間，時間到前台將無法再填寫表單</span>
+                    </div>
+                )}
 
                 <div className="form-group">
                     <div className="schedule-toggle">

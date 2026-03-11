@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { formatDate } from '../utils';
 import { autoSpace } from '../utils/textUtils';
 import DOMPurify from 'dompurify';
+import WinnerForm from '../components/WinnerForm';
 
 function PostDetailPage() {
     const { id } = useParams();
@@ -142,6 +143,8 @@ function PostDetailPage() {
                     className="post-detail-content ql-editor"
                     dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(post.content)) }}
                 />
+
+                {post.category === '中獎名單公告' && <WinnerForm post={post} />}
             </article>
         </div>
     );

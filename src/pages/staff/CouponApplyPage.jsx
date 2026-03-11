@@ -248,6 +248,9 @@ function CouponApplyPage() {
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontSize: '0.85rem', color: '#666' }}>申請張數：<strong>{req.quantityRequested} 張</strong></div>
                                         <div style={{ fontSize: '0.8125rem', color: '#888', marginTop: '0.25rem' }}>原因：{req.reason || '未填寫'}</div>
+                                        {(req.status === 'approved' || req.status === 'rejected') && (
+                                            <div style={{ fontSize: '0.8125rem', color: '#888', marginTop: '0.25rem' }}>審核者：{req.approvedByName || req.rejectedByName || '管理員'}</div>
+                                        )}
                                     </div>
                                     <div style={{ textAlign: 'right', marginLeft: '0.5rem' }}>
                                         {req.status === 'approved' && req.assignedCoupons && (
@@ -282,6 +285,7 @@ function CouponApplyPage() {
                                     <th>張數</th>
                                     <th>原因</th>
                                     <th>狀態</th>
+                                    <th>審核者</th>
                                     <th>電子券碼</th>
                                 </tr>
                             </thead>
@@ -302,6 +306,9 @@ function CouponApplyPage() {
                                                 <span className={`tag tag-${req.status}`}>
                                                     {req.status === 'pending' ? '待審核' : req.status === 'approved' ? '已核准' : '已退回'}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                {(req.status === 'approved' || req.status === 'rejected') ? (req.approvedByName || req.rejectedByName || '管理員') : '-'}
                                             </td>
                                             <td>
                                                 {req.status === 'approved' && req.assignedCoupons && (

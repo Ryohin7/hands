@@ -223,6 +223,11 @@ function MemberActionPage() {
                                 <div style={{ fontSize: '0.85rem', color: '#666', background: '#f8f9fa', padding: '0.5rem', borderRadius: '4px' }}>
                                     {req.detail}
                                 </div>
+                                {(req.status === 'approved' || req.status === 'rejected') && (
+                                    <div style={{ fontSize: '0.8125rem', color: '#888', marginTop: '0.5rem' }}>
+                                        審核者：{req.reviewedByName || '管理員'}
+                                    </div>
+                                )}
                                 {req.adminNote && (
                                     <div style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.5rem' }}>
                                         備註：{req.adminNote}
@@ -244,6 +249,7 @@ function MemberActionPage() {
                                     <th>會員ID</th>
                                     <th>詳細內容</th>
                                     <th>狀態</th>
+                                    <th>審核者</th>
                                     <th>備註</th>
                                 </tr>
                             </thead>
@@ -263,6 +269,9 @@ function MemberActionPage() {
                                                 <span className={`tag tag-${req.status}`}>
                                                     {req.status === 'pending' ? '待審核' : req.status === 'approved' ? '已核准' : '已駁回'}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                {(req.status === 'approved' || req.status === 'rejected') ? (req.reviewedByName || '管理員') : '-'}
                                             </td>
                                             <td>{req.adminNote || '-'}</td>
                                         </tr>

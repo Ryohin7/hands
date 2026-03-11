@@ -158,6 +158,7 @@ function ReportPage() {
                                     <th>張數</th>
                                     <th>原因</th>
                                     <th>狀態</th>
+                                    <th>審核者</th>
                                 </tr>
                             ) : (
                                 <tr>
@@ -168,13 +169,14 @@ function ReportPage() {
                                     <th>會員ID</th>
                                     <th>詳細內容</th>
                                     <th>狀態</th>
+                                    <th>審核者</th>
                                 </tr>
                             )}
                         </thead>
                         <tbody>
                             {data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={reportType === 'coupon' ? 6 : 7} style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>
+                                    <td colSpan={reportType === 'coupon' ? 7 : 8} style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>
                                         無符合條件之資料
                                     </td>
                                 </tr>
@@ -202,6 +204,9 @@ function ReportPage() {
                                             <span className={`tag tag-${item.status}`}>
                                                 {item.status === 'pending' ? '待審核' : item.status === 'approved' ? '已核准' : '已駁回'}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {item.status !== 'pending' ? (item.reviewedByName || item.approvedByName || item.rejectedByName || '管理員') : '-'}
                                         </td>
                                     </tr>
                                 ))

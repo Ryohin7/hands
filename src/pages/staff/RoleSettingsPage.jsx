@@ -129,7 +129,7 @@ function RoleSettingsPage() {
                 <h2 className="admin-content-title">角色權限設定</h2>
             </div>
 
-            <div className="grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="role-settings-main-grid">
                 {/* 角色管理 */}
                 <div className="card">
                     <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee' }}>
@@ -154,7 +154,7 @@ function RoleSettingsPage() {
                                     <strong style={{ fontSize: '1.1rem' }}>{role.name}</strong>
                                     <button onClick={() => handleDeleteRole(role.id)} style={{ color: '#DC2626', border: 'none', background: 'none', cursor: 'pointer' }}>刪除</button>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                <div className="role-settings-perms-grid">
                                     {AVAILABLE_PERMISSIONS.map(perm => (
                                         <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
                                             <input 
@@ -212,6 +212,34 @@ function RoleSettingsPage() {
                     </div>
                 </div>
             </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                .role-settings-main-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 2rem;
+                }
+                .role-settings-perms-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0.5rem;
+                }
+                @media (max-width: 900px) {
+                    .role-settings-main-grid {
+                        grid-template-columns: 1fr;
+                        gap: 1.5rem;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .role-settings-perms-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .admin-table th, .admin-table td {
+                        padding: 0.5rem;
+                        font-size: 0.875rem;
+                    }
+                }
+            ` }} />
         </div>
     );
 }

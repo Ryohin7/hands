@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
+import WinnersPage from './pages/WinnersPage';
 import PostDetailPage from './pages/PostDetailPage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
@@ -23,6 +24,7 @@ import GlobalSettingsPage from './pages/GlobalSettingsPage';
 import FontTestPage from './pages/FontTestPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ExcelComparePage from './pages/ExcelComparePage';
+import WinnerAdminPage from './pages/WinnerAdminPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import StaffLayout from './components/StaffLayout';
@@ -39,7 +41,7 @@ import MemberActionPage from './pages/staff/MemberActionPage';
 import MemberAuditPage from './pages/staff/MemberAuditPage';
 import StoreManagePage from './pages/staff/StoreManagePage';
 import ReportPage from './pages/staff/ReportPage';
-
+import StaffDashboardPage from './pages/staff/StaffDashboardPage';
 
 function PWAUpdateHandler() {
     const [showUpdate, setShowUpdate] = useState(false);
@@ -136,6 +138,7 @@ function App() {
                 <Routes>
                     {/* 前台頁面 - 帶 Header & Footer */}
                     <Route path="/" element={<><Header /><main className="main-content"><HomePage /></main><Footer /></>} />
+                    <Route path="/winners" element={<><Header /><main className="main-content"><WinnersPage /></main><Footer /></>} />
                     <Route path="/post/:id" element={<><Header /><main className="main-content"><PostDetailPage /></main><Footer /></>} />
                     <Route path="/login" element={<><Header /><main className="main-content"><LoginPage /></main><Footer /></>} />
                     <Route path="/stores" element={<><Header /><main className="main-content"><StoreListPage /></main><Footer /></>} />
@@ -181,6 +184,7 @@ function App() {
                         {/* 全域設定 */}
                         <Route path="settings" element={<GlobalSettingsPage />} />
                         <Route path="excel-compare" element={<ExcelComparePage />} />
+                        <Route path="winners" element={<WinnerAdminPage />} />
                     </Route>
 
                     {/* 員工入口頁面 */}
@@ -192,7 +196,8 @@ function App() {
                             </ProtectedRoute>
                         }
                     >
-                        <Route index element={<CouponApplyPage />} />
+                        <Route index element={<StaffDashboardPage />} />
+                        <Route path="coupon-apply" element={<CouponApplyPage />} />
                         <Route path="coupon-audit" element={<CouponAuditPage />} />
                         <Route path="user-audit" element={<StaffAuditPage />} />
                         <Route path="role-settings" element={<RoleSettingsPage />} />

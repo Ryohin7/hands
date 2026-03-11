@@ -8,35 +8,57 @@ import {
     orderBy, 
     serverTimestamp,
     doc,
-    updateDoc
+    updateDoc,
+    getDoc,
+    limit
 } from 'firebase/firestore';
 
 function MemberAuditPage() {
     const [requests, setRequests] = useState([]);
+    const [history, setHistory] = useState([]);
+    const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'history'
     const [loading, setLoading] = useState(false);
     const [adminNote, setAdminNote] = useState({});
 
     useEffect(() => {
         // 監聽所有待審核的會員資料異動
-        const q = query(
+        const qPending = query(
             collection(db, 'member_actions'),
             where('status', '==', 'pending'),
             orderBy('createdAt', 'desc')
         );
-
-        const unsub = onSnapshot(q, (snapshot) => {
+        const unsubPending = onSnapshot(qPending, (snapshot) => {
             setRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
 
-        return () => unsub();
+        // 監聽歷史紀錄 (最近50筆)
+        const qHistory = query(
+            collection(db, 'member_actions'),
+            where('status', '!=', 'pending'),
+            orderBy('status'),
+            orderBy('createdAt', 'desc'),
+            limit(50)
+        );
+        const unsubHistory = onSnapshot(qHistory, (snapshot) => {
+            setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+
+        return () => {
+            unsubPending();
+            unsubHistory();
+        };
     }, []);
 
     const handleAction = async (id, status) => {
         setLoading(true);
         try {
+            const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+            const reviewerName = userDoc.exists() ? userDoc.data().displayName : '管理員';
+
             await updateDoc(doc(db, 'member_actions', id), {
                 status: status,
                 reviewedBy: auth.currentUser.uid,
+                reviewedByName: reviewerName,
                 reviewedAt: serverTimestamp(),
                 adminNote: adminNote[id] || ''
             });
@@ -65,62 +87,108 @@ function MemberAuditPage() {
 
     return (
         <div className="admin-page-content" style={{ padding: '1rem' }}>
-            <div className="admin-content-header" style={{ marginBottom: '1.5rem' }}>
+            <div className="admin-content-header" style={{ marginBottom: '1rem' }}>
                 <h2 className="admin-content-title" style={{ fontSize: '1.5rem' }}>會員異動審核</h2>
+            </div>
+            
+            <div className="tabs" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem' }}>
+                <button 
+                    className={`btn ${activeTab === 'pending' ? 'btn-primary' : 'btn-outline'}`} 
+                    style={{ border: activeTab === 'pending' ? 'none' : '1px solid #ddd' }}
+                    onClick={() => setActiveTab('pending')}
+                >
+                    待審核 ({requests.length})
+                </button>
+                <button 
+                    className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
+                    style={{ border: activeTab === 'history' ? 'none' : '1px solid #ddd' }}
+                    onClick={() => setActiveTab('history')}
+                >
+                    歷史紀錄 (最近50筆)
+                </button>
             </div>
 
             <div className="audit-container">
                 {/* 手機版：卡片式列表 */}
                 <div className="mobile-only" style={{ display: 'none' }}>
-                    {requests.length === 0 ? (
-                        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>目前無待審核異動</div>
+                    {activeTab === 'pending' ? (
+                        requests.length === 0 ? (
+                            <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>目前無待審核異動</div>
+                        ) : (
+                            requests.map(req => (
+                                <div key={req.id} className="card" style={{ padding: '1.25rem', marginBottom: '1rem', borderLeft: '4px solid #007130' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                                        <div style={{ fontWeight: '600' }}>{req.submittedByName}</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.createdAt?.toDate().toLocaleDateString()}</div>
+                                    </div>
+                                    <div style={{ fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
+                                        <span style={{ color: '#666' }}>類型：</span>
+                                        <span className="tag tag-pending" style={{ background: '#e6f4ec', color: '#007130' }}>{getTypeName(req.type)}</span>
+                                    </div>
+                                    <div style={{ fontSize: '0.9375rem', marginBottom: '0.5rem' }}>
+                                        <strong>{req.memberId}</strong>
+                                    </div>
+                                    <div style={{ fontSize: '0.875rem', background: '#f8f9fa', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem' }}>
+                                        {req.detail}
+                                    </div>
+                                    <div style={{ marginBottom: '1rem' }}>
+                                        <input 
+                                            type="text" 
+                                            placeholder="審核備註..."
+                                            className="form-control"
+                                            style={{ fontSize: '0.875rem', width: '100%' }}
+                                            value={adminNote[req.id] || ''}
+                                            onChange={(e) => handleNoteChange(req.id, e.target.value)}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        <button 
+                                            className="btn btn-primary"
+                                            style={{ flex: 1 }}
+                                            onClick={() => handleAction(req.id, 'approved')}
+                                            disabled={loading}
+                                        >
+                                            核准
+                                        </button>
+                                        <button 
+                                            className="btn btn-outline"
+                                            style={{ flex: 1, color: '#DC2626', borderColor: '#DC2626' }}
+                                            onClick={() => handleAction(req.id, 'rejected')}
+                                            disabled={loading}
+                                        >
+                                            駁回
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )
                     ) : (
-                        requests.map(req => (
-                            <div key={req.id} className="card" style={{ padding: '1.25rem', marginBottom: '1rem', borderLeft: '4px solid #007130' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                    <div style={{ fontWeight: '600' }}>{req.submittedByName}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.createdAt?.toDate().toLocaleDateString()}</div>
+                        history.length === 0 ? (
+                            <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>目前無歷史紀錄</div>
+                        ) : (
+                            history.map(req => (
+                                <div key={req.id} className="card" style={{ padding: '1.25rem', marginBottom: '1rem', borderLeft: req.status === 'approved' ? '4px solid #007130' : '4px solid #DC2626' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                                        <div style={{ fontWeight: '600' }}>{req.submittedByName}</div>
+                                        <span className={`tag tag-${req.status}`} style={{ fontSize: '0.7rem' }}>
+                                            {req.status === 'approved' ? '已核准' : '已駁回'}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
+                                        <span style={{ color: '#666' }}>類型：</span>
+                                        <strong>{getTypeName(req.type)}</strong>
+                                    </div>
+                                    <div style={{ fontSize: '0.9375rem', marginBottom: '0.5rem' }}>
+                                        <strong>{req.memberId}</strong>
+                                    </div>
+                                    <div style={{ fontSize: '0.875rem', background: '#f8f9fa', padding: '0.75rem', borderRadius: '4px', marginBottom: '0.5rem' }}>
+                                        {req.detail}
+                                    </div>
+                                    <div style={{ fontSize: '0.8125rem', color: '#444', marginBottom: '0.25rem' }}>審核者：{req.reviewedByName || '管理員'}</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>時間：{req.createdAt?.toDate().toLocaleString()}</div>
                                 </div>
-                                <div style={{ fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
-                                    <span style={{ color: '#666' }}>類型：</span>
-                                    <span className="tag tag-pending" style={{ background: '#e6f4ec', color: '#007130' }}>{getTypeName(req.type)}</span>
-                                </div>
-                                <div style={{ fontSize: '0.9375rem', marginBottom: '0.5rem' }}>
-                                    <strong>{req.memberId}</strong>
-                                </div>
-                                <div style={{ fontSize: '0.875rem', background: '#f8f9fa', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem' }}>
-                                    {req.detail}
-                                </div>
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <input 
-                                        type="text" 
-                                        placeholder="審核備註..."
-                                        className="form-control"
-                                        style={{ fontSize: '0.875rem', width: '100%' }}
-                                        value={adminNote[req.id] || ''}
-                                        onChange={(e) => handleNoteChange(req.id, e.target.value)}
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                    <button 
-                                        className="btn btn-primary"
-                                        style={{ flex: 1 }}
-                                        onClick={() => handleAction(req.id, 'approved')}
-                                        disabled={loading}
-                                    >
-                                        核准
-                                    </button>
-                                    <button 
-                                        className="btn btn-outline"
-                                        style={{ flex: 1, color: '#DC2626', borderColor: '#DC2626' }}
-                                        onClick={() => handleAction(req.id, 'rejected')}
-                                        disabled={loading}
-                                    >
-                                        駁回
-                                    </button>
-                                </div>
-                            </div>
-                        ))
+                            ))
+                        )
                     )}
                 </div>
 
@@ -135,57 +203,96 @@ function MemberAuditPage() {
                                     <th>會員ID</th>
                                     <th>詳細內容</th>
                                     <th>申請時間</th>
-                                    <th>審核備註</th>
-                                    <th>操作</th>
+                                    {activeTab === 'pending' ? (
+                                        <>
+                                            <th>審核備註</th>
+                                            <th>操作</th>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <th>狀態 / 審核者</th>
+                                            <th>備註</th>
+                                        </>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
-                                {requests.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無待審核異動</td>
-                                    </tr>
-                                ) : (
-                                    requests.map(req => (
-                                        <tr key={req.id}>
-                                            <td>
-                                                <div style={{ fontWeight: '500' }}>{req.submittedByName}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.submittedByStore}</div>
-                                            </td>
-                                            <td>{getTypeName(req.type)}</td>
-                                            <td>{req.memberId}</td>
-                                            <td>{req.detail}</td>
-                                            <td>{req.createdAt?.toDate().toLocaleString() || '...'}</td>
-                                            <td>
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="輸入紀錄或原因"
-                                                    className="form-control"
-                                                    style={{ fontSize: '0.875rem' }}
-                                                    value={adminNote[req.id] || ''}
-                                                    onChange={(e) => handleNoteChange(req.id, e.target.value)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    <button 
-                                                        className="btn btn-sm btn-primary"
-                                                        onClick={() => handleAction(req.id, 'approved')}
-                                                        disabled={loading}
-                                                    >
-                                                        核准
-                                                    </button>
-                                                    <button 
-                                                        className="btn btn-sm btn-outline"
-                                                        style={{ color: '#DC2626', borderColor: '#DC2626' }}
-                                                        onClick={() => handleAction(req.id, 'rejected')}
-                                                        disabled={loading}
-                                                    >
-                                                        駁回
-                                                    </button>
-                                                </div>
-                                            </td>
+                                {activeTab === 'pending' ? (
+                                    requests.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無待審核異動</td>
                                         </tr>
-                                    ))
+                                    ) : (
+                                        requests.map(req => (
+                                            <tr key={req.id}>
+                                                <td>
+                                                    <div style={{ fontWeight: '500' }}>{req.submittedByName}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.submittedByStore}</div>
+                                                </td>
+                                                <td>{getTypeName(req.type)}</td>
+                                                <td>{req.memberId}</td>
+                                                <td>{req.detail}</td>
+                                                <td>{req.createdAt?.toDate().toLocaleString() || '...'}</td>
+                                                <td>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="輸入紀錄或原因"
+                                                        className="form-control"
+                                                        style={{ fontSize: '0.875rem' }}
+                                                        value={adminNote[req.id] || ''}
+                                                        onChange={(e) => handleNoteChange(req.id, e.target.value)}
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        <button 
+                                                            className="btn btn-sm btn-primary"
+                                                            onClick={() => handleAction(req.id, 'approved')}
+                                                            disabled={loading}
+                                                        >
+                                                            核准
+                                                        </button>
+                                                        <button 
+                                                            className="btn btn-sm btn-outline"
+                                                            style={{ color: '#DC2626', borderColor: '#DC2626' }}
+                                                            onClick={() => handleAction(req.id, 'rejected')}
+                                                            disabled={loading}
+                                                        >
+                                                            駁回
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )
+                                ) : (
+                                    history.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無歷史紀錄</td>
+                                        </tr>
+                                    ) : (
+                                        history.map(req => (
+                                            <tr key={req.id}>
+                                                <td>
+                                                    <div style={{ fontWeight: '500' }}>{req.submittedByName}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.submittedByStore}</div>
+                                                </td>
+                                                <td>{getTypeName(req.type)}</td>
+                                                <td>{req.memberId}</td>
+                                                <td>{req.detail}</td>
+                                                <td>{req.createdAt?.toDate().toLocaleString() || '...'}</td>
+                                                <td>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                        <span className={`tag tag-${req.status}`} style={{ alignSelf: 'flex-start' }}>
+                                                            {req.status === 'approved' ? '已核准' : '已駁回'}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.85rem' }}>{req.reviewedByName || '管理員'}</span>
+                                                    </div>
+                                                </td>
+                                                <td>{req.adminNote || '-'}</td>
+                                            </tr>
+                                        ))
+                                    )
                                 )}
                             </tbody>
                         </table>
