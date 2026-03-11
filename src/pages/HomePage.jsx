@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { collection, query, where, orderBy, limit, startAfter, getDocs, getCountFromServer, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { formatDate, groupByMonth } from '../utils';
+import { autoSpace } from '../utils/textUtils';
 
 const PAGE_SIZE = 20;
 
@@ -198,7 +199,7 @@ function HomePage() {
                                                 )}
 
                                             </div>
-                                            <h2 className="post-title">{post.title}</h2>
+                                            <h2 className="post-title">{autoSpace(post.title)}</h2>
                                         </div>
                                     </Link>
                                 ))}
@@ -228,7 +229,7 @@ function HomePage() {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <h2 className="post-title">{post.title}</h2>
+                                                <h2 className="post-title">{autoSpace(post.title)}</h2>
                                             </div>
                                         </Link>
                                     ))}

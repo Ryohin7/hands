@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
+import { autoSpace } from '../utils/textUtils';
 
 function StoreListPage() {
     const [stores, setStores] = useState([]);
@@ -70,8 +71,8 @@ function StoreListPage() {
                         style={{ animationDelay: `${index * 0.05}s` }}
                     >
                         <div className="store-card-header">
-                            <h3 className="store-card-name">{store.name}</h3>
-                            <span className="store-card-area">{store.area}</span>
+                            <h3 className="store-card-name">{autoSpace(store.name)}</h3>
+                            <span className="store-card-area">{autoSpace(store.area)}</span>
                         </div>
                         <div className="store-card-body">
                             <div className="store-info-row">
@@ -79,7 +80,7 @@ function StoreListPage() {
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                                     <circle cx="12" cy="10" r="3" />
                                 </svg>
-                                <span>{store.address}</span>
+                                <span>{autoSpace(store.address)}</span>
                             </div>
                             <div className="store-info-row">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -92,7 +93,7 @@ function StoreListPage() {
                                     <circle cx="12" cy="12" r="10" />
                                     <polyline points="12 6 12 12 16 14" />
                                 </svg>
-                                <span>{store.hours}</span>
+                                <span>{autoSpace(store.hours)}</span>
                             </div>
                         </div>
                         {store.mapUrl && (

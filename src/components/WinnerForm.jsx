@@ -139,13 +139,13 @@ function WinnerForm({ post }) {
                 <form onSubmit={handleSubmit} className="responsive-form">
                     <div className="form-section">
                         <div className="form-item full-width">
-                            <label>Facebook 名稱 / Instagram 帳號 <span className="required">*</span></label>
+                            <label>社群名稱(帳號) <span className="required">*</span></label>
                             <input
                                 type="text"
                                 required
                                 value={communityName}
                                 onChange={e => setCommunityName(e.target.value)}
-                                placeholder="輸入您的 FB 名稱或 IG 帳號"
+                                placeholder="請輸入您的FB中獎名子 (IG抽獎填IG帳號)"
                             />
                         </div>
 
@@ -200,7 +200,7 @@ function WinnerForm({ post }) {
                                     type="text"
                                     readOnly
                                     value={zipCode}
-                                    placeholder="郵遞"
+                                    placeholder="郵遞區號"
                                     className="zip-input"
                                 />
                             </div>
@@ -230,7 +230,8 @@ function WinnerForm({ post }) {
                 </form>
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .winner-form-container {
                     margin-top: 3rem;
                     max-width: 800px;
@@ -311,10 +312,21 @@ function WinnerForm({ post }) {
                     box-shadow: 0 0 0 3px rgba(0, 113, 48, 0.1);
                 }
                 .address-selectors {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr 80px;
+                    display: flex;
                     gap: 8px;
                     margin-bottom: 8px;
+                }
+                .address-selectors select:first-child {
+                    width: calc(50% - 0.625rem); /* 與上面 .form-grid 第一欄寬度一致 */
+                    flex-shrink: 0;
+                    margin-right: calc(1.25rem - 8px); /* 補足 gap 差額以對齊上面的 1.25rem gap */
+                }
+                .address-selectors select:nth-child(2) {
+                    flex: 1; /* 佔滿剩下的電話欄位寬度減去郵遞區號 */
+                }
+                .address-selectors .zip-input {
+                    width: 110px;
+                    flex-shrink: 0;
                 }
                 .zip-input {
                     background: #f3f4f6 !important;
@@ -372,10 +384,17 @@ function WinnerForm({ post }) {
                         grid-template-columns: 1fr;
                     }
                     .address-selectors {
+                        display: grid;
                         grid-template-columns: 1fr 1fr;
+                        gap: 8px;
                     }
-                    .zip-input {
+                    .address-selectors select:first-child {
+                        width: auto;
+                        margin-right: 0;
+                    }
+                    .address-selectors .zip-input {
                         grid-column: span 2;
+                        width: 100%;
                     }
                     .submit-btn {
                         width: 100%;

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
+import { autoSpace } from '../utils/textUtils';
 
 function DmListPage() {
     const [dms, setDms] = useState([]);
@@ -39,8 +40,8 @@ function DmListPage() {
                             <img src={dm.bannerUrl} alt={dm.title} className="dm-banner-img" />
                         </div>
                         <div className="dm-info">
-                            <h3 className="dm-title">{dm.title}</h3>
-                            <p className="dm-period">檔期：{dm.period}</p>
+                             <h3 className="dm-title">{autoSpace(dm.title)}</h3>
+                             <p className="dm-period">檔期：{autoSpace(dm.period)}</p>
                             <Link to={`/dm/${dm.id}`} className="btn btn-outline btn-sm">
                                 查看線上 DM
                             </Link>

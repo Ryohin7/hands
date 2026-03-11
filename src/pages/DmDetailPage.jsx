@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { autoSpace } from '../utils/textUtils';
 
 function DmDetailPage() {
     const { id } = useParams();
@@ -51,8 +52,8 @@ function DmDetailPage() {
 
             <article className="post-detail">
                 <div className="post-detail-header">
-                    <h1 className="post-detail-title">{dm.title}</h1>
-                    <p className="post-detail-date">檔期：{dm.period}</p>
+                    <h1 className="post-detail-title">{autoSpace(dm.title)}</h1>
+                    <p className="post-detail-date">檔期：{autoSpace(dm.period)}</p>
                 </div>
                 <div className="dm-detail-image-wrap" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
                     <img
