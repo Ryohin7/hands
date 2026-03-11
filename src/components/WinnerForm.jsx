@@ -120,110 +120,268 @@ function WinnerForm({ post }) {
     }
 
     return (
-        <div className="winner-form-container" style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #e0e0e0', borderRadius: '8px', background: '#fafafa' }}>
-            <h3 style={{ marginBottom: '1.5rem', color: '#007130', fontSize: '1.5rem', borderBottom: '2px solid #007130', paddingBottom: '0.5rem', display: 'inline-block' }}>得獎者寄件資料填寫</h3>
-
-            {post?.formDeadline && (
-                <div style={{ marginBottom: '1.5rem', color: '#d32f2f', fontWeight: 'bold' }}>
-                    填寫截止時間：{(post.formDeadline.toDate ? post.formDeadline.toDate() : new Date(post.formDeadline)).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="edit-form" style={{ marginTop: 0 }}>
-                <div className="form-group">
-                    <label>Facebook 名稱 <span style={{ color: 'red' }}>*</span></label>
-                    <input
-                        type="text"
-                        required
-                        value={communityName}
-                        onChange={e => setCommunityName(e.target.value)}
-                        placeholder="輸入您的 FB 名稱，若您參加 IG 抽獎則填寫 IG 帳號"
-                        className="input-md"
-                    />
+        <div className="winner-form-container">
+            <div className="winner-form-card">
+                <div className="winner-form-header">
+                    <h3>得獎者寄件資料填寫</h3>
                 </div>
 
-                <div className="form-row" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
-                        <label>收件者姓名 <span style={{ color: 'red' }}>*</span></label>
-                        <input
-                            type="text"
-                            required
-                            value={recipientName}
-                            onChange={e => setRecipientName(e.target.value)}
-                            placeholder="請輸入真實姓名"
-                            className="input-md"
+                {post?.formDeadline && (
+                    <div className="deadline-alert">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        填寫截止時間：{(post.formDeadline.toDate ? post.formDeadline.toDate() : new Date(post.formDeadline)).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="responsive-form">
+                    <div className="form-section">
+                        <div className="form-item full-width">
+                            <label>Facebook 名稱 / Instagram 帳號 <span className="required">*</span></label>
+                            <input
+                                type="text"
+                                required
+                                value={communityName}
+                                onChange={e => setCommunityName(e.target.value)}
+                                placeholder="輸入您的 FB 名稱或 IG 帳號"
+                            />
+                        </div>
+
+                        <div className="form-grid">
+                            <div className="form-item">
+                                <label>收件者姓名 <span className="required">*</span></label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={recipientName}
+                                    onChange={e => setRecipientName(e.target.value)}
+                                    placeholder="請輸入真實姓名"
+                                />
+                            </div>
+                            <div className="form-item">
+                                <label>收件者電話 <span className="required">*</span></label>
+                                <input
+                                    type="tel"
+                                    required
+                                    value={recipientPhone}
+                                    onChange={e => setRecipientPhone(e.target.value.replace(/\D/g, ''))}
+                                    placeholder="如: 0912345678"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-item full-width">
+                            <label>聯絡地址 <span className="required">*</span></label>
+                            <div className="address-selectors">
+                                <select
+                                    required
+                                    value={county}
+                                    onChange={handleCountyChange}
+                                >
+                                    <option value="">選擇縣市</option>
+                                    {Object.keys(twzipcodeData).map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    required
+                                    value={district}
+                                    onChange={handleDistrictChange}
+                                    disabled={!county}
+                                >
+                                    <option value="">選擇鄉鎮市區</option>
+                                    {county && twzipcodeData[county] && Object.keys(twzipcodeData[county]).map(d => (
+                                        <option key={d} value={d}>{d}</option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={zipCode}
+                                    placeholder="郵遞"
+                                    className="zip-input"
+                                />
+                            </div>
+                            <input
+                                type="text"
+                                required
+                                value={addressDetail}
+                                onChange={e => setAddressDetail(e.target.value)}
+                                placeholder="請輸入詳細地址 (街道、巷弄、號、樓)"
+                                className="address-detail-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="captcha-section">
+                        <ReCAPTCHA
+                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                            onChange={(value) => setCaptchaValue(value)}
                         />
                     </div>
-                    <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
-                        <label>收件者電話 <span style={{ color: 'red' }}>*</span></label>
-                        <input
-                            type="tel"
-                            required
-                            value={recipientPhone}
-                            onChange={e => setRecipientPhone(e.target.value.replace(/\D/g, ''))}
-                            placeholder="請輸入聯絡電話 (如: 0912345678)"
-                            className="input-md"
-                        />
+
+                    <div className="form-actions">
+                        <button type="submit" className="submit-btn" disabled={submitting || !captchaValue}>
+                            {submitting ? '處理中...' : '確認送出資料'}
+                        </button>
                     </div>
-                </div>
+                </form>
+            </div>
 
-                <div className="form-group">
-                    <label>聯絡地址 <span style={{ color: 'red' }}>*</span></label>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                        <select
-                            required
-                            value={county}
-                            onChange={handleCountyChange}
-                            style={{ flex: 1, minWidth: '120px' }}
-                        >
-                            <option value="">選擇縣市</option>
-                            {Object.keys(twzipcodeData).map(c => (
-                                <option key={c} value={c}>{c}</option>
-                            ))}
-                        </select>
-                        <select
-                            required
-                            value={district}
-                            onChange={handleDistrictChange}
-                            disabled={!county}
-                            style={{ flex: 1, minWidth: '120px' }}
-                        >
-                            <option value="">選擇鄉鎮市區</option>
-                            {county && twzipcodeData[county] && Object.keys(twzipcodeData[county]).map(d => (
-                                <option key={d} value={d}>{d}</option>
-                            ))}
-                        </select>
-                        <input
-                            type="text"
-                            readOnly
-                            value={zipCode}
-                            placeholder="郵遞區號"
-                            style={{ width: '80px', background: '#e9ecef', cursor: 'not-allowed' }}
-                        />
-                    </div>
-                    <input
-                        type="text"
-                        required
-                        value={addressDetail}
-                        onChange={e => setAddressDetail(e.target.value)}
-                        placeholder="請輸入詳細地址 (街道、巷弄、號、樓)"
-                        className="input-md"
-                    />
-                </div>
+            <style dangerouslySetInnerHTML={{ __html: `
+                .winner-form-container {
+                    margin-top: 3rem;
+                    max-width: 800px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                .winner-form-card {
+                    background: #fff;
+                    border-radius: 12px;
+                    border: 1px solid #e5e7eb;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                    overflow: hidden;
+                }
+                .winner-form-header {
+                    background: #fdfdfd;
+                    padding: 1.5rem 2rem;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+                .winner-form-header h3 {
+                    margin: 0;
+                    color: #007130;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                }
+                .deadline-alert {
+                    margin: 1.5rem 2rem;
+                    background: #fef2f2;
+                    border: 1px solid #fee2e2;
+                    color: #dc2626;
+                    padding: 0.75rem 1rem;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.95rem;
+                }
+                .responsive-form {
+                    padding: 0 2rem 2rem 2rem;
+                }
+                .form-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.25rem;
+                }
+                .form-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1.25rem;
+                }
+                .form-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+                .form-item label {
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    color: #374151;
+                }
+                .required {
+                    color: #ef4444;
+                }
+                .responsive-form input[type="text"],
+                .responsive-form input[type="tel"],
+                .responsive-form select {
+                    padding: 0.75rem 1rem;
+                    border: 1px solid #d1d5db;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    transition: all 0.2s;
+                    background: #fff;
+                }
+                .responsive-form input:focus,
+                .responsive-form select:focus {
+                    outline: none;
+                    border-color: #007130;
+                    box-shadow: 0 0 0 3px rgba(0, 113, 48, 0.1);
+                }
+                .address-selectors {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 80px;
+                    gap: 8px;
+                    margin-bottom: 8px;
+                }
+                .zip-input {
+                    background: #f3f4f6 !important;
+                    cursor: not-allowed;
+                    text-align: center;
+                }
+                .captcha-section {
+                    display: flex;
+                    justify-content: center;
+                    margin: 2rem 0;
+                }
+                .form-actions {
+                    display: flex;
+                    justify-content: center;
+                }
+                .submit-btn {
+                    background: #007130;
+                    color: white;
+                    border: none;
+                    padding: 1rem 4rem;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    box-shadow: 0 4px 6px -1px rgba(0, 113, 48, 0.2);
+                }
+                .submit-btn:hover:not(:disabled) {
+                    background: #005a26;
+                    transform: translateY(-1px);
+                    box-shadow: 0 10px 15px -3px rgba(0, 113, 48, 0.3);
+                }
+                .submit-btn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
 
-                <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem', marginBottom: '1rem' }}>
-                    <ReCAPTCHA
-                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                        onChange={(value) => setCaptchaValue(value)}
-                    />
-                </div>
-
-                <div className="edit-actions" style={{ marginTop: '1rem', justifyContent: 'center' }}>
-                    <button type="submit" className="btn btn-primary" disabled={submitting || !captchaValue} style={{ padding: '0.8rem 3rem', fontSize: '1.1rem' }}>
-                        {submitting ? '處理中...' : '確認送出'}
-                    </button>
-                </div>
-            </form>
+                @media (max-width: 640px) {
+                    .winner-form-card {
+                        border-radius: 0;
+                        border-left: none;
+                        border-right: none;
+                        box-shadow: none;
+                    }
+                    .winner-form-header {
+                        padding: 1.5rem 1rem;
+                    }
+                    .responsive-form {
+                        padding: 0 1rem 1.5rem 1rem;
+                    }
+                    .deadline-alert {
+                        margin: 1rem;
+                    }
+                    .form-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .address-selectors {
+                        grid-template-columns: 1fr 1fr;
+                    }
+                    .zip-input {
+                        grid-column: span 2;
+                    }
+                    .submit-btn {
+                        width: 100%;
+                    }
+                }
+            ` }} />
         </div>
     );
 }

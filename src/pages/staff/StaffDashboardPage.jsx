@@ -86,8 +86,8 @@ function StaffDashboardPage() {
             ) : (
                 <div className="dashboard-grid">
                     {/* 自己的申請中項目 */}
-                    <div className="card dashboard-card">
-                        <div className="dashboard-card-icon" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6' }}>
+                    <div className={`card dashboard-card ${myApplyingCoupons > 0 ? 'has-items status-pending' : ''}`}>
+                        <div className="dashboard-card-icon" style={{ background: myApplyingCoupons > 0 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)', color: '#3B82F6' }}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                 <polyline points="14 2 14 8 20 8" />
@@ -96,15 +96,18 @@ function StaffDashboardPage() {
                         </div>
                         <div className="dashboard-card-content">
                             <h3>申請中項目</h3>
-                            <div className="dashboard-value">{myApplyingCoupons} <span className="dashboard-unit">件</span></div>
+                            <div className="dashboard-value">
+                                {myApplyingCoupons} <span className="dashboard-unit">件</span>
+                                {myApplyingCoupons > 0 && <span className="status-badge">處理中</span>}
+                            </div>
                             <Link to="/staff/coupon-apply" className="dashboard-link">前往查看 →</Link>
                         </div>
                     </div>
 
                     {/* 待審核項目 (需要審核權限) */}
                     {hasAuditPermission && (
-                        <div className="card dashboard-card">
-                            <div className="dashboard-card-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>
+                        <div className={`card dashboard-card ${pendingCoupons > 0 ? 'has-items status-audit' : ''}`}>
+                            <div className="dashboard-card-icon" style={{ background: pendingCoupons > 0 ? 'rgba(245, 158, 11, 0.2)' : 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                     <polyline points="22 4 12 14.01 9 11.01" />
@@ -112,7 +115,10 @@ function StaffDashboardPage() {
                             </div>
                             <div className="dashboard-card-content">
                                 <h3>待審核項目</h3>
-                                <div className="dashboard-value">{pendingCoupons} <span className="dashboard-unit">件</span></div>
+                                <div className="dashboard-value">
+                                    {pendingCoupons} <span className="dashboard-unit">件</span>
+                                    {pendingCoupons > 0 && <span className="status-badge badge-warning">需審核</span>}
+                                </div>
                                 <Link to="/staff/coupon-audit" className="dashboard-link">前往審核 →</Link>
                             </div>
                         </div>
@@ -120,8 +126,8 @@ function StaffDashboardPage() {
 
                     {/* 員工帳號審核項目 (需要審核權限) */}
                     {hasUserAuditPermission && (
-                        <div className="card dashboard-card">
-                            <div className="dashboard-card-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
+                        <div className={`card dashboard-card ${pendingUsers > 0 ? 'has-items status-user-audit' : ''}`}>
+                            <div className="dashboard-card-icon" style={{ background: pendingUsers > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                     <circle cx="9" cy="7" r="4" />
@@ -130,7 +136,10 @@ function StaffDashboardPage() {
                             </div>
                             <div className="dashboard-card-content">
                                 <h3>員工帳號審核</h3>
-                                <div className="dashboard-value">{pendingUsers} <span className="dashboard-unit">件</span></div>
+                                <div className="dashboard-value">
+                                    {pendingUsers} <span className="dashboard-unit">件</span>
+                                    {pendingUsers > 0 && <span className="status-badge badge-success">待處理</span>}
+                                </div>
                                 <Link to="/staff/user-audit" className="dashboard-link">前往審核 →</Link>
                             </div>
                         </div>
@@ -141,60 +150,116 @@ function StaffDashboardPage() {
             <style dangerouslySetInnerHTML={{ __html: `
                 .dashboard-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
                     gap: 1.5rem;
                 }
                 .dashboard-card {
                     display: flex;
                     align-items: center;
-                    padding: 1.5rem;
-                    transition: transform 0.2s;
+                    padding: 2rem;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border: 2px solid transparent;
+                    position: relative;
+                    overflow: hidden;
+                    background: #fff;
                 }
+                .dashboard-card.has-items {
+                    border-color: rgba(0,0,0,0.05);
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                }
+                .dashboard-card.status-pending.has-items {
+                    background: linear-gradient(135deg, #fff 0%, #eff6ff 100%);
+                    border-color: #bfdbfe;
+                }
+                .dashboard-card.status-audit.has-items {
+                    background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
+                    border-color: #fde68a;
+                }
+                .dashboard-card.status-user-audit.has-items {
+                    background: linear-gradient(135deg, #fff 0%, #ecfdf5 100%);
+                    border-color: #a7f3d0;
+                }
+                
                 .dashboard-card:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
                 }
+                
                 .dashboard-card-icon {
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 16px;
+                    width: 72px;
+                    height: 72px;
+                    border-radius: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     margin-right: 1.5rem;
+                    flex-shrink: 0;
+                }
+                .dashboard-card-content {
+                    flex: 1;
                 }
                 .dashboard-card-content h3 {
                     margin: 0 0 0.5rem 0;
-                    font-size: 1rem;
-                    color: #666;
+                    font-size: 1.1rem;
+                    color: #4b5563;
+                    font-weight: 600;
                 }
                 .dashboard-value {
-                    font-size: 2rem;
-                    font-weight: 700;
-                    color: #111;
+                    font-size: 2.5rem;
+                    font-weight: 800;
+                    color: #111827;
                     line-height: 1;
-                    margin-bottom: 0.5rem;
+                    margin-bottom: 0.75rem;
+                    display: flex;
+                    align-items: baseline;
+                    gap: 0.5rem;
                 }
                 .dashboard-unit {
                     font-size: 1rem;
-                    color: #888;
-                    font-weight: normal;
+                    color: #6b7280;
+                    font-weight: 500;
                 }
+                .status-badge {
+                    font-size: 0.75rem;
+                    padding: 0.25rem 0.6rem;
+                    border-radius: 100px;
+                    background: #3B82F6;
+                    color: white;
+                    margin-left: 0.5rem;
+                    font-weight: 600;
+                    vertical-align: middle;
+                }
+                .badge-warning { background: #F59E0B; }
+                .badge-success { background: #10B981; }
+
                 .dashboard-link {
-                    font-size: 0.875rem;
+                    font-size: 0.95rem;
                     color: #007130;
                     text-decoration: none;
-                    font-weight: 500;
+                    font-weight: 600;
                     display: inline-block;
+                    transition: color 0.2s;
                 }
                 .dashboard-link:hover {
+                    color: #004d20;
                     text-decoration: underline;
                 }
                 
                 @media (max-width: 768px) {
                     .dashboard-grid {
                         grid-template-columns: 1fr;
-                        gap: 1rem;
+                        gap: 1.25rem;
+                    }
+                    .dashboard-card {
+                        padding: 1.5rem;
+                    }
+                    .dashboard-card-icon {
+                        width: 60px;
+                        height: 60px;
+                        border-radius: 16px;
+                    }
+                    .dashboard-value {
+                        font-size: 2.25rem;
                     }
                 }
             ` }} />
