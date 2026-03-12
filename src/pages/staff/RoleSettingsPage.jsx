@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { 
-    collection, 
-    getDocs, 
-    addDoc, 
-    deleteDoc, 
-    doc, 
+import {
+    collection,
+    getDocs,
+    addDoc,
+    deleteDoc,
+    doc,
     updateDoc,
     query,
     orderBy,
@@ -30,7 +30,7 @@ function RoleSettingsPage() {
     const [users, setUsers] = useState([]);
     const [newRoleName, setNewRoleName] = useState('');
     const [loading, setLoading] = useState(false);
-    const [editingRole, setEditingRole] = useState(null);
+    const [activeTab, setActiveTab] = useState('roles'); // roles, assignment
 
     useEffect(() => {
         // 即時監聽角色
@@ -82,21 +82,19 @@ function RoleSettingsPage() {
         const newPerms = role.permissions.includes(permId)
             ? role.permissions.filter(p => p !== permId)
             : [...role.permissions, permId];
-        
+
         try {
             const batch = writeBatch(db);
-            
+
             // 1. 更新角色權限
             batch.update(doc(db, 'roles', role.id), {
                 permissions: newPerms
             });
 
             // 2. 找到所有屬於該角色的用戶並同步更新權限
-            // 注意：由於 Firestore 查詢限制，如果用戶非常多建議改用 Firebase Cloud Functions
-            // 這裡針對一般量級使用 batch 更新
             const usersWithRoleQuery = query(collection(db, 'users'), where('roleId', '==', role.id));
             const usersSnapshot = await getDocs(usersWithRoleQuery);
-            
+
             usersSnapshot.docs.forEach(uDoc => {
                 batch.update(uDoc.ref, { permissions: newPerms });
             });
@@ -125,81 +123,133 @@ function RoleSettingsPage() {
 
     return (
         <div className="admin-page-content">
-            <div className="admin-content-header">
-                <h2 className="admin-content-title">角色權限設定</h2>
+            <div className="admin-content-header" style={{ marginBottom: '1.5rem' }}>
+                <h2 className="admin-content-title">職能與權限管理</h2>
             </div>
 
-            <div className="role-settings-main-grid">
-                {/* 角色管理 */}
-                <div className="card">
+            {/* Tab Navigation */}
+            <div className="admin-tabs" style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', borderBottom: '1px solid #ddd' }}>
+                <button
+                    className={`tab-btn ${activeTab === 'roles' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('roles')}
+                    style={{
+                        padding: '0.75rem 1.5rem',
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        borderBottom: activeTab === 'roles' ? '3px solid #007130' : '3px solid transparent',
+                        color: activeTab === 'roles' ? '#007130' : '#666',
+                        fontWeight: activeTab === 'roles' ? 'bold' : 'normal'
+                    }}
+                >
+                    角色定義
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'assignment' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('assignment')}
+                    style={{
+                        padding: '0.75rem 1.5rem',
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        borderBottom: activeTab === 'assignment' ? '3px solid #007130' : '3px solid transparent',
+                        color: activeTab === 'assignment' ? '#007130' : '#666',
+                        fontWeight: activeTab === 'assignment' ? 'bold' : 'normal'
+                    }}
+                >
+                    用戶角色指派
+                </button>
+            </div>
+
+            {activeTab === 'roles' ? (
+                /* 角色管理 */
+                <div className="card" style={{ maxWidth: '800px' }}>
                     <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee' }}>
-                        <h3>角色定義</h3>
+                        <h3 style={{ margin: 0, fontSize: '1.25rem' }}>新增與編輯角色</h3>
                     </div>
                     <div style={{ padding: '1.5rem' }}>
-                        <form onSubmit={handleAddRole} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                            <input 
-                                type="text" 
-                                placeholder="角色名稱 (如: 門市主管)" 
+                        <form onSubmit={handleAddRole} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+                            <input
+                                type="text"
+                                placeholder="角色名稱 (如: 門市主管)"
                                 value={newRoleName}
                                 onChange={(e) => setNewRoleName(e.target.value)}
                                 className="form-control"
-                                style={{ flex: 1, padding: '8px', border: '1px solid #ddd' }}
+                                style={{ flex: 1, height: '42px' }}
                             />
-                            <button className="btn btn-primary" disabled={loading}>新增角色</button>
+                            <button className="btn btn-primary" disabled={loading} style={{ height: '42px' }}>新增角色</button>
                         </form>
 
-                        {roles.map(role => (
-                            <div key={role.id} style={{ marginBottom: '1.5rem', padding: '1rem', border: '1px solid #eee', borderRadius: '4px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                    <strong style={{ fontSize: '1.1rem' }}>{role.name}</strong>
-                                    <button onClick={() => handleDeleteRole(role.id)} style={{ color: '#DC2626', border: 'none', background: 'none', cursor: 'pointer' }}>刪除</button>
+                        <div className="roles-list-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                            {roles.map(role => (
+                                <div key={role.id} className="role-card" style={{ padding: '1.25rem', border: '1px solid #eee', borderRadius: '8px', background: '#fcfcfc' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', alignItems: 'center' }}>
+                                        <strong style={{ fontSize: '1.15rem', color: '#333' }}>{role.name}</strong>
+                                        <button
+                                            onClick={() => handleDeleteRole(role.id)}
+                                            className="btn-icon"
+                                            style={{ color: '#DC2626' }}
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" /></svg>
+                                        </button>
+                                    </div>
+                                    <div className="role-settings-perms-grid">
+                                        {AVAILABLE_PERMISSIONS.map(perm => (
+                                            <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.875rem', padding: '0.4rem 0', cursor: 'pointer' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={role.permissions.includes(perm.id)}
+                                                    onChange={() => togglePermission(role, perm.id)}
+                                                    style={{ width: '16px', height: '16px', accentColor: '#007130' }}
+                                                />
+                                                {perm.label}
+                                            </label>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="role-settings-perms-grid">
-                                    {AVAILABLE_PERMISSIONS.map(perm => (
-                                        <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-                                            <input 
-                                                type="checkbox" 
-                                                checked={role.permissions.includes(perm.id)}
-                                                onChange={() => togglePermission(role, perm.id)}
-                                            />
-                                            {perm.label}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
-
-                {/* 用戶指派 */}
+            ) : (
+                /* 用戶指派 */
                 <div className="card">
-                    <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee' }}>
-                        <h3>用戶角色指派</h3>
-                    </div>
                     <div className="table-responsive">
                         <table className="admin-table">
                             <thead>
                                 <tr>
-                                    <th>用戶</th>
-                                    <th>目前角色</th>
-                                    <th>指派新角色</th>
+                                    <th>姓名</th>
+                                    <th>門市</th>
+                                    <th>職務</th>
+                                    <th>LINE 綁定狀態</th>
+                                    <th style={{ minWidth: '150px' }}>變更職能角色</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {users.filter(u => u.role !== 'admin').map(user => (
                                     <tr key={user.id}>
+                                        <td style={{ fontWeight: '500' }}>{user.displayName || '未設定'}</td>
+                                        <td>{user.storeName || '-'}</td>
                                         <td>
-                                            <div>{user.displayName}</div>
-                                            <small style={{ color: '#999' }}>{user.storeName}</small>
+                                            <span className="tag" style={{ background: user.roleId ? '#E1F5FE' : '#F5F5F5', color: user.roleId ? '#0288D1' : '#757575', border: 'none' }}>
+                                                {user.roleName || '未指派'}
+                                            </span>
                                         </td>
-                                        <td>{user.roleName || '未指派'}</td>
                                         <td>
-                                            <select 
-                                                value={user.roleId || ''} 
+                                            {user.lineUserId ? (
+                                                <span className="tag" style={{ background: '#E8F5E9', color: '#2E7D32', border: 'none' }}>● 已綁定</span>
+                                            ) : (
+                                                <span className="tag" style={{ background: '#FFF3E0', color: '#E65100', border: 'none' }}>○ 未綁定</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <select
+                                                className="form-control"
+                                                value={user.roleId || ''}
                                                 onChange={(e) => handleAssignRole(user.id, e.target.value)}
-                                                style={{ padding: '4px', border: '1px solid #ddd', borderRadius: '4px' }}
+                                                style={{ padding: '6px 10px', fontSize: '0.875rem' }}
                                             >
-                                                <option value="" disabled>請選擇角色</option>
+                                                <option value="" disabled>指派新角色</option>
                                                 {roles.map(r => (
                                                     <option key={r.id} value={r.id}>{r.name}</option>
                                                 ))}
@@ -211,32 +261,32 @@ function RoleSettingsPage() {
                         </table>
                     </div>
                 </div>
-            </div>
+            )}
 
-            <style dangerouslySetInnerHTML={{ __html: `
-                .role-settings-main-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 2rem;
-                }
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .role-settings-perms-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 0.5rem;
+                    gap: 0.25rem;
                 }
-                @media (max-width: 900px) {
-                    .role-settings-main-grid {
-                        grid-template-columns: 1fr;
-                        gap: 1.5rem;
-                    }
+                .btn-icon {
+                    background: none;
+                    border: none;
+                    padding: 4px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                }
+                .btn-icon:hover {
+                    background: #fee2e2;
                 }
                 @media (max-width: 480px) {
                     .role-settings-perms-grid {
                         grid-template-columns: 1fr;
-                    }
-                    .admin-table th, .admin-table td {
-                        padding: 0.5rem;
-                        font-size: 0.875rem;
                     }
                 }
             ` }} />
