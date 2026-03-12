@@ -131,7 +131,7 @@ async function handleEvent(event) {
             const requestRef = db.collection('coupon_requests').doc(requestId);
             const docSnap = await requestRef.get();
             if (!docSnap.exists || docSnap.data().status !== 'pending') {
-                return await replyFlex(replyToken, '處理通知', '此案件已經處裡完成，無法重複操作。', '#666666');
+                return await replyFlex(replyToken, '處理通知', '此案件已被您或其他主管處裡完成，請勿重複操作。', '#666666');
             }
 
             const adminSessionRef = db.collection('line_sessions').doc(lineUserId);
@@ -165,7 +165,7 @@ async function notifySupervisors(requestId, applicantName, qty, reason) {
             },
             footer: {
                 type: 'box', layout: 'horizontal', spacing: 'sm', contents: [
-                    { type: 'button', action: { type: 'postback', label: '核准', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
+                    { type: 'button', action: { type: 'postback', label: '核準', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
                     { type: 'button', action: { type: 'postback', label: '駁回', data: `action=reject&id=${requestId}` }, style: 'secondary' }
                 ]
             }
@@ -174,6 +174,7 @@ async function notifySupervisors(requestId, applicantName, qty, reason) {
 }
 
 async function handleApprove(requestId, adminName, replyToken) {
+    let assignedCoupons = [];
     try {
         await db.runTransaction(async (transaction) => {
             const requestRef = db.collection('coupon_requests').doc(requestId);
@@ -185,7 +186,7 @@ async function handleApprove(requestId, adminName, replyToken) {
 
             const requestedQty = docSnap.data().quantityRequested;
 
-            // 檢查庫存 (注意: Admin SDK Transaction 支援 query)
+            // 抓取未使用電子券
             const couponsQuery = db.collection('coupons').where('isUsed', '==', false).limit(requestedQty);
             const couponsSnap = await transaction.get(couponsQuery);
 
@@ -193,9 +194,22 @@ async function handleApprove(requestId, adminName, replyToken) {
                 throw new Error('InsufficientStock');
             }
 
+            const couponCodes = [];
+            couponsSnap.docs.forEach(cDoc => {
+                const code = cDoc.data().code;
+                couponCodes.push(code);
+                transaction.update(cDoc.ref, {
+                    isUsed: true,
+                    requestId: requestId,
+                    usedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+            });
+            assignedCoupons = couponCodes;
+
             // 更新申請狀態
             transaction.update(requestRef, {
                 status: 'approved',
+                assignedCoupons: couponCodes,
                 reviewedByName: adminName,
                 reviewedAt: admin.firestore.FieldValue.serverTimestamp()
             });
@@ -203,8 +217,12 @@ async function handleApprove(requestId, adminName, replyToken) {
 
         const requestDoc = await db.collection('coupon_requests').doc(requestId).get();
         const requestData = requestDoc.data();
-        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請（單號：${requestId}）已由主管 ${adminName} 核准！`, '#007130');
-        await replyFlex(replyToken, '核准作業成功', '已順利完成核准作業。', '#007130');
+        
+        // 格式化電子券號顯示
+        const couponListText = assignedCoupons.join('\n');
+
+        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請（單號：${requestId}）已由 ${adminName} 核准！\n\n【核發券號如下】：\n${couponListText}`, '#007130');
+        await replyFlex(replyToken, '核准作業成功', '已順利完成核准作業並發放券號。', '#007130');
 
     } catch (err) {
         if (err.message === 'CaseHandled') {
@@ -238,7 +256,7 @@ async function handleReject(requestId, adminName, reason, replyToken) {
 
         const requestDoc = await db.collection('coupon_requests').doc(requestId).get();
         const requestData = requestDoc.data();
-        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請（單號：${requestId}）已被主管 ${adminName} 駁回。\n原因：${reason}`, '#DC2626');
+        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請（單號：${requestId}）已被 ${adminName} 駁回。\n原因：${reason}`, '#DC2626');
         await replyFlex(replyToken, '駁回作業成功', '案件已成功設定為駁回狀態。', '#666666');
 
     } catch (err) {
@@ -266,16 +284,16 @@ async function callLineAPI(path, body) {
 async function replyFlex(replyToken, title, text, color = '#007130', footerContents = []) {
     const flex = {
         type: 'bubble',
-        header: { 
-            type: 'box', 
-            layout: 'vertical', 
-            contents: [{ type: 'text', text: title, color: '#ffffff', weight: 'bold', size: 'md' }], 
-            backgroundColor: color 
+        header: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [{ type: 'text', text: title, color: '#ffffff', weight: 'bold', size: 'md' }],
+            backgroundColor: color
         },
-        body: { 
-            type: 'box', 
-            layout: 'vertical', 
-            contents: [{ type: 'text', text: text, wrap: true, size: 'sm' }] 
+        body: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [{ type: 'text', text: text, wrap: true, size: 'sm' }]
         }
     };
     if (footerContents.length > 0) {
@@ -287,16 +305,16 @@ async function replyFlex(replyToken, title, text, color = '#007130', footerConte
 async function pushFlex(to, title, text, color = '#007130') {
     const flex = {
         type: 'bubble',
-        header: { 
-            type: 'box', 
-            layout: 'vertical', 
-            contents: [{ type: 'text', text: title, color: '#ffffff', weight: 'bold', size: 'md' }], 
-            backgroundColor: color 
+        header: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [{ type: 'text', text: title, color: '#ffffff', weight: 'bold', size: 'md' }],
+            backgroundColor: color
         },
-        body: { 
-            type: 'box', 
-            layout: 'vertical', 
-            contents: [{ type: 'text', text, wrap: true, size: 'sm' }] 
+        body: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [{ type: 'text', text, wrap: true, size: 'sm' }]
         }
     };
     return await callLineAPI('push', { to, messages: [{ type: 'flex', altText: title, contents: flex }] });

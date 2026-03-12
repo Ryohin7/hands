@@ -101,13 +101,28 @@ function CouponAuditPage() {
 
             // 發送 LINE 通知
             if (req.lineUserId) {
+                const couponListText = assignedCodes.join('\n');
                 try {
                     await fetch('/api/notify', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             to: req.lineUserId,
-                            text: `您的電子券申請（單號：${req.id}）已由 ${profile?.displayName || '主管'} 核准！`,
+                            messages: [{
+                                type: 'flex',
+                                altText: '申請核准通知',
+                                contents: {
+                                    type: 'bubble',
+                                    header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '✅ 電子券申請已核准', color: '#ffffff', weight: 'bold' }], backgroundColor: '#007130' },
+                                    body: {
+                                        type: 'box', layout: 'vertical', contents: [
+                                            { type: 'text', text: `您的申請（單號：${req.id}）已由 ${profile?.displayName || '主管'} 核准！`, wrap: true, size: 'sm' },
+                                            { type: 'text', text: '【核發券號如下】：', weight: 'bold', size: 'sm', margin: 'md' },
+                                            { type: 'text', text: couponListText, wrap: true, size: 'sm', color: '#007130' }
+                                        ]
+                                    }
+                                }
+                            }],
                             apiKey: import.meta.env.VITE_INTERNAL_API_KEY
                         })
                     });

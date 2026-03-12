@@ -5,18 +5,20 @@
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(200).send('OK');
 
-    const { to, text, apiKey } = req.body;
+    const { to, text, messages, apiKey } = req.body;
 
-    // 簡單的安全檢查
+    // 安全檢查
     if (apiKey !== process.env.INTERNAL_API_KEY) {
         return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    if (!to || !text) {
+    if (!to || (!text && !messages)) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
 
     try {
+        const lineMessages = messages || [{ type: 'text', text: text }];
+
         const response = await fetch('https://api.line.me/v2/bot/message/push', {
             method: 'POST',
             headers: {
@@ -25,7 +27,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 to: to,
-                messages: [{ type: 'text', text: text }]
+                messages: lineMessages
             })
         });
 
