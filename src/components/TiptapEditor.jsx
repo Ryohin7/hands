@@ -14,6 +14,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Highlight } from '@tiptap/extension-highlight';
 import { Extension } from '@tiptap/core';
 import { useCallback, useRef, useEffect } from 'react';
+import { ProductExtension } from './ProductExtension';
 
 // 自定義字體大小擴展 - 使用 Global Attributes 方式綁定到 textStyle
 const FontSize = Extension.create({
@@ -87,6 +88,7 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
       Placeholder.configure({
         placeholder,
       }),
+      ProductExtension,
     ],
     content,
     immediatelyRender: false,
@@ -157,6 +159,18 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
     if (!isNaN(rows) && !isNaN(cols) && rows > 0 && cols > 0) {
       editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
     }
+  }, [editor]);
+
+  const addProduct = useCallback(() => {
+    if (!editor) return;
+    const imageUrl = window.prompt('請輸入商品圖片網址 (URL):');
+    if (!imageUrl) return;
+    const name = window.prompt('請輸入商品名稱:');
+    if (!name) return;
+    const price = window.prompt('請輸入商品售價 (純數字，例如: 990):');
+    if (!price) return;
+    
+    editor.chain().focus().insertProduct({ imageUrl, name, price }).run();
   }, [editor]);
 
   if (!editor) return <div className="editor-loading">正在初始化編輯器...</div>;
@@ -354,6 +368,13 @@ const TiptapEditor = ({ content, onChange, placeholder = '請開始輸入內容.
           </button>
           <button type="button" onClick={addTable} title="插入表格">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" /></svg>
+          </button>
+          <button type="button" onClick={addProduct} title="插入商品卡片">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
           </button>
         </div>
 

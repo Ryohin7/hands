@@ -68,6 +68,7 @@ function MemberActionPage() {
                 submittedBy: auth.currentUser.uid,
                 submittedByName: userData.displayName || '未命名',
                 submittedByStore: userData.storeName || '未設定',
+                submittedByLineId: userData.lineUserId || null,
                 createdAt: serverTimestamp()
             });
 

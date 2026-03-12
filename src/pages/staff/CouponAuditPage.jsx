@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { db, auth } from '../../firebase';
-import { 
-    collection, 
-    query, 
-    where, 
-    onSnapshot, 
-    orderBy, 
+import {
+    collection,
+    query,
+    where,
+    onSnapshot,
+    orderBy,
     serverTimestamp,
     doc,
     updateDoc,
@@ -70,9 +70,9 @@ function CouponAuditPage() {
                 limit(req.quantityRequested)
             );
             const couponSnap = await getDocs(couponsQuery);
-            
+
             if (couponSnap.size < req.quantityRequested) {
-                alert(`庫存不足！現有 ${couponSnap.size} 張，需求 ${req.quantityRequested} 張。`);
+                alert(`庫存不足！請向企劃補充庫存，現有 ${couponSnap.size} 張，需求 ${req.quantityRequested} 張。`);
                 return;
             }
 
@@ -81,8 +81,8 @@ function CouponAuditPage() {
 
             couponSnap.docs.forEach(cDoc => {
                 assignedCodes.push(cDoc.data().code);
-                batch.update(cDoc.ref, { 
-                    isUsed: true, 
+                batch.update(cDoc.ref, {
+                    isUsed: true,
                     requestId: req.id,
                     usedAt: serverTimestamp()
                 });
@@ -98,6 +98,23 @@ function CouponAuditPage() {
 
             await batch.commit();
             alert('核准成功');
+
+            // 發送 LINE 通知
+            if (req.lineUserId) {
+                try {
+                    await fetch('/api/notify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: req.lineUserId,
+                            text: `您的電子券申請（單號：${req.id}）已由 ${profile?.displayName || '主管'} 核准！`,
+                            apiKey: import.meta.env.VITE_INTERNAL_API_KEY
+                        })
+                    });
+                } catch (e) {
+                    console.error('LINE 通知發送失敗', e);
+                }
+            }
         } catch (err) {
             console.error(err);
             alert('操作失敗');
@@ -106,7 +123,7 @@ function CouponAuditPage() {
         }
     };
 
-    const handleReject = async (id) => {
+    const handleReject = async (id, req) => {
         if (!confirm('確定要退回此申請？')) return;
         setLoading(true);
         try {
@@ -117,6 +134,23 @@ function CouponAuditPage() {
                 rejectedAt: serverTimestamp()
             });
             alert('已退回');
+
+            // 發送 LINE 通知
+            if (req?.lineUserId) {
+                try {
+                    await fetch('/api/notify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: req.lineUserId,
+                            text: `您的電子券申請（單號：${id}）已被 ${profile?.displayName || '主管'} 退回。`,
+                            apiKey: import.meta.env.VITE_INTERNAL_API_KEY
+                        })
+                    });
+                } catch (e) {
+                    console.error('LINE 通知發送失敗', e);
+                }
+            }
         } catch (err) {
             console.error(err);
             alert('操作失敗');
@@ -130,16 +164,16 @@ function CouponAuditPage() {
             <div className="admin-content-header" style={{ marginBottom: '1rem' }}>
                 <h2 className="admin-content-title">電子券審核</h2>
             </div>
-            
+
             <div className="tabs" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem' }}>
-                <button 
-                    className={`btn ${activeTab === 'pending' ? 'btn-primary' : 'btn-outline'}`} 
+                <button
+                    className={`btn ${activeTab === 'pending' ? 'btn-primary' : 'btn-outline'}`}
                     style={{ border: activeTab === 'pending' ? 'none' : '1px solid #ddd' }}
                     onClick={() => setActiveTab('pending')}
                 >
                     待審核 ({requests.length})
                 </button>
-                <button 
+                <button
                     className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
                     style={{ border: activeTab === 'history' ? 'none' : '1px solid #ddd' }}
                     onClick={() => setActiveTab('history')}
@@ -163,18 +197,18 @@ function CouponAuditPage() {
                                     </div>
                                     <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.25rem' }}>門市：{req.storeName}</div>
                                     <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.5rem' }}>張數：<strong>{req.quantityRequested}</strong></div>
-                                    <div style={{ 
-                                        background: '#f8f9fa', 
-                                        padding: '0.75rem', 
-                                        borderRadius: '6px', 
-                                        fontSize: '0.8125rem', 
+                                    <div style={{
+                                        background: '#f8f9fa',
+                                        padding: '0.75rem',
+                                        borderRadius: '6px',
+                                        fontSize: '0.8125rem',
                                         color: '#555',
-                                        marginBottom: '1rem' 
+                                        marginBottom: '1rem'
                                     }}>
                                         原因：{req.reason || '未填寫'}
                                     </div>
                                     <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                        <button 
+                                        <button
                                             className="btn btn-primary"
                                             style={{ flex: 1, height: '40px' }}
                                             onClick={() => handleApprove(req)}
@@ -182,7 +216,7 @@ function CouponAuditPage() {
                                         >
                                             核准
                                         </button>
-                                        <button 
+                                        <button
                                             className="btn btn-outline"
                                             style={{ flex: 1, height: '40px', color: '#DC2626', borderColor: '#DC2626' }}
                                             onClick={() => handleReject(req.id)}
@@ -247,17 +281,17 @@ function CouponAuditPage() {
                                             <td>待審核</td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    <button 
+                                                    <button
                                                         className="btn btn-sm btn-primary"
                                                         onClick={() => handleApprove(req)}
                                                         disabled={loading}
                                                     >
                                                         核准
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         className="btn btn-sm btn-outline"
                                                         style={{ color: '#DC2626', borderColor: '#DC2626' }}
-                                                        onClick={() => handleReject(req.id)}
+                                                        onClick={() => handleReject(req.id, req)}
                                                         disabled={loading}
                                                     >
                                                         退回
@@ -297,7 +331,8 @@ function CouponAuditPage() {
                 </div>
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @media (max-width: 768px) {
                     .desktop-only { display: none !important; }
                     .mobile-only { display: block !important; }

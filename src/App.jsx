@@ -42,6 +42,7 @@ import MemberAuditPage from './pages/staff/MemberAuditPage';
 import StoreManagePage from './pages/staff/StoreManagePage';
 import ReportPage from './pages/staff/ReportPage';
 import StaffDashboardPage from './pages/staff/StaffDashboardPage';
+import LineBindPage from './pages/staff/LineBindPage';
 
 function PWAUpdateHandler() {
     const [showUpdate, setShowUpdate] = useState(false);
@@ -206,6 +207,7 @@ function App() {
                         <Route path="member-audit" element={<MemberAuditPage />} />
                         <Route path="stores" element={<StoreManagePage />} />
                         <Route path="reports" element={<ReportPage />} />
+                        <Route path="line-bind" element={<LineBindPage />} />
                     </Route>
 
 

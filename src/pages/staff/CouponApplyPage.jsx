@@ -81,7 +81,8 @@ function CouponApplyPage() {
                 userName: userData.displayName || '未命名',
                 storeName: userData.storeName || '未設定門市',
                 quantityRequested: quantity,
-                reason: reason, // 紀錄原因
+                reason: reason,
+                lineUserId: userData.lineUserId || null,
                 status: 'pending',
                 createdAt: serverTimestamp()
             });
@@ -216,7 +217,7 @@ function CouponApplyPage() {
                             style={{ height: '45px', fontSize: '1rem' }}
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder="例如：門市活動發放、補償會員等"
+                            placeholder="例如：檔期結束退貨補券"
                             required
                         />
                     </div>

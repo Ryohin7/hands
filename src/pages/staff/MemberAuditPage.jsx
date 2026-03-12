@@ -49,7 +49,7 @@ function MemberAuditPage() {
         };
     }, []);
 
-    const handleAction = async (id, status) => {
+    const handleAction = async (id, status, req) => {
         setLoading(true);
         try {
             const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
@@ -63,6 +63,23 @@ function MemberAuditPage() {
                 adminNote: adminNote[id] || ''
             });
             alert(status === 'approved' ? '已核准' : '已駁回');
+
+            // 發送 LINE 通知
+            if (req?.submittedByLineId) {
+                try {
+                    await fetch('/api/notify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: req.submittedByLineId,
+                            text: `您的會員資料異動申請（類型：${getTypeName(req.type)}）已由 ${reviewerName} ${status === 'approved' ? '核准' : '駁回'}。${adminNote[id] ? `\n備註：${adminNote[id]}` : ''}`,
+                            apiKey: import.meta.env.VITE_INTERNAL_API_KEY
+                        })
+                    });
+                } catch (e) {
+                    console.error('LINE 通知發送失敗', e);
+                }
+            }
         } catch (err) {
             console.error(err);
             alert('操作失敗');

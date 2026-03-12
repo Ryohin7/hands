@@ -435,24 +435,84 @@ img {
 /* === 文章內容渲染區 === */
 .post-detail-content {
   padding: 2.5rem 0;
-  font-size: clamp(1rem, 2vw, 1.125rem);
-  /* 自適應 16px ~ 20px */
-  line-height: 1.625;
+  font-size: 1rem;
+  line-height: 1.8;
   color: var(--text);
   overflow-wrap: break-word;
   /* 標準排版設定 */
-  letter-spacing: 0.01em;
+  letter-spacing: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 文章同步 editor 樣式 */
+  text-autospace: ideograph-alpha ideograph-numeric !important;
+  text-spacing: ideograph-alpha ideograph-numeric;
+  text-spacing-adjacent-characters: ideograph-alpha 0.5em ideograph-numeric 0.5em;
 }
 
-/* 文章段落間距與空行處理 */
-.post-detail-content p {
-  margin-bottom: 1.25rem;
+/* 文章段落間距與空行處理 (統一前台與編輯器) */
+.post-detail-content p,
+.editor-content-area .ProseMirror p {
+  margin: 0 0 1rem 0;
 }
 
-.post-detail-content p:empty::before {
+/* 針對空行，強制設定為一個字的高度 (1em)，並移除 margin */
+.post-detail-content p:empty,
+.editor-content-area .ProseMirror p:empty:not(.is-editor-empty) {
+  height: 1em;
+  line-height: 1;
+  margin: 0;
+}
+
+.post-detail-content p:empty::before,
+.editor-content-area .ProseMirror p:empty:not(.is-editor-empty)::before {
   content: "\00a0";
+}
+/* 商品展示卡片 */
+.product-display-card {
+  display: flex !important;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  background: var(--bg-gray);
+  margin: 1.5rem 0;
+}
+
+.product-img-wrapper {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  margin: 0 !important;
+}
+
+.product-info-wrapper {
+  flex: 1;
+}
+
+.product-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.product-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #d32f2f;
 }
 
 /* 文章圖片 */
@@ -2444,4 +2504,4 @@ mark {
   }
 }
 
-/* vercel-redeploy-trigger: 2026-03-11 17:09 */
+/* vercel-redeploy-trigger: 2026-03-11 17:09 */
