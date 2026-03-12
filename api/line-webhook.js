@@ -146,7 +146,7 @@ async function notifySupervisors(requestId, applicantName, qty, reason) {
             },
             footer: {
                 type: 'box', layout: 'horizontal', spacing: 'sm', contents: [
-                    { type: 'button', action: { type: 'postback', label: '核核准', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
+                    { type: 'button', action: { type: 'postback', label: '核准', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
                     { type: 'button', action: { type: 'postback', label: '駁回', data: `action=reject&id=${requestId}` }, style: 'secondary' }
                 ]
             }

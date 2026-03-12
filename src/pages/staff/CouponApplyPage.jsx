@@ -76,7 +76,7 @@ function CouponApplyPage() {
             const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
             const userData = userDoc.data();
 
-            await addDoc(collection(db, 'coupon_requests'), {
+            const docRef = await addDoc(collection(db, 'coupon_requests'), {
                 userId: auth.currentUser.uid,
                 userName: userData.displayName || '未命名',
                 storeName: userData.storeName || '未設定門市',
@@ -86,6 +86,24 @@ function CouponApplyPage() {
                 status: 'pending',
                 createdAt: serverTimestamp()
             });
+
+            // 觸發主管 LINE 通知
+            try {
+                await fetch('/api/notify-supervisors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        requestId: docRef.id,
+                        applicantName: userData.displayName || '員工',
+                        quantity: quantity,
+                        reason: reason,
+                        apiKey: import.meta.env.VITE_INTERNAL_API_KEY
+                    })
+                });
+            } catch (e) {
+                console.error('LINE 通知發送失敗', e);
+            }
+
             alert('申請已送出，等待主管審核');
             setQuantity(1);
             setReason('');
