@@ -12,6 +12,17 @@ import {
     Timestamp
 } from 'firebase/firestore';
 
+function formatDate(date) {
+    if (!date) return '-';
+    const d = date instanceof Date ? date : date.toDate();
+    const Y = d.getFullYear();
+    const M = (d.getMonth() + 1).toString().padStart(2, '0');
+    const D = d.getDate().toString().padStart(2, '0');
+    const h = d.getHours().toString().padStart(2, '0');
+    const m = d.getMinutes().toString().padStart(2, '0');
+    return `${Y}/${M}/${D} ${h}:${m}`;
+}
+
 function ReportPage() {
     const [reportType, setReportType] = useState('coupon'); // coupon, member
     const [startDate, setStartDate] = useState('');
@@ -152,6 +163,7 @@ function ReportPage() {
                         <thead>
                             {reportType === 'coupon' ? (
                                 <tr>
+                                    <th>單號</th>
                                     <th>日期</th>
                                     <th>門市 (申請時)</th>
                                     <th>員工</th>
@@ -176,25 +188,27 @@ function ReportPage() {
                         <tbody>
                             {data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={reportType === 'coupon' ? 7 : 8} style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>
+                                    <td colSpan={reportType === 'coupon' ? 8 : 8} style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>
                                         無符合條件之資料
                                     </td>
                                 </tr>
                             ) : (
                                 data.map(item => (
                                     <tr key={item.id}>
-                                        <td>{item.createdAt?.toDate().toLocaleString()}</td>
-                                        <td style={{ fontWeight: 500 }}>
-                                            {reportType === 'coupon' ? (item.storeName || '未設定') : (item.submittedByStore || '未設定')}
-                                        </td>
-                                        <td>{reportType === 'coupon' ? item.userName : item.submittedByName}</td>
                                         {reportType === 'coupon' ? (
                                             <>
+                                                <td style={{ fontWeight: '600' }}>{item.displayId || '-'}</td>
+                                                <td>{formatDate(item.createdAt)}</td>
+                                                <td style={{ fontWeight: 500 }}>{item.storeName || '未設定'}</td>
+                                                <td>{item.userName}</td>
                                                 <td>{item.quantityRequested}</td>
                                                 <td>{item.reason || '-'}</td>
                                             </>
                                         ) : (
                                             <>
+                                                <td>{formatDate(item.createdAt)}</td>
+                                                <td style={{ fontWeight: 500 }}>{item.submittedByStore || '未設定'}</td>
+                                                <td>{item.submittedByName}</td>
                                                 <td>{formatType(item.type)}</td>
                                                 <td>{item.memberId}</td>
                                                 <td>{item.detail}</td>

@@ -7,7 +7,7 @@ function ProfileSettingsPage() {
     const [name, setName] = useState('');
     const [storeName, setStoreName] = useState('');
     const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState(''); // 確認新密碼
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', content: '' });
     const [stores, setStores] = useState([]); // 門市清單
@@ -28,7 +28,12 @@ function ProfileSettingsPage() {
         };
         const fetchStores = async () => {
             const querySnapshot = await getDocs(query(collection(db, 'stores'), orderBy('name', 'asc')));
-            setStores(querySnapshot.docs.map(doc => doc.data().name));
+            let fetchedStores = querySnapshot.docs.map(doc => doc.data().name);
+            // 確保「總部」在選項中
+            if (!fetchedStores.includes('總部')) {
+                fetchedStores.unshift('總部');
+            }
+            setStores(fetchedStores);
         };
         fetchProfile();
         fetchStores();

@@ -82,14 +82,14 @@ async function handleEvent(event) {
         // 處理電子券申請流程
         if (text === '申請電子券' || text === '電子券申請') {
             await sessionRef.set({ state: 'WAIT_QTY', updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-            return await replyFlex(replyToken, '電子券申請', '請輸入欲申請電子券數量，每張面額為 100 元\n（請輸入半形純數字）', '#007130');
+            return await replyFlex(replyToken, '電子券申請', '請輸入欲申請電子券數量，每張面額為 100 元\n(請輸入半形純數字)', '#007130');
         }
 
         if (session.state === 'WAIT_QTY') {
             const qty = parseInt(text);
-            if (isNaN(qty) || qty <= 0) return await replyFlex(replyToken, '輸入錯誤', '請輸入有效的正整數數量。', '#DC2626');
+            if (isNaN(qty) || qty <= 0) return await replyFlex(replyToken, '輸入錯誤', '請輸入有效的整數數量。', '#DC2626');
             await sessionRef.update({ state: 'WAIT_REASON', quantity: qty });
-            return await replyFlex(replyToken, '電子券申請', '請問申請原因為何？\n（例如：檔期結束退貨補券）', '#007130');
+            return await replyFlex(replyToken, '電子券申請', '請問申請原因為何？\n(例如：檔期結束退貨補券)', '#007130');
         }
 
         if (session.state === 'WAIT_REASON') {
@@ -217,11 +217,11 @@ async function handleApprove(requestId, adminName, replyToken) {
 
         const requestDoc = await db.collection('coupon_requests').doc(requestId).get();
         const requestData = requestDoc.data();
-        
+
         // 格式化電子券號顯示
         const couponListText = assignedCoupons.join('\n');
 
-        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請（單號：${requestId}）已由 ${adminName} 核准！\n\n【核發券號如下】：\n${couponListText}`, '#007130');
+        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請\n（單號：${requestId}）\n已由 ${adminName} 核准！\n\n【核發券號如下】：\n${couponListText}`, '#007130');
         await replyFlex(replyToken, '核准作業成功', '已順利完成核准作業並發放券號。', '#007130');
 
     } catch (err) {

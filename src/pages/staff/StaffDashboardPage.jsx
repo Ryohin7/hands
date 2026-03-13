@@ -7,9 +7,11 @@ function StaffDashboardPage() {
     const [pendingCoupons, setPendingCoupons] = useState(0);
     const [myApplyingCoupons, setMyApplyingCoupons] = useState(0);
     const [pendingUsers, setPendingUsers] = useState(0);
+    const [pendingMemberActions, setPendingMemberActions] = useState(0);
     const [loading, setLoading] = useState(true);
     const [hasAuditPermission, setHasAuditPermission] = useState(false);
     const [hasUserAuditPermission, setHasUserAuditPermission] = useState(false);
+    const [hasMemberAuditPermission, setHasMemberAuditPermission] = useState(false);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -21,18 +23,22 @@ function StaffDashboardPage() {
                 const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
                 let canAuditCoupons = false;
                 let canAuditUsers = false;
+                let canAuditMemberActions = false;
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     if (userData.role === 'admin') {
                         canAuditCoupons = true;
                         canAuditUsers = true;
+                        canAuditMemberActions = true;
                     } else {
                         canAuditCoupons = userData.permissions?.includes('coupon_audit') || false;
                         canAuditUsers = userData.permissions?.includes('user_audit') || false;
+                        canAuditMemberActions = userData.permissions?.includes('member_audit') || false;
                     }
                     setHasAuditPermission(canAuditCoupons);
                     setHasUserAuditPermission(canAuditUsers);
+                    setHasMemberAuditPermission(canAuditMemberActions);
                 }
 
                 // 1. 待審核項目 (有權限才撈取)
@@ -63,6 +69,16 @@ function StaffDashboardPage() {
                     );
                     const pendingUsersSnap = await getDocs(qPendingUsers);
                     setPendingUsers(pendingUsersSnap.size);
+                }
+
+                // 4. 會員資料異動待審核 (有權限才撈取)
+                if (canAuditMemberActions) {
+                    const qPendingMember = query(
+                        collection(db, 'member_actions'),
+                        where('status', '==', 'pending')
+                    );
+                    const pendingMemberSnap = await getDocs(qPendingMember);
+                    setPendingMemberActions(pendingMemberSnap.size);
                 }
 
             } catch (error) {
@@ -144,6 +160,28 @@ function StaffDashboardPage() {
                             </div>
                         </div>
                     )}
+
+                    {/* 會員異動審核 (需要審核權限) */}
+                    {hasMemberAuditPermission && (
+                        <div className={`card dashboard-card ${pendingMemberActions > 0 ? 'has-items status-member-audit' : ''}`}>
+                            <div className="dashboard-card-icon" style={{ background: pendingMemberActions > 0 ? 'rgba(139, 92, 246, 0.2)' : 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="9" y1="9" x2="15" y2="9" />
+                                    <line x1="9" y1="13" x2="15" y2="13" />
+                                    <line x1="9" y1="17" x2="13" y2="17" />
+                                </svg>
+                            </div>
+                            <div className="dashboard-card-content">
+                                <h3>待變更項目</h3>
+                                <div className="dashboard-value">
+                                    {pendingMemberActions} <span className="dashboard-unit">件</span>
+                                    {pendingMemberActions > 0 && <span className="status-badge badge-purple">待處理</span>}
+                                </div>
+                                <Link to="/staff/member-audit" className="dashboard-link">前往審核 →</Link>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -178,6 +216,10 @@ function StaffDashboardPage() {
                 .dashboard-card.status-user-audit.has-items {
                     background: linear-gradient(135deg, #fff 0%, #ecfdf5 100%);
                     border-color: #a7f3d0;
+                }
+                .dashboard-card.status-member-audit.has-items {
+                    background: linear-gradient(135deg, #fff 0%, #f5f3ff 100%);
+                    border-color: #ddd6fe;
                 }
                 
                 .dashboard-card:hover {
@@ -231,6 +273,7 @@ function StaffDashboardPage() {
                 }
                 .badge-warning { background: #F59E0B; }
                 .badge-success { background: #10B981; }
+                .badge-purple { background: #8B5CF6; }
 
                 .dashboard-link {
                     font-size: 0.95rem;

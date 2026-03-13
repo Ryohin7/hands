@@ -8,8 +8,7 @@ function StaffLayout() {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [profile, setProfile] = useState(null);
-    const [deferredPrompt, setDeferredPrompt] = useState(null);
-    const [showInstallHint, setShowInstallHint] = useState(false);
+    // Removed deferredPrompt and showInstallHint states as per instruction
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -23,31 +22,14 @@ function StaffLayout() {
         };
         fetchProfile();
 
-        const handleBeforeInstallPrompt = (e) => {
-            e.preventDefault();
-            setDeferredPrompt(e);
-            // 只有在瀏覽器中才顯示提示 (非獨立運行模式)
-            if (!window.matchMedia('(display-mode: standalone)').matches) {
-                setShowInstallHint(true);
-            }
-        };
-
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        // Removed beforeinstallprompt event listener and related logic as per instruction
         
         return () => {
-            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            // Removed event listener cleanup as per instruction
         };
     }, []);
 
-    const handleInstallClick = async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            setDeferredPrompt(null);
-            setShowInstallHint(false);
-        }
-    };
+    // Removed handleInstallClick function as per instruction
 
     async function handleLogout() {
         await signOut(auth);
@@ -262,28 +244,6 @@ function StaffLayout() {
 
             {/* 主內容區 */}
             <main className="admin-main">
-                {showInstallHint && (
-                    <div className="install-hint" style={{ 
-                        background: '#007130', 
-                        color: 'white', 
-                        padding: '10px 15px', 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        fontSize: '0.875rem',
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 90
-                    }}>
-                        <span>將「員工入口」加入主畫面，操作更便利！</span>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button onClick={handleInstallClick} style={{ background: 'white', color: '#007130', border: 'none', padding: '4px 12px', borderRadius: '4px', fontWeight: '600', cursor: 'pointer' }}>
-                                立即備份
-                            </button>
-                            <button onClick={() => setShowInstallHint(false)} style={{ background: 'transparent', color: 'white', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
-                        </div>
-                    </div>
-                )}
                 <Outlet />
             </main>
         </div>
