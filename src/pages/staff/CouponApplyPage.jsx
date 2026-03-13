@@ -10,8 +10,8 @@ import {
     serverTimestamp,
     limit,
     writeBatch,
-    doc,
-    getDoc
+    getDoc,
+    getDocs
 } from 'firebase/firestore';
 
 function CouponApplyPage() {
@@ -76,7 +76,27 @@ function CouponApplyPage() {
             const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
             const userData = userDoc.data();
 
+            // 1. 生成自定義單號 CP[YYYYMMDD][XXXX]
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const dateStr = `${year}${month}${day}`;
+            
+            // 查詢當天已有的申請數量來決定流水號
+            const todayStart = new Date(now.setHours(0,0,0,0));
+            const todayEnd = new Date(now.setHours(23,59,59,999));
+            const qCountToday = query(
+                collection(db, 'coupon_requests'),
+                where('createdAt', '>=', todayStart),
+                where('createdAt', '<=', todayEnd)
+            );
+            const todaySnap = await getDocs(qCountToday);
+            const sequence = (todaySnap.size + 1).toString().padStart(4, '0');
+            const displayId = `CP${dateStr}${sequence}`;
+
             const docRef = await addDoc(collection(db, 'coupon_requests'), {
+                displayId: displayId,
                 userId: auth.currentUser.uid,
                 userName: userData.displayName || '未命名',
                 storeName: userData.storeName || '未設定門市',
@@ -94,6 +114,7 @@ function CouponApplyPage() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         requestId: docRef.id,
+                        displayId: displayId,
                         applicantName: userData.displayName || '員工',
                         quantity: quantity,
                         reason: reason,
@@ -258,6 +279,7 @@ function CouponApplyPage() {
                         requests.map(req => (
                             <div key={req.id} className="card" style={{ padding: '1rem', marginBottom: '0.75rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#111' }}>{req.displayId || req.id.substring(0, 8)}</span>
                                     <span style={{ fontSize: '0.75rem', color: '#666' }}>{req.createdAt?.toDate().toLocaleDateString()}</span>
                                     <span className={`tag tag-${req.status}`} style={{ fontSize: '0.7rem' }}>
                                         {req.status === 'pending' ? '待審核' : req.status === 'approved' ? '已核准' : '已退回'}
@@ -300,6 +322,7 @@ function CouponApplyPage() {
                         <table className="admin-table">
                             <thead>
                                 <tr>
+                                    <th style={{ width: '130px' }}>單號</th>
                                     <th>日期</th>
                                     <th>張數</th>
                                     <th>原因</th>
@@ -316,6 +339,7 @@ function CouponApplyPage() {
                                 ) : (
                                     requests.map(req => (
                                         <tr key={req.id}>
+                                            <td style={{ fontWeight: '600', color: '#111' }}>{req.displayId || '-'}</td>
                                             <td>{req.createdAt?.toDate().toLocaleString() || '處理中...'}</td>
                                             <td>{req.quantityRequested}</td>
                                             <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={req.reason}>

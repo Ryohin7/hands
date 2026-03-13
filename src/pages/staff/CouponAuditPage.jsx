@@ -116,7 +116,7 @@ function CouponAuditPage() {
                                     header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '✅ 電子券申請已核准', color: '#ffffff', weight: 'bold' }], backgroundColor: '#007130' },
                                     body: {
                                         type: 'box', layout: 'vertical', contents: [
-                                            { type: 'text', text: `您的申請（單號：${req.id}）已由 ${profile?.displayName || '主管'} 核准！`, wrap: true, size: 'sm' },
+                                            { type: 'text', text: `您的申請（單號：${req.displayId || req.id}）已由 ${profile?.displayName || '主管'} 核准！`, wrap: true, size: 'sm' },
                                             { type: 'text', text: '【核發券號如下】：', weight: 'bold', size: 'sm', margin: 'md' },
                                             { type: 'text', text: couponListText, wrap: true, size: 'sm', color: '#007130' }
                                         ]
@@ -158,7 +158,7 @@ function CouponAuditPage() {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             to: req.lineUserId,
-                            text: `您的電子券申請（單號：${id}）已被 ${profile?.displayName || '主管'} 退回。`,
+                            text: `您的電子券申請（單號：${req?.displayId || id}）已被 ${profile?.displayName || '主管'} 退回。`,
                             apiKey: import.meta.env.VITE_INTERNAL_API_KEY
                         })
                     });
@@ -207,9 +207,10 @@ function CouponAuditPage() {
                             requests.map(req => (
                                 <div key={req.id} className="card" style={{ padding: '1rem', marginBottom: '0.75rem', border: '1px solid #eee' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                        <span style={{ fontWeight: '600' }}>{req.userName}</span>
+                                        <span style={{ fontWeight: '600' }}>{req.displayId || '無單號'}</span>
                                         <span style={{ fontSize: '0.75rem', color: '#666' }}>{req.createdAt?.toDate().toLocaleDateString()}</span>
                                     </div>
+                                    <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.25rem' }}>申請人：{req.userName}</div>
                                     <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.25rem' }}>門市：{req.storeName}</div>
                                     <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.5rem' }}>張數：<strong>{req.quantityRequested}</strong></div>
                                     <div style={{
@@ -234,7 +235,7 @@ function CouponAuditPage() {
                                         <button
                                             className="btn btn-outline"
                                             style={{ flex: 1, height: '40px', color: '#DC2626', borderColor: '#DC2626' }}
-                                            onClick={() => handleReject(req.id)}
+                                            onClick={() => handleReject(req.id, req)}
                                             disabled={loading}
                                         >
                                             退回
@@ -250,11 +251,12 @@ function CouponAuditPage() {
                             history.map(req => (
                                 <div key={req.id} className="card" style={{ padding: '1rem', marginBottom: '0.75rem', border: '1px solid #eee' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                        <span style={{ fontWeight: '600' }}>{req.userName}</span>
+                                        <span style={{ fontWeight: '600' }}>{req.displayId || '無單號'}</span>
                                         <span className={`tag tag-${req.status}`} style={{ fontSize: '0.7rem' }}>
                                             {req.status === 'approved' ? '已核准' : '已退回'}
                                         </span>
                                     </div>
+                                    <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.25rem' }}>申請人：{req.userName}</div>
                                     <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.25rem' }}>門市：{req.storeName}</div>
                                     <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.5rem' }}>張數：<strong>{req.quantityRequested}</strong></div>
                                     <div style={{ fontSize: '0.875rem', color: '#444', marginBottom: '0.25rem' }}>審核者：{req.approvedByName || req.rejectedByName || '管理員'}</div>
@@ -270,6 +272,7 @@ function CouponAuditPage() {
                     <table className="admin-table">
                         <thead>
                             <tr>
+                                <th>單號</th>
                                 <th>申請人</th>
                                 <th>門市</th>
                                 <th>張數</th>
@@ -283,11 +286,12 @@ function CouponAuditPage() {
                             {activeTab === 'pending' ? (
                                 requests.length === 0 ? (
                                     <tr>
-                                        <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無待審核申請</td>
+                                        <td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無待審核申請</td>
                                     </tr>
                                 ) : (
                                     requests.map(req => (
                                         <tr key={req.id}>
+                                            <td style={{ fontWeight: '600' }}>{req.displayId || '-'}</td>
                                             <td>{req.userName}</td>
                                             <td>{req.storeName}</td>
                                             <td><strong>{req.quantityRequested}</strong></td>
@@ -319,11 +323,12 @@ function CouponAuditPage() {
                             ) : (
                                 history.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無歷史紀錄</td>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無歷史紀錄</td>
                                     </tr>
                                 ) : (
                                     history.map(req => (
                                         <tr key={req.id}>
+                                            <td style={{ fontWeight: '600' }}>{req.displayId || '-'}</td>
                                             <td>{req.userName}</td>
                                             <td>{req.storeName}</td>
                                             <td><strong>{req.quantityRequested}</strong></td>

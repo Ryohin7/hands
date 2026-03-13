@@ -96,7 +96,25 @@ async function handleEvent(event) {
             const reason = text;
             const quantity = session.quantity;
 
+            // 1. 生成自定義單號 CP[YYYYMMDD][XXXX]
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const dateStr = `${year}${month}${day}`;
+            
+            // 查詢當天已有的申請數量來決定流水號
+            const todayStart = new Date(now.setHours(0,0,0,0));
+            const todayEnd = new Date(now.setHours(23,59,59,999));
+            const qCountToday = await db.collection('coupon_requests')
+                .where('createdAt', '>=', admin.firestore.Timestamp.fromDate(todayStart))
+                .where('createdAt', '<=', admin.firestore.Timestamp.fromDate(todayEnd))
+                .get();
+            const sequence = (qCountToday.size + 1).toString().padStart(4, '0');
+            const displayId = `CP${dateStr}${sequence}`;
+
             const applyRef = await db.collection('coupon_requests').add({
+                displayId: displayId,
                 userId: userData.id,
                 userName: userData.displayName || '員工',
                 lineUserId: lineUserId,
@@ -107,9 +125,9 @@ async function handleEvent(event) {
             });
 
             await sessionRef.delete();
-            await notifySupervisors(applyRef.id, userData.displayName, quantity, reason);
+            await notifySupervisors(applyRef.id, userData.displayName, quantity, reason, displayId);
 
-            return await replyFlex(replyToken, '申請已送出', `單號：${applyRef.id}\n數量：${quantity} 張\n原因：${reason}\n\n請靜待主管審核，系統將會即時通知您結果。`, '#007130');
+            return await replyFlex(replyToken, '申請已送出', `單號：${displayId}\n數量：${quantity} 張\n原因：${reason}\n\n請靜待主管審核，系統將會即時通知您結果。`, '#007130');
         }
     }
 
@@ -146,7 +164,7 @@ async function handleEvent(event) {
     }
 }
 
-async function notifySupervisors(requestId, applicantName, qty, reason) {
+async function notifySupervisors(requestId, applicantName, qty, reason, displayId) {
     const supervisors = await db.collection('users').where('permissions', 'array-contains', 'coupon_audit').get();
 
     for (const doc of supervisors.docs) {
@@ -158,7 +176,8 @@ async function notifySupervisors(requestId, applicantName, qty, reason) {
             header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '🔔 電子券申請待審核', weight: 'bold', color: '#ffffff' }], backgroundColor: '#007130' },
             body: {
                 type: 'box', layout: 'vertical', contents: [
-                    { type: 'text', text: `申請人：${applicantName}`, size: 'sm', weight: 'bold' },
+                    { type: 'text', text: `申請單號：${displayId || requestId.substring(0,8)}`, size: 'sm', weight: 'bold', color: '#111111' },
+                    { type: 'text', text: `申請人：${applicantName}`, size: 'sm', weight: 'bold', margin: 'sm' },
                     { type: 'text', text: `申請數量：${qty} 張`, size: 'sm' },
                     { type: 'text', text: `原因：${reason}`, size: 'sm', wrap: true, margin: 'md' }
                 ]
@@ -221,7 +240,7 @@ async function handleApprove(requestId, adminName, replyToken) {
         // 格式化電子券號顯示
         const couponListText = assignedCoupons.join('\n');
 
-        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請\n（單號：${requestId}）\n已由 ${adminName} 核准！\n\n【核發券號如下】：\n${couponListText}`, '#007130');
+        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請\n（單號：${requestData.displayId || requestId}）\n已由 ${adminName} 核准！\n\n【核發券號如下】：\n${couponListText}`, '#007130');
         await replyFlex(replyToken, '核准作業成功', '已順利完成核准作業並發放券號。', '#007130');
 
     } catch (err) {
@@ -256,7 +275,7 @@ async function handleReject(requestId, adminName, reason, replyToken) {
 
         const requestDoc = await db.collection('coupon_requests').doc(requestId).get();
         const requestData = requestDoc.data();
-        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請（單號：${requestId}）已被 ${adminName} 駁回。\n原因：${reason}`, '#DC2626');
+        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請（單號：${requestData.displayId || requestId}）已被 ${adminName} 駁回。\n原因：${reason}`, '#DC2626');
         await replyFlex(replyToken, '駁回作業成功', '案件已成功設定為駁回狀態。', '#666666');
 
     } catch (err) {

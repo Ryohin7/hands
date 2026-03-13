@@ -19,7 +19,7 @@ const db = admin.firestore();
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(200).send('OK');
 
-    const { requestId, applicantName, quantity, reason, apiKey } = req.body;
+    const { requestId, displayId, applicantName, quantity, reason, apiKey } = req.body;
 
     // 安全檢查
     if (apiKey !== process.env.INTERNAL_API_KEY) {
@@ -54,7 +54,8 @@ export default async function handler(req, res) {
                             header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '🔔 電子券申請待審核', weight: 'bold', color: '#007130' }] },
                             body: {
                                 type: 'box', layout: 'vertical', contents: [
-                                    { type: 'text', text: `申請人：${applicantName}`, size: 'sm' },
+                                    { type: 'text', text: `申請單號：${displayId || requestId.substring(0,8)}`, size: 'sm', weight: 'bold' },
+                                    { type: 'text', text: `申請人：${applicantName}`, size: 'sm', margin: 'sm' },
                                     { type: 'text', text: `申請張數：${quantity}`, size: 'sm' },
                                     { type: 'text', text: `原因：${reason || '未填寫'}`, size: 'sm', wrap: true }
                                 ]
