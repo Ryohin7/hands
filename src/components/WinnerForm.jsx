@@ -18,6 +18,7 @@ function WinnerForm({ post }) {
     const [captchaValue, setCaptchaValue] = useState(null);
     const [isReviewing, setIsReviewing] = useState(false);
     const [isInsideApp, setIsInsideApp] = useState(false);
+    const [captchaLoaded, setCaptchaLoaded] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const formRef = useRef(null);
 
