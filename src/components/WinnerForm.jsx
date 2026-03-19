@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { twzipcodeData } from '../utils/twzipcodeData';
@@ -18,8 +18,8 @@ function WinnerForm({ post }) {
     const [captchaValue, setCaptchaValue] = useState(null);
     const [isReviewing, setIsReviewing] = useState(false);
     const [isInsideApp, setIsInsideApp] = useState(false);
-    const [captchaLoaded, setCaptchaLoaded] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const formRef = useRef(null);
 
     useEffect(() => {
         if (post?.formDeadline) {
@@ -80,7 +80,10 @@ function WinnerForm({ post }) {
         }
 
         setIsReviewing(true);
-        window.scrollTo(0, 0); // 簡單捲動以增加相容性
+        // 捲動到表單區塊的最上方
+        setTimeout(() => {
+            formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 0);
     };
 
     const handleSubmit = async () => {
@@ -146,7 +149,7 @@ function WinnerForm({ post }) {
     }
 
     return (
-        <div className="winner-form-container">
+        <div className="winner-form-container" ref={formRef}>
             {isInsideApp && (
                 <div className="app-browser-notice">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -191,7 +194,12 @@ function WinnerForm({ post }) {
                         {errorMsg && <div className="error-message-inline">{errorMsg}</div>}
 
                         <div className="review-actions">
-                            <button type="button" className="edit-btn" onClick={() => setIsReviewing(false)} disabled={submitting}>
+                            <button type="button" className="edit-btn" onClick={() => {
+                                setIsReviewing(false);
+                                setTimeout(() => {
+                                    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }, 0);
+                            }} disabled={submitting}>
                                 返回修改
                             </button>
                             <button type="button" className="submit-btn" onClick={handleSubmit} disabled={submitting}>
@@ -286,7 +294,7 @@ function WinnerForm({ post }) {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .winner-form-container { margin-top: 3rem; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 1rem; }
+                .winner-form-container { margin-top: 3rem; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 1rem; scroll-margin-top: 100px; }
                 .app-browser-notice { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 12px; font-size: 0.85rem; }
                 .winner-form-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
                 .winner-form-header { background: #fdfdfd; padding: 1.5rem 2rem; border-bottom: 1px solid #e5e7eb; }
