@@ -18,6 +18,8 @@ function WinnerForm({ post }) {
     const [captchaValue, setCaptchaValue] = useState(null);
     const [isReviewing, setIsReviewing] = useState(false);
     const [isInsideApp, setIsInsideApp] = useState(false);
+    const [captchaLoaded, setCaptchaLoaded] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
         if (post?.formDeadline) {
@@ -28,7 +30,6 @@ function WinnerForm({ post }) {
             }
         }
 
-        // 偵測是否在 FB Messenger 或 LINE 內
         const ua = navigator.userAgent || navigator.vendor || window.opera;
         const isFB = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Messenger") > -1);
         const isLine = (ua.indexOf("Line") > -1);
@@ -37,7 +38,16 @@ function WinnerForm({ post }) {
         }
     }, [post]);
 
-    // 當縣市改變時，清空鄉鎮與郵遞區號
+    useEffect(() => {
+        // 如果 10 秒後驗證元件還沒載入，顯示建議切換瀏覽器的訊息
+        const timer = setTimeout(() => {
+            if (!captchaLoaded && !submitted && !isExpired) {
+                setErrorMsg('驗證元件載入過久，若持續未出現，請點擊右上角「...」並選擇「以瀏覽器開啟」。');
+            }
+        }, 10000);
+        return () => clearTimeout(timer);
+    }, [captchaLoaded, submitted, isExpired]);
+
     const handleCountyChange = (e) => {
         const selectedCounty = e.target.value;
         setCounty(selectedCounty);
@@ -45,7 +55,6 @@ function WinnerForm({ post }) {
         setZipCode('');
     };
 
-    // 當鄉鎮改變時，自動帶入對應郵遞區號
     const handleDistrictChange = (e) => {
         const selectedDistrict = e.target.value;
         setDistrict(selectedDistrict);
@@ -58,23 +67,29 @@ function WinnerForm({ post }) {
 
     const handlePreSubmit = (e) => {
         e.preventDefault();
+        setErrorMsg('');
+
         if (!communityName || !recipientName || !recipientPhone || !county || !district || !addressDetail) {
-            alert('請填寫所有必填欄位！');
+            setErrorMsg('請填寫所有必填欄位！');
             return;
         }
 
         if (!captchaValue) {
-            alert('請先勾選「我不是機器人」進行驗證！');
+            setErrorMsg('請先勾選「我不是機器人」進行驗證！');
             return;
         }
+
         setIsReviewing(true);
-        // 滾動到頂部以便查看確認資訊
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0, 0); // 簡單捲動以增加相容性
     };
 
     const handleSubmit = async () => {
+        if (submitting) return;
         setSubmitting(true);
+        setErrorMsg('');
+
         try {
+            console.log('開始提交中獎表單...', post.id);
             await addDoc(collection(db, 'winner_submissions'), {
                 postId: post.id,
                 postTitle: post.title,
@@ -88,11 +103,11 @@ function WinnerForm({ post }) {
                 submittedAt: serverTimestamp(),
             });
 
+            console.log('提交成功');
             setSubmitted(true);
-            alert('寄件資料已成功送出！');
         } catch (error) {
             console.error('送出表單失敗', error);
-            alert('資料送出失敗，請重試或聯絡系統管理員。');
+            setErrorMsg('資料送出失敗：' + (error.message || '未知錯誤') + '。請稍後再試。');
         } finally {
             setSubmitting(false);
         }
@@ -139,7 +154,7 @@ function WinnerForm({ post }) {
                         <line x1="12" y1="16" x2="12" y2="12"></line>
                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
-                    <span>偵測到您正在使用 App 內建瀏覽器。若無法送出，請點擊右上角「...」並選擇「瀏覽器開啟」。</span>
+                    <span>偵測到您在 App 內，若無法勾選驗證或送出，請點擊右上角「...」選擇「以瀏覽器開啟」。</span>
                 </div>
             )}
 
@@ -150,10 +165,6 @@ function WinnerForm({ post }) {
 
                 {!isReviewing && post?.formDeadline && (
                     <div className="deadline-alert">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
                         填寫截止時間：{(post.formDeadline.toDate ? post.formDeadline.toDate() : new Date(post.formDeadline)).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </div>
                 )}
@@ -176,6 +187,9 @@ function WinnerForm({ post }) {
                             <label>聯絡地址</label>
                             <div>{zipCode} {county}{district}{addressDetail}</div>
                         </div>
+                        
+                        {errorMsg && <div className="error-message-inline">{errorMsg}</div>}
+
                         <div className="review-actions">
                             <button type="button" className="edit-btn" onClick={() => setIsReviewing(false)} disabled={submitting}>
                                 返回修改
@@ -225,52 +239,41 @@ function WinnerForm({ post }) {
                             <div className="form-item full-width">
                                 <label>聯絡地址 <span className="required">*</span></label>
                                 <div className="address-selectors">
-                                    <select
-                                        required
-                                        value={county}
-                                        onChange={handleCountyChange}
-                                    >
+                                    <select required value={county} onChange={handleCountyChange}>
                                         <option value="">選擇縣市</option>
                                         {Object.keys(twzipcodeData).map(c => (
                                             <option key={c} value={c}>{c}</option>
                                         ))}
                                     </select>
-                                    <select
-                                        required
-                                        value={district}
-                                        onChange={handleDistrictChange}
-                                        disabled={!county}
-                                    >
+                                    <select required value={district} onChange={handleDistrictChange} disabled={!county}>
                                         <option value="">選擇鄉鎮市區</option>
                                         {county && twzipcodeData[county] && Object.keys(twzipcodeData[county]).map(d => (
                                             <option key={d} value={d}>{d}</option>
                                         ))}
                                     </select>
-                                    <input
-                                        type="text"
-                                        readOnly
-                                        value={zipCode}
-                                        placeholder="郵遞區號"
-                                        className="zip-input"
-                                    />
+                                    <input type="text" readOnly value={zipCode} placeholder="郵遞" className="zip-input" />
                                 </div>
                                 <input
                                     type="text"
                                     required
                                     value={addressDetail}
                                     onChange={e => setAddressDetail(e.target.value)}
-                                    placeholder="請輸入詳細地址 (街道、巷弄、號、樓)"
+                                    placeholder="詳細地址 (街道、巷弄、號、樓)"
                                     className="address-detail-input"
                                 />
                             </div>
                         </div>
 
                         <div className="captcha-section">
+                            {!captchaLoaded && <div className="captcha-loading">正在載入驗證元件...</div>}
                             <ReCAPTCHA
                                 sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
                                 onChange={(value) => setCaptchaValue(value)}
+                                asyncScriptOnLoad={() => setCaptchaLoaded(true)}
                             />
                         </div>
+
+                        {errorMsg && <div className="error-message-inline">{errorMsg}</div>}
 
                         <div className="form-actions">
                             <button type="submit" className="submit-btn" disabled={submitting || !captchaValue}>
@@ -283,232 +286,41 @@ function WinnerForm({ post }) {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .winner-form-container {
-                    margin-top: 3rem;
-                    max-width: 800px;
-                    margin-left: auto;
-                    margin-right: auto;
-                }
-                .app-browser-notice {
-                    background: #fffbeb;
-                    border: 1px solid #fde68a;
-                    color: #92400e;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    margin-bottom: 1.5rem;
-                    display: flex;
-                    align-items: flex-start;
-                    gap: 12px;
-                    font-size: 0.9rem;
-                    line-height: 1.5;
-                }
-                .app-browser-notice svg {
-                    flex-shrink: 0;
-                    margin-top: 2px;
-                }
-                .winner-form-card {
-                    background: #fff;
-                    border-radius: 12px;
-                    border: 1px solid #e5e7eb;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-                    overflow: hidden;
-                }
-                .winner-form-header {
-                    background: #fdfdfd;
-                    padding: 1.5rem 2rem;
-                    border-bottom: 1px solid #e5e7eb;
-                }
-                .winner-form-header h3 {
-                    margin: 0;
-                    color: #007130;
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                }
-                .deadline-alert {
-                    margin: 1.5rem 2rem;
-                    background: #fef2f2;
-                    border: 1px solid #fee2e2;
-                    color: #dc2626;
-                    padding: 0.75rem 1rem;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 0.95rem;
-                }
-                .responsive-form, .review-container {
-                    padding: 2rem;
-                }
-                .review-container {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1.5rem;
-                }
-                .review-item {
-                    border-bottom: 1px solid #f3f4f6;
-                    padding-bottom: 0.75rem;
-                }
-                .review-item label {
-                    font-size: 0.85rem;
-                    color: #6b7280;
-                    margin-bottom: 0.5rem;
-                    display: block;
-                }
-                .review-item div {
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    color: #111827;
-                }
-                .review-actions {
-                    display: flex;
-                    gap: 1rem;
-                    margin-top: 1rem;
-                }
-                .edit-btn {
-                    flex: 1;
-                    background: #f3f4f6;
-                    color: #374151;
-                    border: 1px solid #d1d5db;
-                    padding: 1rem;
-                    font-weight: 600;
-                    border-radius: 8px;
-                    cursor: pointer;
-                }
-                .form-section {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1.25rem;
-                }
-                .form-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1.25rem;
-                }
-                .form-item {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                }
-                .form-item label {
-                    font-size: 0.9rem;
-                    font-weight: 600;
-                    color: #374151;
-                }
-                .required {
-                    color: #ef4444;
-                }
-                .responsive-form input[type="text"],
-                .responsive-form input[type="tel"],
-                .responsive-form select {
-                    padding: 0.75rem 1rem;
-                    border: 1px solid #d1d5db;
-                    border-radius: 8px;
-                    font-size: 1rem;
-                    transition: all 0.2s;
-                    background: #fff;
-                }
-                .responsive-form input:focus,
-                .responsive-form select:focus {
-                    outline: none;
-                    border-color: #007130;
-                    box-shadow: 0 0 0 3px rgba(0, 113, 48, 0.1);
-                }
-                .address-selectors {
-                    display: flex;
-                    gap: 8px;
-                    margin-bottom: 8px;
-                }
-                .address-selectors select:first-child {
-                    width: calc(50% - 0.625rem);
-                    flex-shrink: 0;
-                    margin-right: calc(1.25rem - 8px);
-                }
-                .address-selectors select:nth-child(2) {
-                    flex: 1;
-                }
-                .address-selectors .zip-input {
-                    width: 110px;
-                    flex-shrink: 0;
-                }
-                .zip-input {
-                    background: #f3f4f6 !important;
-                    cursor: not-allowed;
-                    text-align: center;
-                }
-                .captcha-section {
-                    display: flex;
-                    justify-content: center;
-                    margin: 2rem 0;
-                }
-                .form-actions {
-                    display: flex;
-                    justify-content: center;
-                }
-                .submit-btn {
-                    background: #007130;
-                    color: white;
-                    border: none;
-                    padding: 1rem 4rem;
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    box-shadow: 0 4px 6px -1px rgba(0, 113, 48, 0.2);
-                    flex: 2;
-                }
-                .submit-btn:hover:not(:disabled) {
-                    background: #005a26;
-                    transform: translateY(-1px);
-                    box-shadow: 0 10px 15px -3px rgba(0, 113, 48, 0.3);
-                }
-                .submit-btn:disabled {
-                    opacity: 0.6;
-                    cursor: not-allowed;
-                }
-
+                .winner-form-container { margin-top: 3rem; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 1rem; }
+                .app-browser-notice { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 12px; font-size: 0.85rem; }
+                .winner-form-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+                .winner-form-header { background: #fdfdfd; padding: 1.5rem 2rem; border-bottom: 1px solid #e5e7eb; }
+                .winner-form-header h3 { margin: 0; color: #007130; font-size: 1.25rem; font-weight: 700; }
+                .deadline-alert { margin: 1rem 2rem; background: #fef2f2; border: 1px solid #fee2e2; color: #dc2626; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
+                .responsive-form, .review-container { padding: 1.5rem 2rem; }
+                .review-container { display: flex; flex-direction: column; gap: 1.25rem; }
+                .review-item { border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem; }
+                .review-item label { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.25rem; display: block; }
+                .review-item div { font-size: 1rem; font-weight: 600; color: #111827; }
+                .review-actions { display: flex; gap: 1rem; margin-top: 0.5rem; }
+                .edit-btn { flex: 1; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 0.8rem; font-weight: 600; border-radius: 8px; cursor: pointer; }
+                .form-section { display: flex; flex-direction: column; gap: 1rem; }
+                .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                .form-item { display: flex; flex-direction: column; gap: 0.4rem; }
+                .form-item label { font-size: 0.85rem; font-weight: 600; color: #374151; }
+                .required { color: #ef4444; }
+                .responsive-form input, .responsive-form select { padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+                .address-selectors { display: flex; gap: 6px; margin-bottom: 6px; }
+                .zip-input { width: 80px !important; background: #f3f4f6 !important; text-align: center; }
+                .captcha-section { display: flex; flex-direction: column; align-items: center; margin: 1.5rem 0; min-height: 78px; justify-content: center; }
+                .captcha-loading { font-size: 0.85rem; color: #6b7280; margin-bottom: 0.5rem; }
+                .error-message-inline { background: #fee2e2; color: #b91c1c; padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 1rem; border: 1px solid #fecaca; }
+                .submit-btn { background: #007130; color: white; border: none; padding: 1rem; font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; flex: 2; }
+                .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+                
                 @media (max-width: 640px) {
-                    .winner-form-container {
-                        margin-top: 1rem;
-                    }
-                    .winner-form-card {
-                        border-radius: 0;
-                        border-left: none;
-                        border-right: none;
-                        box-shadow: none;
-                    }
-                    .winner-form-header {
-                        padding: 1.5rem 1rem;
-                    }
-                    .responsive-form, .review-container {
-                        padding: 1.5rem 1rem;
-                    }
-                    .deadline-alert {
-                        margin: 1rem;
-                    }
-                    .form-grid {
-                        grid-template-columns: 1fr;
-                    }
-                    .address-selectors {
-                        display: grid;
-                        grid-template-columns: 1fr 1fr;
-                        gap: 8px;
-                    }
-                    .address-selectors select:first-child {
-                        width: auto;
-                        margin-right: 0;
-                    }
-                    .address-selectors .zip-input {
-                        grid-column: span 2;
-                        width: 100%;
-                    }
-                    .submit-btn {
-                        width: 100%;
-                    }
-                    .review-actions {
-                        flex-direction: column;
-                    }
+                    .winner-form-container { margin-top: 1rem; }
+                    .form-grid { grid-template-columns: 1fr; }
+                    .address-selectors { display: grid; grid-template-columns: 1fr 1fr; }
+                    .address-selectors input { grid-column: span 2; }
+                    .review-actions { flex-direction: column-reverse; }
+                    .winner-form-header { padding: 1rem; }
+                    .responsive-form, .review-container { padding: 1rem; }
                 }
             ` }} />
         </div>
