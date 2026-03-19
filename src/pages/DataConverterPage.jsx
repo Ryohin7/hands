@@ -86,11 +86,11 @@ function DataConverterPage() {
         try {
             const rows = fileData.slice(1).map(row => [row[9] || '']).filter(r => r[0] !== '');
             const ws = XLSX.utils.aoa_to_sheet(rows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'LINE推播');
-            const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            saveAs(new Blob([buf], { type: 'application/octet-stream' }), 'LINE推播.xlsx');
-            setMessage({ type: 'success', text: 'LINE推播 檔案已下載！' });
+            // 輸出為 CSV (加上 BOM 以便 Excel 讀取中文)
+            const csv = XLSX.utils.sheet_to_csv(ws);
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+            saveAs(blob, 'LINE推播.csv');
+            setMessage({ type: 'success', text: 'LINE推播 CSV 檔案已下載！' });
         } catch (err) {
             console.error(err);
             setMessage({ type: 'error', text: '轉換失敗' });
@@ -142,10 +142,9 @@ function DataConverterPage() {
             CARD_TYPES.forEach(type => {
                 if (grouped[type].length > 0) {
                     const ws = XLSX.utils.aoa_to_sheet(grouped[type]);
-                    const wb = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(wb, ws, type);
-                    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-                    zip.file(`生日推播_${type}.xlsx`, buf);
+                    const csv = XLSX.utils.sheet_to_csv(ws);
+                    // 加上 BOM 以便 Excel 讀取中文
+                    zip.file(`生日推播_${type}.csv`, '\uFEFF' + csv);
                     hasFile = true;
                 }
             });
@@ -307,7 +306,7 @@ function DataConverterPage() {
                     </div>
                     <div className="info-card">
                         <h4>LINE 推播</h4>
-                        <p>無表頭，僅輸出 LINE ID 欄</p>
+                        <p>無表頭，僅輸出 LINE ID 欄 (CSV 格式)</p>
                     </div>
                     <div className="info-card">
                         <h4>SMS 推播</h4>
@@ -315,7 +314,7 @@ function DataConverterPage() {
                     </div>
                     <div className="info-card">
                         <h4>生日推播</h4>
-                        <p>依卡類型分成三個檔案（一般/VIP/VVIP），無表頭，僅輸出 LINE ID 欄，打包 ZIP 下載</p>
+                        <p>依卡類型分成三個 CSV 檔案（一般/VIP/VVIP），無表頭，僅輸出 LINE ID 欄，打包 ZIP 下載</p>
                     </div>
                 </div>
             </div>
