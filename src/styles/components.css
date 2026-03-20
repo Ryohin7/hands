@@ -1,0 +1,287 @@
+/* === 通用組件 (components.css) === */
+
+/* === 按鈕 === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--text);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  background: transparent;
+  color: var(--text);
+  letter-spacing: 0.05em;
+}
+
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #555;
+  border-color: #555;
+}
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--brand);
+  border: 1px solid var(--brand);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--brand-light);
+}
+
+.btn-outline {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--text);
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.btn-full {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-icon:hover { border-color: var(--text); color: var(--text); }
+.btn-icon-danger:hover {
+  border-color: #EF4444;
+  color: #EF4444;
+  background: #FEF2F2;
+}
+
+.btn-icon-archive:hover {
+  border-color: #F59E0B;
+  color: #F59E0B;
+  background: #FFFBEB;
+}
+
+.btn-icon-restore:hover {
+  border-color: #007130;
+  color: #007130;
+  background: #E6F4EC;
+}
+
+.btn-icon-pin:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+.btn-icon-pinned { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+.btn-icon-pinned:hover { border-color: #999; color: #999; background: #f5f5f5; }
+
+/* === 表單元素 === */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.625rem 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  font-size: 0.9375rem;
+  font-family: var(--font);
+  color: var(--text);
+  background: transparent;
+  transition: var(--transition);
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-bottom-color: var(--text);
+}
+
+.form-group input::placeholder { color: #ccc; }
+.input-lg { padding: 0.75rem 0 !important; font-size: 1rem !important; }
+
+/* === 表單開關與排程 === */
+.schedule-toggle { display: flex; align-items: center; gap: 1rem; }
+.toggle-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; color: var(--text); cursor: pointer; }
+.toggle-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: #007130; cursor: pointer; }
+
+/* === 表格與狀態標籤 === */
+.admin-table-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  animation: fadeIn 0.4s ease both;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--bg-gray);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+}
+
+.admin-table tr:hover td { background: var(--bg-gray); }
+
+.status-badge {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.status-published { background: #E8F5E9; color: #2E7D32; }
+.status-draft { background: #FFF3E0; color: #E65100; }
+.status-archived { background: #F3F4F6; color: #9CA3AF; }
+.status-scheduled { background: #EDE9FE; color: #7C3AED; }
+
+/* === 分頁 === */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.pagination-btn {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* === 加載與狀態 === */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem;
+  color: var(--text-secondary);
+  gap: 0.75rem;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 3px;
+}
+
+.post-card-skeleton { padding: 1.5rem 0; border-bottom: 1px solid var(--border-light); }
+
+/* === Tiptap Editor Premium UI === */
+.tiptap-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 6px;
+  background: #fdfdfd;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 2px;
+}
+
+.tiptap-toolbar button {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #555;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tiptap-toolbar button.active {
+  background: #007130;
+  color: #fff;
+}

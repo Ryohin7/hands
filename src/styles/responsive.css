@@ -1,0 +1,67 @@
+/* === 響應式佈局 (responsive.css) === */
+
+@media (max-width: 745px) {
+  .header-inner { padding: 0 1.5rem; }
+  .page-container { padding: 1.5rem 1.5rem 2.5rem; overflow-x: hidden; }
+  .page-title { font-size: 1.125rem; padding: 0 0.25rem; }
+  .month-group { gap: 1rem; }
+  .month-label { width: 40px; font-size: 1.75rem; padding-top: 1.25rem; }
+  .post-card { padding: 1.25rem 0; }
+  .post-title { font-size: 0.8125rem; }
+  .post-detail-header { padding: 0 0 1.25rem; margin: 0; }
+  .post-detail-content {
+    padding: 1rem 0;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-break: break-all;
+    text-align: justify;
+    text-justify: inter-ideograph;
+    text-wrap: normal;
+  }
+
+  .post-detail-content p, .post-detail-content div, .post-detail-content h1, .post-detail-content h2, .post-detail-content h3 {
+    max-width: 100%; margin-left: 0 !important; margin-right: 0 !important;
+  }
+
+  /* 行動版按鈕與表單優化 */
+  .edit-actions { flex-direction: column; }
+  .edit-actions .btn { width: 100%; }
+  .login-card { padding: 1.5rem; }
+  .pinned-card { padding: 1rem 1.25rem !important; }
+
+  /* 側邊欄手機版 */
+  .sidebar-toggle { display: flex; }
+  .sidebar-overlay { display: block; animation: fadeIn 0.2s ease; }
+  .admin-sidebar { transform: translateX(-100%); }
+  .admin-sidebar.open { transform: translateX(0); }
+  .admin-main { margin-left: 0; }
+  .admin-page-content { padding: 3.5rem 1rem 2.5rem; }
+  .admin-content-header { flex-direction: column; align-items: flex-start; }
+
+  /* 行動版導航選單 */
+  .mobile-menu-toggle { display: flex; }
+  .header-nav {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background: var(--bg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 0;
+    transition: 0.3s ease;
+    z-index: 101;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.05);
+  }
+  .header-nav.mobile-open { right: 0; }
+  .nav-item-wrapper { width: 100%; }
+  .header-link { width: 100%; padding: 1rem 1.5rem; font-size: 0.9rem; border-radius: 0; justify-content: space-between; }
+  .header-dropdown { position: static; opacity: 1; visibility: visible; box-shadow: none; padding-left: 1.5rem; background: var(--bg-gray); display: none; }
+  .nav-item-wrapper:hover .header-dropdown { display: block; transform: none; }
+
+  .store-grid { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
