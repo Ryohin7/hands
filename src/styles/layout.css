@@ -38,7 +38,7 @@
 
 .header-link {
   color: var(--text-secondary);
-  font-size: 0.8125rem;
+  font-size: 0.9375rem; /* 13px -> 15px (+2px) */
   font-weight: 400;
   padding: 0.375rem 0.75rem;
   border-radius: var(--radius-sm);
@@ -92,6 +92,14 @@
   padding: 2.5rem 2rem 4rem;
 }
 
+.post-detail-container {
+  max-width: 860px !important;
+}
+
+.announcement-section {
+  max-width: 860px;
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -102,8 +110,8 @@
 }
 
 .page-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem; /* 20px -> 24px (+4px) */
+  font-weight: 700;
   color: var(--text);
   display: flex;
   align-items: center;
@@ -113,8 +121,8 @@
 
 .page-title svg {
   color: var(--text);
-  width: 20px;
-  height: 20px;
+  width: 24px; /* 同步放大圖示 */
+  height: 24px;
 }
 
 .page-count {
@@ -371,3 +379,26 @@
 }
 
 .social-icon:hover { opacity: 1; }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  margin-bottom: 2.5rem; /* 增加與下方公告分類標籤的間距 */
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--brand);
+}
+
+.back-link svg {
+  transition: transform 0.2s ease;
+}
+
+.back-link:hover svg {
+  transform: translateX(-3px);
+}

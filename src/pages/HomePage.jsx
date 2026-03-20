@@ -213,7 +213,7 @@ function HomePage() {
     };
 
     return (
-        <div className="page-container">
+        <div className="page-container post-detail-container">
             {loading ? renderSkeleton() : posts.length === 0 && pinnedPosts.length === 0 && physicalEvents.length === 0 ? (
                 <div className="empty-state">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -386,12 +386,13 @@ function HomePage() {
                         </div>
                     )}
 
-                    <div className="page-header">
-                        <h1 className="page-title">最新公告</h1>
-                        {totalCount > 0 && (
-                            <span className="page-count">共 {totalCount} 則</span>
-                        )}
-                    </div>
+                    <div className="announcement-section">
+                        <div className="page-header">
+                            <h1 className="page-title">最新公告</h1>
+                            {totalCount > 0 && (
+                                <span className="page-count">共 {totalCount} 則</span>
+                            )}
+                        </div>
 
                     {/* 置頂公告區塊 */}
                     {pinnedPosts.length > 0 && currentPage === 1 && (
@@ -407,12 +408,6 @@ function HomePage() {
                                         <div className="post-card-content">
                                             <div className="post-card-meta">
                                                 <span className="post-date">{formatDate(post.createdAt)}</span>
-                                                {post.category && (
-                                                    <span className="post-category-tag">
-                                                        {post.category}
-                                                    </span>
-                                                )}
-
                                             </div>
                                             <h2 className="post-title">{autoSpace(post.title)}</h2>
                                         </div>
@@ -438,11 +433,6 @@ function HomePage() {
                                             <div className="post-card-content">
                                                 <div className="post-card-meta">
                                                     <span className="post-date">{formatDate(post.createdAt)}</span>
-                                                    {post.category && (
-                                                        <span className="post-category-tag">
-                                                            {post.category}
-                                                        </span>
-                                                    )}
                                                 </div>
                                                 <h2 className="post-title">{autoSpace(post.title)}</h2>
                                             </div>
@@ -471,9 +461,10 @@ function HomePage() {
                                 onClick={() => setCurrentPage((p) => p + 1)}
                             >
                                 下一頁 →
-                            </button>
-                        </div>
-                    )}
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </>
             )}
         </div>

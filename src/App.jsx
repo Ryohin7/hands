@@ -48,91 +48,22 @@ import StaffDashboardPage from './pages/staff/StaffDashboardPage';
 import LineBindPage from './pages/staff/LineBindPage';
 
 function PWAUpdateHandler() {
-    const [showUpdate, setShowUpdate] = useState(false);
-    const [registration, setRegistration] = useState(null);
-
     useEffect(() => {
         const handleUpdate = (e) => {
-            setRegistration(e.detail);
-            setShowUpdate(true);
+            const registration = e.detail;
+            if (registration && registration.waiting) {
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                // 給一點時間讓 SW 接管並重刷
+                setTimeout(() => {
+                    window.location.reload();
+                }, 200);
+            }
         };
         window.addEventListener('swUpdated', handleUpdate);
         return () => window.removeEventListener('swUpdated', handleUpdate);
     }, []);
 
-    const onUpdate = () => {
-        if (registration && registration.waiting) {
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
-        setShowUpdate(false);
-        // 給一點時間讓 SW 接管
-        setTimeout(() => {
-            window.location.reload();
-        }, 100);
-    };
-
-    if (!showUpdate) return null;
-
-    return (
-        <div style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            right: '20px',
-            background: '#007130',
-            color: 'white',
-            padding: '16px',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-            zIndex: 10000,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            animation: 'pwa-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-        }} className="pwa-update-toast">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '6px', borderRadius: '50%' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                    </svg>
-                </div>
-                <div style={{ fontWeight: '600', fontSize: '1rem' }}>發現新版本！</div>
-            </div>
-            <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>
-                我們已準備好最新的系統更新，請立即套用以獲得最佳體驗。
-            </div>
-            <button
-                onClick={onUpdate}
-                style={{
-                    background: 'white',
-                    color: '#007130',
-                    border: 'none',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    fontSize: '0.9375rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                }}
-            >
-                立即更新
-            </button>
-            <style>{`
-                @keyframes pwa-slide-up {
-                    from { transform: translateY(100px); opacity: 0; }
-                    to { transform: translateY(0); opacity: 1; }
-                }
-                @media (min-width: 768px) {
-                    .pwa-update-toast {
-                        left: auto !important;
-                        right: 20px !important;
-                        width: 320px !important;
-                    }
-                }
-            `}</style>
-        </div>
-    );
+    return null;
 }
 
 function App() {

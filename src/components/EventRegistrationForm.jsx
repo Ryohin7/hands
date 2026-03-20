@@ -399,7 +399,7 @@ function EventRegistrationForm({ post }) {
                 .deadline-alert { margin: 1rem 2rem; background: #fef2f2; border: 1px solid #fee2e2; color: #dc2626; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
                 .responsive-form, .review-container { padding: 1.5rem 2rem; }
                 /* ... 略過重複樣式 ... */
-                .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+                .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1rem; }
                 .modal-card { background: #fff; width: 100%; max-width: 600px; max-height: 85vh; border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
                 .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #eee; background: #fafafa; }
                 .modal-header h3 { margin: 0; font-size: 1.1rem; color: #333; }
