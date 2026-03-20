@@ -22,9 +22,12 @@ import CustomPageEditPage from './pages/CustomPageEditPage';
 import CustomPageView from './pages/CustomPageView';
 import GlobalSettingsPage from './pages/GlobalSettingsPage';
 import FontTestPage from './pages/FontTestPage';
+import RegistrationInquiryPage from './pages/RegistrationInquiryPage';
+import PhysicalEventsPage from './pages/PhysicalEventsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ExcelComparePage from './pages/ExcelComparePage';
 import WinnerAdminPage from './pages/WinnerAdminPage';
+import EventAdminPage from './pages/EventAdminPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import StaffLayout from './components/StaffLayout';
@@ -147,6 +150,8 @@ function App() {
                     <Route path="/dm/:id" element={<><Header /><main className="main-content"><DmDetailPage /></main><Footer /></>} />
                     <Route path="/p/:id" element={<><Header /><main className="main-content"><CustomPageView /></main><Footer /></>} />
                     <Route path="/test-font" element={<><Header /><main className="main-content"><FontTestPage /></main><Footer /></>} />
+                    <Route path="/registration-inquiry" element={<><Header /><main className="main-content"><RegistrationInquiryPage /></main><Footer /></>} />
+                    <Route path="/events" element={<><Header /><main className="main-content"><PhysicalEventsPage /></main><Footer /></>} />
                     <Route path="/staff/login" element={<><Header /><main className="main-content"><StaffLoginPage /></main><Footer /></>} />
 
 
@@ -186,6 +191,7 @@ function App() {
                         <Route path="settings" element={<GlobalSettingsPage />} />
                         <Route path="excel-compare" element={<ExcelComparePage />} />
                         <Route path="winners" element={<WinnerAdminPage />} />
+                        <Route path="events" element={<EventAdminPage />} />
                     </Route>
 
                     {/* 員工入口頁面 */}

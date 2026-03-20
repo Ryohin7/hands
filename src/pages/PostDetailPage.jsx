@@ -6,6 +6,7 @@ import { formatDate } from '../utils';
 import { autoSpace } from '../utils/textUtils';
 import DOMPurify from 'dompurify';
 import WinnerForm from '../components/WinnerForm';
+import EventRegistrationForm from '../components/EventRegistrationForm';
 
 function PostDetailPage() {
     const { id } = useParams();
@@ -145,6 +146,7 @@ function PostDetailPage() {
                 />
 
                 {post.category === '中獎名單公告' && <WinnerForm post={post} />}
+                {post.category === '實體活動' && <EventRegistrationForm post={post} />}
             </article>
         </div>
     );

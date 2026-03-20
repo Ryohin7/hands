@@ -191,7 +191,7 @@ function WinnerForm({ post }) {
                             <label>聯絡地址</label>
                             <div>{zipCode} {county}{district}{addressDetail}</div>
                         </div>
-                        
+
                         {errorMsg && <div className="error-message-inline">{errorMsg}</div>}
 
                         <div className="review-actions">
@@ -218,7 +218,7 @@ function WinnerForm({ post }) {
                                     required
                                     value={communityName}
                                     onChange={e => setCommunityName(e.target.value)}
-                                    placeholder="請輸入您的FB中獎身分 (IG抽獎填IG帳號)"
+                                    placeholder="請輸入您的FB名稱 (IG抽獎填IG帳號)"
                                 />
                             </div>
 
@@ -230,7 +230,7 @@ function WinnerForm({ post }) {
                                         required
                                         value={recipientName}
                                         onChange={e => setRecipientName(e.target.value)}
-                                        placeholder="請輸入真實姓名"
+                                        placeholder="請輸入收件者姓名"
                                     />
                                 </div>
                                 <div className="form-item">
