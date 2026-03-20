@@ -36,17 +36,17 @@ function StoreListPage() {
 
     if (loading) {
         return (
-            <div className="admin-page-content">
+            <div className="page-container container-860">
                 <div className="loading-container"><div className="loading-spinner"></div><p>門市載入中...</p></div>
             </div>
         );
     }
 
     return (
-        <div className="admin-page-content">
-            <div className="admin-content-header">
-                <h2 className="admin-content-title">門市資訊</h2>
-                <span className="store-count">共 {filteredStores.length} 間門市</span>
+        <div className="page-container container-860">
+            <div className="page-header">
+                <h1 className="page-title">門市資訊</h1>
+                <span className="page-count">共 {filteredStores.length} 間門市</span>
             </div>
 
             {/* 地區篩選 */}

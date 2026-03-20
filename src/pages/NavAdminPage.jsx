@@ -160,8 +160,8 @@ function NavAdminPage() {
                 <h3 style={{ fontSize: '0.9375rem', marginBottom: '1rem', fontWeight: '600' }}>
                     {newItem.parentId ? `新增子項目至 [${navItems.find(i => i.id === newItem.parentId)?.label}]` : '新增頂層導航'}
                 </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto auto', gap: '0.75rem', alignItems: 'end' }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'end' }}>
+                    <div className="form-group" style={{ marginBottom: 0, flex: '1 1 200px' }}>
                         <label>從現有頁面選取</label>
                         <select onChange={e => {
                             const page = customPages.find(p => p.id === e.target.value);
@@ -171,22 +171,22 @@ function NavAdminPage() {
                             {customPages.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                         </select>
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
+                    <div className="form-group" style={{ marginBottom: 0, flex: '1 1 180px' }}>
                         <label>自訂名稱</label>
                         <input type="text" placeholder="名稱" value={newItem.label} onChange={e => setNewItem({ ...newItem, label: e.target.value })} />
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
+                    <div className="form-group" style={{ marginBottom: 0, flex: '2 1 240px' }}>
                         <label>連結網址</label>
                         <input type="text" placeholder="/" value={newItem.path} onChange={e => setNewItem({ ...newItem, path: e.target.value })} />
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
+                    <div className="form-group" style={{ marginBottom: 0, flex: '0 0 140px' }}>
                         <label>所屬層級</label>
                         <select value={newItem.parentId || ''} onChange={e => setNewItem({ ...newItem, parentId: e.target.value || null })}>
                             <option value="">頂層導航</option>
                             {navItems.map(i => <option key={i.id} value={i.id}>{i.label}</option>)}
                         </select>
                     </div>
-                    <button onClick={handleAddLink} className="btn btn-outline" style={{ height: '42px' }}>加入</button>
+                    <button onClick={handleAddLink} className="btn btn-primary" style={{ height: '42px', flex: '0 0 auto', whiteSpace: 'nowrap' }}>加入</button>
                 </div>
             </div>
 

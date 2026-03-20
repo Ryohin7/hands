@@ -292,49 +292,8 @@ function WinnerForm({ post }) {
                     </form>
                 )}
             </div>
-
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .winner-form-container { margin-top: 3rem; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 1rem; scroll-margin-top: 100px; }
-                .app-browser-notice { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 12px; font-size: 0.85rem; }
-                .winner-form-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
-                .winner-form-header { background: #fdfdfd; padding: 1.5rem 2rem; border-bottom: 1px solid #e5e7eb; }
-                .winner-form-header h3 { margin: 0; color: #007130; font-size: 1.25rem; font-weight: 700; }
-                .deadline-alert { margin: 1rem 2rem; background: #fef2f2; border: 1px solid #fee2e2; color: #dc2626; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
-                .responsive-form, .review-container { padding: 1.5rem 2rem; }
-                .review-container { display: flex; flex-direction: column; gap: 1.25rem; }
-                .review-item { border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem; }
-                .review-item label { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.25rem; display: block; }
-                .review-item div { font-size: 1rem; font-weight: 600; color: #111827; }
-                .review-actions { display: flex; gap: 1rem; margin-top: 0.5rem; }
-                .edit-btn { flex: 1; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 0.8rem; font-weight: 600; border-radius: 8px; cursor: pointer; }
-                .form-section { display: flex; flex-direction: column; gap: 1rem; }
-                .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-                .form-item { display: flex; flex-direction: column; gap: 0.4rem; }
-                .form-item label { font-size: 0.85rem; font-weight: 600; color: #374151; }
-                .required { color: #ef4444; }
-                .responsive-form input, .responsive-form select { padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
-                .address-selectors { display: flex; gap: 6px; margin-bottom: 6px; }
-                .zip-input { width: 80px !important; background: #f3f4f6 !important; text-align: center; }
-                .captcha-section { display: flex; flex-direction: column; align-items: center; margin: 1.5rem 0; min-height: 78px; justify-content: center; }
-                .captcha-loading { font-size: 0.85rem; color: #6b7280; margin-bottom: 0.5rem; }
-                .error-message-inline { background: #fee2e2; color: #b91c1c; padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 1rem; border: 1px solid #fecaca; }
-                .submit-btn { background: #007130; color: white; border: none; padding: 1rem; font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; flex: 2; }
-                .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-                
-                @media (max-width: 640px) {
-                    .winner-form-container { margin-top: 1rem; }
-                    .form-grid { grid-template-columns: 1fr; }
-                    .address-selectors { display: grid; grid-template-columns: 1fr 1fr; }
-                    .address-selectors input { grid-column: span 2; }
-                    .review-actions { flex-direction: column-reverse; }
-                    .winner-form-header { padding: 1rem; }
-                    .responsive-form, .review-container { padding: 1rem; }
-                }
-            ` }} />
         </div>
     );
 }
 
 export default WinnerForm;
-

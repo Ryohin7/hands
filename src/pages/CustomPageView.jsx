@@ -86,21 +86,21 @@ function CustomPageView() {
 
             <article className="post-detail">
                 <div className="post-detail-header">
-                    {/* 若有分類或日期，則一併顯示以與公告一致 */}
-                    {page.category && (
-                        <span className="post-detail-category">{page.category}</span>
-                    )}
+                    {/* 標籤與日期並排 */}
+                    <div className="post-detail-meta-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        {page.category ? (
+                            <span className="post-detail-category">{page.category}</span>
+                        ) : (
+                            <span /> /* spacer */
+                        )}
+                        <time className="post-detail-date" style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                            {formatDate(page.createdAt)}
+                        </time>
+                    </div>
                     <h1 className="post-detail-title">{autoSpace(page.title)}</h1>
                     {page.subtitle && (
                         <h2 className="post-detail-subtitle">{autoSpace(page.subtitle)}</h2>
                     )}
-                    <time className="post-detail-date">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                        {formatDate(page.createdAt)}
-                    </time>
                 </div>
                 <div
                     className="post-detail-content ql-editor"

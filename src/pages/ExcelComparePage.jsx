@@ -224,16 +224,18 @@ function ExcelComparePage() {
 
             <style dangerouslySetInnerHTML={{ __html: `
                 .file-list-card {
-                    background: rgba(255,255,255,0.03);
-                    border: 1px solid rgba(255,255,255,0.1);
+                    background: #fff;
+                    border: 1px solid var(--border-light);
                     border-radius: 12px;
                     padding: 1.5rem;
                     margin-bottom: 1.5rem;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
                 }
                 .section-small-title {
                     font-size: 0.9rem;
-                    opacity: 0.6;
+                    color: var(--text-secondary);
                     margin-bottom: 1rem;
+                    font-weight: 600;
                     text-transform: uppercase;
                     letter-spacing: 1px;
                 }
@@ -245,16 +247,18 @@ function ExcelComparePage() {
                 .file-item-row {
                     display: flex;
                     align-items: center;
-                    background: rgba(255,255,255,0.05);
+                    background: var(--bg-gray);
                     padding: 0.75rem 1rem;
                     border-radius: 8px;
                     position: relative;
                     overflow: hidden;
+                    border: 1px solid var(--border-light);
                 }
                 .file-index {
                     width: 24px;
                     height: 24px;
-                    background: var(--primary-color);
+                    background: var(--brand);
+                    color: #fff;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
@@ -271,14 +275,15 @@ function ExcelComparePage() {
                 }
                 .file-name {
                     font-weight: 500;
-                    max-width: 300px;
+                    max-width: 400px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                    color: var(--text);
                 }
                 .file-count {
                     font-size: 0.85rem;
-                    opacity: 0.7;
+                    color: var(--text-secondary);
                 }
                 .remove-btn {
                     background: none;
@@ -288,33 +293,37 @@ function ExcelComparePage() {
                     font-size: 1.2rem;
                     padding: 5px;
                     line-height: 1;
+                    opacity: 0.7;
+                    transition: opacity 0.2s;
                 }
+                .remove-btn:hover { opacity: 1; }
                 .item-progress {
                     position: absolute;
                     bottom: 0;
                     left: 0;
                     width: 100%;
                     height: 2px;
-                    background: rgba(255,255,255,0.1);
+                    background: rgba(0,0,0,0.05);
                 }
                 .item-progress-fill {
                     height: 100%;
-                    background: var(--primary-color);
+                    background: var(--brand);
                     transition: width 0.3s ease;
                 }
                 .compare-config-card {
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
+                    background: #fff;
+                    border: 1px solid var(--border-light);
                     border-radius: 12px;
                     padding: 2rem;
                     margin-bottom: 2rem;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
                 }
                 .compare-label-text {
                     display: block;
                     margin-bottom: 0.75rem;
                     font-weight: 600;
-                    color: #000000 !important;
-                    font-size: 1.1rem;
+                    color: var(--text) !important;
+                    font-size: 1rem;
                 }
                 .config-row {
                     display: flex;

@@ -83,9 +83,11 @@ function PostDetailPage() {
                 <div className="skeleton-back-link" />
                 <article className="post-detail">
                     <div className="post-detail-header">
-                        <div className="skeleton skeleton-tag" />
+                        <div className="post-detail-meta-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <div className="skeleton skeleton-tag" />
+                            <div className="skeleton skeleton-date" />
+                        </div>
                         <div className="skeleton skeleton-title-lg" />
-                        <div className="skeleton skeleton-date" />
                     </div>
                     <div className="skeleton-content">
                         <div className="skeleton skeleton-line" />
@@ -125,20 +127,20 @@ function PostDetailPage() {
 
             <article className="post-detail">
                 <div className="post-detail-header">
-                    {post.category && (
-                        <span className="post-detail-category">{post.category}</span>
-                    )}
+                    <div className="post-detail-meta-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        {post.category ? (
+                            <span className="post-detail-category">{post.category}</span>
+                        ) : (
+                            <span /> /* spacer */
+                        )}
+                        <time className="post-detail-date" style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                            {formatDate(post.createdAt)}
+                        </time>
+                    </div>
                     <h1 className="post-detail-title">{autoSpace(post.title)}</h1>
                     {post.subtitle && (
                         <h2 className="post-detail-subtitle">{autoSpace(post.subtitle)}</h2>
                     )}
-                    <time className="post-detail-date">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                        {formatDate(post.createdAt)}
-                    </time>
                 </div>
                 <div
                     className="post-detail-content ql-editor"

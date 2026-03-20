@@ -27,10 +27,10 @@ function DmListPage() {
         fetchDms();
     }, []);
 
-    if (loading) return <div className="page-container">載入中...</div>;
+    if (loading) return <div className="page-container post-detail-container">載入中...</div>;
 
     return (
-        <div className="page-container">
+        <div className="page-container post-detail-container">
             <h1 className="page-title">最新 DM / 檔期</h1>
 
             <div className="dm-grid">

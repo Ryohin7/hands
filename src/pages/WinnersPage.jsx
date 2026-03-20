@@ -141,7 +141,7 @@ function WinnersPage() {
     }
 
     return (
-        <div className="page-container">
+        <div className="page-container container-860">
             <div className="page-header">
                 <h1 className="page-title">中獎名單</h1>
                 {totalCount > 0 && (

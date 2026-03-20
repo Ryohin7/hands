@@ -250,7 +250,7 @@ function DataConverterPage() {
             {fileData && (
                 <div className="converter-actions">
                     <h3 className="converter-section-title">🔄 選擇轉換格式</h3>
-                    <div className="converter-btn-group">
+                    <div className="converter-btn-group" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
                         <button
                             onClick={convertLINE}
                             disabled={converting}

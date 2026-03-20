@@ -28,6 +28,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ExcelComparePage from './pages/ExcelComparePage';
 import WinnerAdminPage from './pages/WinnerAdminPage';
 import EventAdminPage from './pages/EventAdminPage';
+import FormTestPage from './pages/FormTestPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import StaffLayout from './components/StaffLayout';
@@ -84,6 +85,7 @@ function App() {
                     <Route path="/registration-inquiry" element={<><Header /><main className="main-content"><RegistrationInquiryPage /></main><Footer /></>} />
                     <Route path="/events" element={<><Header /><main className="main-content"><PhysicalEventsPage /></main><Footer /></>} />
                     <Route path="/staff/login" element={<><Header /><main className="main-content"><StaffLoginPage /></main><Footer /></>} />
+                    <Route path="/form-test" element={<><Header /><main className="main-content"><FormTestPage /></main><Footer /></>} />
 
 
                     {/* 後台頁面 - 側邊欄佈局 */}

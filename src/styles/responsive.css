@@ -3,11 +3,11 @@
 @media (max-width: 745px) {
   .header-inner { padding: 0 1.5rem; }
   .page-container { padding: 1.5rem 1.5rem 2.5rem; overflow-x: hidden; }
-  .page-title { font-size: 1.125rem; padding: 0 0.25rem; }
+  .page-title { font-size: 1.375rem; padding: 0 0.25rem; }
   .month-group { gap: 1rem; }
   .month-label { width: 40px; font-size: 1.75rem; padding-top: 1.25rem; }
   .post-card { padding: 1.25rem 0; }
-  .post-title { font-size: 0.8125rem; }
+  .post-title { font-size: 1.125rem; font-weight: 700; }
   .post-detail-header { padding: 0 0 1.25rem; margin: 0; }
   .post-detail-content {
     padding: 1rem 0;

@@ -100,6 +100,11 @@
   max-width: 860px;
 }
 
+.container-860 {
+  max-width: 860px !important;
+  margin: 0 auto;
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -226,13 +231,13 @@
 
 .admin-main {
   flex: 1;
-  margin-left: 240px;
   min-height: 100vh;
   background: var(--bg-gray);
+  margin-left: 240px; /* 預設桌面版 */
 }
 
 .admin-page-content {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 2rem 4rem;
 }
