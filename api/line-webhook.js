@@ -258,12 +258,13 @@ async function notifySupervisors(requestId, applicantName, qty, reason, displayI
 
         await pushFlexMessage(adminLineId, {
             type: 'bubble',
-            header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '🔔 電子券申請待審核', weight: 'bold', color: '#ffffff', size: 'md' }], backgroundColor: '#007130' },
+            header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '待審核申請通知', weight: 'bold', color: '#ffffff', size: 'md' }], backgroundColor: '#007130' },
             body: {
                 type: 'box',
                 layout: 'vertical',
                 contents: [
-                    { type: 'text', text: '收到新的電子券申請', weight: 'bold', size: 'lg', color: '#111111', margin: 'md' },
+                    { type: 'text', text: '電子券申請', weight: 'bold', size: 'xl', color: '#007130', margin: 'md' },
+                    { type: 'text', text: '狀態：待主管審核', size: 'sm', color: '#666666', margin: 'xs' },
                     { type: 'separator', margin: 'lg' },
                     {
                         type: 'box',
@@ -294,7 +295,7 @@ async function notifySupervisors(requestId, applicantName, qty, reason, displayI
                                 layout: 'baseline',
                                 spacing: 'sm',
                                 contents: [
-                                    { type: 'text', text: '申請張數', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: '數量張數', color: '#aaaaaa', size: 'sm', flex: 2 },
                                     { type: 'text', text: `${qty} 張`, wrap: true, color: '#111111', size: 'sm', flex: 5, weight: 'bold' }
                                 ]
                             },
@@ -316,8 +317,8 @@ async function notifySupervisors(requestId, applicantName, qty, reason, displayI
                 layout: 'horizontal',
                 spacing: 'sm',
                 contents: [
-                    { type: 'button', action: { type: 'postback', label: '核准', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
-                    { type: 'button', action: { type: 'postback', label: '駁回', data: `action=reject&id=${requestId}` }, style: 'secondary' }
+                    { type: 'button', action: { type: 'postback', label: '核准透過', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
+                    { type: 'button', action: { type: 'postback', label: '核准駁回', data: `action=reject&id=${requestId}` }, style: 'secondary' }
                 ]
             }
         });
@@ -377,7 +378,7 @@ async function handleApprove(requestId, adminName, replyToken) {
             header: {
                 type: 'box',
                 layout: 'vertical',
-                contents: [{ type: 'text', text: '申請審核結果', color: '#ffffff', weight: 'bold', size: 'md' }],
+                contents: [{ type: 'text', text: '審核結果通知', color: '#ffffff', weight: 'bold', size: 'md' }],
                 backgroundColor: '#007130'
             },
             body: {
@@ -385,7 +386,7 @@ async function handleApprove(requestId, adminName, replyToken) {
                 layout: 'vertical',
                 contents: [
                     { type: 'text', text: '核准透過', weight: 'bold', size: 'xl', color: '#007130', margin: 'md' },
-                    { type: 'text', text: `單號：${requestData.displayId || requestId}`, size: 'sm', color: '#666666', margin: 'xs' },
+                    { type: 'text', text: '類型：電子券申請', size: 'sm', color: '#666666', margin: 'xs' },
                     { type: 'separator', margin: 'lg' },
                     {
                         type: 'box',
@@ -395,10 +396,20 @@ async function handleApprove(requestId, adminName, replyToken) {
                         contents: [
                             {
                                 type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '申請單號', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: requestData.displayId || requestId, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            },
+                            {
+                                type: 'box',
                                 layout: 'vertical',
                                 spacing: 'xs',
+                                margin: 'md',
                                 contents: [
-                                    { type: 'text', text: '已核發電子券號：', color: '#aaaaaa', size: 'sm' },
+                                    { type: 'text', text: '核發電子券號', color: '#aaaaaa', size: 'sm' },
                                     { type: 'text', text: assignedCoupons.join('\n'), wrap: true, color: '#111111', size: 'md', weight: 'bold', fontStyle: 'italic' }
                                 ]
                             },
@@ -458,15 +469,15 @@ async function handleReject(requestId, adminName, reason, replyToken) {
             header: {
                 type: 'box',
                 layout: 'vertical',
-                contents: [{ type: 'text', text: '申請審核結果', color: '#ffffff', weight: 'bold', size: 'md' }],
+                contents: [{ type: 'text', text: '審核結果通知', color: '#ffffff', weight: 'bold', size: 'md' }],
                 backgroundColor: '#800019'
             },
             body: {
                 type: 'box',
                 layout: 'vertical',
                 contents: [
-                    { type: 'text', text: '申請被駁回', weight: 'bold', size: 'xl', color: '#800019', margin: 'md' },
-                    { type: 'text', text: `單號：${requestData.displayId || requestId}`, size: 'sm', color: '#666666', margin: 'xs' },
+                    { type: 'text', text: '核准駁回', weight: 'bold', size: 'xl', color: '#800019', margin: 'md' },
+                    { type: 'text', text: '類型：電子券申請', size: 'sm', color: '#666666', margin: 'xs' },
                     { type: 'separator', margin: 'lg' },
                     {
                         type: 'box',
@@ -474,6 +485,15 @@ async function handleReject(requestId, adminName, reason, replyToken) {
                         margin: 'lg',
                         spacing: 'sm',
                         contents: [
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '申請單號', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: requestData.displayId || requestId, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            },
                             {
                                 type: 'box',
                                 layout: 'baseline',
