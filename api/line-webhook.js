@@ -21,17 +21,82 @@ export default async function handler(req, res) {
 
     // 處理內部 API 呼叫：發送會員異動結果的 Flex Message 通知
     if (req.body.action === 'notify_member_action') {
-        const { to, status, typeName, reviewerName, note, apiKey } = req.body;
+        const { to, status, typeName, reviewerName, note, memberId, detail, apiKey } = req.body;
         if (apiKey !== process.env.INTERNAL_API_KEY) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
         
         const color = status === 'approved' ? '#007130' : '#DC2626';
-        let text = `您的會員資料異動申請\n（類型：${typeName}）\n已由 ${reviewerName} ${status === 'approved' ? '核准' : '駁回'}！`;
-        if (note) text += `\n\n備註：${note}`;
+        const statusText = status === 'approved' ? '核准透過' : '核准駁回';
         
+        const flexBody = {
+            type: 'bubble',
+            header: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [{ type: 'text', text: '審核結果通知', color: '#ffffff', weight: 'bold', size: 'md' }],
+                backgroundColor: color
+            },
+            body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    { type: 'text', text: statusText, weight: 'bold', size: 'xl', color: color, margin: 'md' },
+                    { type: 'text', text: `類型：${typeName}`, size: 'sm', color: '#666666', margin: 'xs' },
+                    { type: 'separator', margin: 'lg' },
+                    {
+                        type: 'box',
+                        layout: 'vertical',
+                        margin: 'lg',
+                        spacing: 'sm',
+                        contents: [
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '會員識別', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: memberId || '-', wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            },
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '異動詳情', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: detail || '-', wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            },
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '審核人員', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: reviewerName || '管理員', wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        if (note) {
+            flexBody.body.contents[3].contents.push({
+                type: 'box',
+                layout: 'baseline',
+                spacing: 'sm',
+                contents: [
+                    { type: 'text', text: '管理備註', color: '#aaaaaa', size: 'sm', flex: 2 },
+                    { type: 'text', text: note, wrap: true, color: '#dc2626', size: 'sm', flex: 5, weight: 'bold' }
+                ]
+            });
+        }
+
         try {
-            await pushFlex(to, '審核結果通知', text, color);
+            await pushFlexMessage(to, flexBody);
             return res.status(200).json({ success: true });
         } catch (err) {
             console.error('Push Flex error:', err);

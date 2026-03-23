@@ -76,6 +76,8 @@ function MemberAuditPage() {
                             status: status,
                             typeName: getTypeName(req.type),
                             reviewerName: reviewerName,
+                            memberId: req.memberId,
+                            detail: req.detail,
                             note: adminNote[id] || '',
                             apiKey: import.meta.env.VITE_INTERNAL_API_KEY
                         })
