@@ -409,7 +409,7 @@ async function handleApprove(requestId, adminName, replyToken) {
                                     margin: 'md',
                                     contents: [
                                         { type: 'text', text: '核發電子券號', color: '#aaaaaa', size: 'sm' },
-                                        { type: 'text', text: assignedCoupons.join('\n'), wrap: true, color: '#111111', size: 'md', weight: 'bold', fontStyle: 'italic' }
+                                        { type: 'text', text: assignedCoupons.join('\n'), wrap: true, color: '#111111', size: 'md', weight: 'bold', style: 'italic' }
                                     ]
                                 },
                                 {
