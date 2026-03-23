@@ -25,10 +25,10 @@ export default async function handler(req, res) {
         if (apiKey !== process.env.INTERNAL_API_KEY) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
-        
+
         const color = status === 'approved' ? '#007130' : '#800019';
-        const statusText = status === 'approved' ? '核准透過' : '核准駁回';
-        
+        const statusText = status === 'approved' ? '核准' : '駁回';
+
         const flexBody = {
             type: 'bubble',
             header: {
@@ -317,7 +317,7 @@ async function notifySupervisors(requestId, applicantName, qty, reason, displayI
                 layout: 'horizontal',
                 spacing: 'sm',
                 contents: [
-                    { type: 'button', action: { type: 'postback', label: '核准透過', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
+                    { type: 'button', action: { type: 'postback', label: '核准通過', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
                     { type: 'button', action: { type: 'postback', label: '核准駁回', data: `action=reject&id=${requestId}` }, style: 'secondary' }
                 ]
             }
@@ -327,6 +327,9 @@ async function notifySupervisors(requestId, applicantName, qty, reason, displayI
 
 async function handleApprove(requestId, adminName, replyToken) {
     let assignedCoupons = [];
+    let applicantLineId = null;
+    let displayId = null;
+
     try {
         await db.runTransaction(async (transaction) => {
             const requestRef = db.collection('coupon_requests').doc(requestId);
@@ -336,9 +339,11 @@ async function handleApprove(requestId, adminName, replyToken) {
                 throw new Error('CaseHandled');
             }
 
-            const requestedQty = docSnap.data().quantityRequested;
+            const data = docSnap.data();
+            applicantLineId = data.lineUserId;
+            displayId = data.displayId;
+            const requestedQty = data.quantityRequested;
 
-            // 抓取未使用電子券
             const couponsQuery = db.collection('coupons').where('isUsed', '==', false).limit(requestedQty);
             const couponsSnap = await transaction.get(couponsQuery);
 
@@ -358,7 +363,6 @@ async function handleApprove(requestId, adminName, replyToken) {
             });
             assignedCoupons = couponCodes;
 
-            // 更新申請狀態
             transaction.update(requestRef, {
                 status: 'approved',
                 assignedCoupons: couponCodes,
@@ -367,69 +371,64 @@ async function handleApprove(requestId, adminName, replyToken) {
             });
         });
 
-        const requestDoc = await db.collection('coupon_requests').doc(requestId).get();
-        const requestData = requestDoc.data();
-
-        // 格式化電子券號顯示
-        const couponListText = assignedCoupons.join('\n');
-
-        const flexBody = {
-            type: 'bubble',
-            header: {
-                type: 'box',
-                layout: 'vertical',
-                contents: [{ type: 'text', text: '審核結果通知', color: '#ffffff', weight: 'bold', size: 'md' }],
-                backgroundColor: '#007130'
-            },
-            body: {
-                type: 'box',
-                layout: 'vertical',
-                contents: [
-                    { type: 'text', text: '核准透過', weight: 'bold', size: 'xl', color: '#007130', margin: 'md' },
-                    { type: 'text', text: '類型：電子券申請', size: 'sm', color: '#666666', margin: 'xs' },
-                    { type: 'separator', margin: 'lg' },
-                    {
-                        type: 'box',
-                        layout: 'vertical',
-                        margin: 'lg',
-                        spacing: 'sm',
-                        contents: [
-                            {
-                                type: 'box',
-                                layout: 'baseline',
-                                spacing: 'sm',
-                                contents: [
-                                    { type: 'text', text: '申請單號', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                    { type: 'text', text: requestData.displayId || requestId, wrap: true, color: '#666666', size: 'sm', flex: 5 }
-                                ]
-                            },
-                            {
-                                type: 'box',
-                                layout: 'vertical',
-                                spacing: 'xs',
-                                margin: 'md',
-                                contents: [
-                                    { type: 'text', text: '核發電子券號', color: '#aaaaaa', size: 'sm' },
-                                    { type: 'text', text: assignedCoupons.join('\n'), wrap: true, color: '#111111', size: 'md', weight: 'bold', fontStyle: 'italic' }
-                                ]
-                            },
-                            {
-                                type: 'box',
-                                layout: 'baseline',
-                                spacing: 'sm',
-                                margin: 'md',
-                                contents: [
-                                    { type: 'text', text: '審核人員', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                    { type: 'text', text: adminName, wrap: true, color: '#666666', size: 'sm', flex: 5 }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        };
-
-        await pushFlexMessage(requestData.lineUserId, flexBody);
+        if (applicantLineId) {
+            const flexBody = {
+                type: 'bubble',
+                header: {
+                    type: 'box',
+                    layout: 'vertical',
+                    contents: [{ type: 'text', text: '審核結果通知', color: '#ffffff', weight: 'bold', size: 'md' }],
+                    backgroundColor: '#007130'
+                },
+                body: {
+                    type: 'box',
+                    layout: 'vertical',
+                    contents: [
+                        { type: 'text', text: '核准通過', weight: 'bold', size: 'xl', color: '#007130', margin: 'md' },
+                        { type: 'text', text: '類型：電子券申請', size: 'sm', color: '#666666', margin: 'xs' },
+                        { type: 'separator', margin: 'lg' },
+                        {
+                            type: 'box',
+                            layout: 'vertical',
+                            margin: 'lg',
+                            spacing: 'sm',
+                            contents: [
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    spacing: 'sm',
+                                    contents: [
+                                        { type: 'text', text: '申請單號', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                        { type: 'text', text: displayId || requestId, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                    ]
+                                },
+                                {
+                                    type: 'box',
+                                    layout: 'vertical',
+                                    spacing: 'xs',
+                                    margin: 'md',
+                                    contents: [
+                                        { type: 'text', text: '核發電子券號', color: '#aaaaaa', size: 'sm' },
+                                        { type: 'text', text: assignedCoupons.join('\n'), wrap: true, color: '#111111', size: 'md', weight: 'bold', fontStyle: 'italic' }
+                                    ]
+                                },
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    spacing: 'sm',
+                                    margin: 'md',
+                                    contents: [
+                                        { type: 'text', text: '審核人員', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                        { type: 'text', text: adminName, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            await pushFlexMessage(applicantLineId, flexBody).catch(e => console.error('Push applicant error:', e));
+        }
         await replyFlex(replyToken, '核准作業成功', '已順利完成核准作業並發放券號。', '#007130');
 
     } catch (err) {
@@ -445,6 +444,9 @@ async function handleApprove(requestId, adminName, replyToken) {
 }
 
 async function handleReject(requestId, adminName, reason, replyToken) {
+    let applicantLineId = null;
+    let displayId = null;
+
     try {
         await db.runTransaction(async (transaction) => {
             const requestRef = db.collection('coupon_requests').doc(requestId);
@@ -454,6 +456,10 @@ async function handleReject(requestId, adminName, reason, replyToken) {
                 throw new Error('CaseHandled');
             }
 
+            const data = docSnap.data();
+            applicantLineId = data.lineUserId;
+            displayId = data.displayId;
+
             transaction.update(requestRef, {
                 status: 'rejected',
                 reviewedByName: adminName,
@@ -462,62 +468,62 @@ async function handleReject(requestId, adminName, reason, replyToken) {
             });
         });
 
-        const requestDoc = await db.collection('coupon_requests').doc(requestId).get();
-        const requestData = requestDoc.data();
-        const flexBody = {
-            type: 'bubble',
-            header: {
-                type: 'box',
-                layout: 'vertical',
-                contents: [{ type: 'text', text: '審核結果通知', color: '#ffffff', weight: 'bold', size: 'md' }],
-                backgroundColor: '#800019'
-            },
-            body: {
-                type: 'box',
-                layout: 'vertical',
-                contents: [
-                    { type: 'text', text: '核准駁回', weight: 'bold', size: 'xl', color: '#800019', margin: 'md' },
-                    { type: 'text', text: '類型：電子券申請', size: 'sm', color: '#666666', margin: 'xs' },
-                    { type: 'separator', margin: 'lg' },
-                    {
-                        type: 'box',
-                        layout: 'vertical',
-                        margin: 'lg',
-                        spacing: 'sm',
-                        contents: [
-                            {
-                                type: 'box',
-                                layout: 'baseline',
-                                spacing: 'sm',
-                                contents: [
-                                    { type: 'text', text: '申請單號', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                    { type: 'text', text: requestData.displayId || requestId, wrap: true, color: '#666666', size: 'sm', flex: 5 }
-                                ]
-                            },
-                            {
-                                type: 'box',
-                                layout: 'baseline',
-                                spacing: 'sm',
-                                contents: [
-                                    { type: 'text', text: '駁回原因', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                    { type: 'text', text: reason, wrap: true, color: '#800019', size: 'sm', flex: 5, weight: 'bold' }
-                                ]
-                            },
-                            {
-                                type: 'box',
-                                layout: 'baseline',
-                                spacing: 'sm',
-                                contents: [
-                                    { type: 'text', text: '審核人員', color: '#aaaaaa', size: 'sm', flex: 2 },
-                                    { type: 'text', text: adminName, wrap: true, color: '#666666', size: 'sm', flex: 5 }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        };
-        await pushFlexMessage(requestData.lineUserId, flexBody);
+        if (applicantLineId) {
+            const flexBody = {
+                type: 'bubble',
+                header: {
+                    type: 'box',
+                    layout: 'vertical',
+                    contents: [{ type: 'text', text: '審核結果通知', color: '#ffffff', weight: 'bold', size: 'md' }],
+                    backgroundColor: '#800019'
+                },
+                body: {
+                    type: 'box',
+                    layout: 'vertical',
+                    contents: [
+                        { type: 'text', text: '核准駁回', weight: 'bold', size: 'xl', color: '#800019', margin: 'md' },
+                        { type: 'text', text: '類型：電子券申請', size: 'sm', color: '#666666', margin: 'xs' },
+                        { type: 'separator', margin: 'lg' },
+                        {
+                            type: 'box',
+                            layout: 'vertical',
+                            margin: 'lg',
+                            spacing: 'sm',
+                            contents: [
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    spacing: 'sm',
+                                    contents: [
+                                        { type: 'text', text: '申請單號', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                        { type: 'text', text: displayId || requestId, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                    ]
+                                },
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    spacing: 'sm',
+                                    contents: [
+                                        { type: 'text', text: '駁回原因', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                        { type: 'text', text: reason, wrap: true, color: '#800019', size: 'sm', flex: 5, weight: 'bold' }
+                                    ]
+                                },
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    spacing: 'sm',
+                                    contents: [
+                                        { type: 'text', text: '審核人員', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                        { type: 'text', text: adminName, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            await pushFlexMessage(applicantLineId, flexBody).catch(e => console.error('Push applicant error:', e));
+        }
         await replyFlex(replyToken, '駁回作業成功', '案件已成功設定為駁回狀態。', '#666666');
 
     } catch (err) {
@@ -532,7 +538,7 @@ async function handleReject(requestId, adminName, reason, replyToken) {
 
 // Helpers
 async function callLineAPI(path, body) {
-    return await fetch(`https://api.line.me/v2/bot/message/${path}`, {
+    const res = await fetch(`https://api.line.me/v2/bot/message/${path}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -540,6 +546,11 @@ async function callLineAPI(path, body) {
         },
         body: JSON.stringify(body)
     });
+    if (!res.ok) {
+        const error = await res.text();
+        console.error(`LINE API Error (${path}):`, error);
+    }
+    return res;
 }
 
 async function replyFlex(replyToken, title, text, color = '#007130', footerContents = []) {
@@ -582,6 +593,10 @@ async function pushFlex(to, title, text, color = '#007130') {
 }
 
 async function pushFlexMessage(to, flex) {
+    if (!to) {
+        console.error('pushFlexMessage error: target ID is empty');
+        return;
+    }
     return await callLineAPI('push', { to, messages: [{ type: 'flex', altText: '員工訊息', contents: flex }] });
 }
 
