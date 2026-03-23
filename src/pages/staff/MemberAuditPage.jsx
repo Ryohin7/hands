@@ -166,7 +166,7 @@ function MemberAuditPage() {
                                         <button 
                                             className="btn btn-primary"
                                             style={{ flex: 1 }}
-                                            onClick={() => handleAction(req.id, 'approved')}
+                                            onClick={() => handleAction(req.id, 'approved', req)}
                                             disabled={loading}
                                         >
                                             核准
@@ -174,7 +174,7 @@ function MemberAuditPage() {
                                         <button 
                                             className="btn btn-outline"
                                             style={{ flex: 1, color: '#DC2626', borderColor: '#DC2626' }}
-                                            onClick={() => handleAction(req.id, 'rejected')}
+                                            onClick={() => handleAction(req.id, 'rejected', req)}
                                             disabled={loading}
                                         >
                                             駁回
@@ -268,7 +268,7 @@ function MemberAuditPage() {
                                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                         <button 
                                                             className="btn btn-sm btn-primary"
-                                                            onClick={() => handleAction(req.id, 'approved')}
+                                                            onClick={() => handleAction(req.id, 'approved', req)}
                                                             disabled={loading}
                                                         >
                                                             核准
@@ -276,7 +276,7 @@ function MemberAuditPage() {
                                                         <button 
                                                             className="btn btn-sm btn-outline"
                                                             style={{ color: '#DC2626', borderColor: '#DC2626' }}
-                                                            onClick={() => handleAction(req.id, 'rejected')}
+                                                            onClick={() => handleAction(req.id, 'rejected', req)}
                                                             disabled={loading}
                                                         >
                                                             駁回
