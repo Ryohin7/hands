@@ -230,7 +230,7 @@ function MemberActionPage() {
                                     </div>
                                 )}
                                 {req.adminNote && (
-                                    <div style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.5rem' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#800019', marginTop: '0.5rem' }}>
                                         備註：{req.adminNote}
                                     </div>
                                 )}

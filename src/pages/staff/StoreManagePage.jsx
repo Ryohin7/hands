@@ -102,7 +102,7 @@ function StoreManagePage() {
                                         <td>
                                             <button 
                                                 className="btn btn-sm btn-outline" 
-                                                style={{ color: '#DC2626', borderColor: '#DC2626' }}
+                                                style={{ color: '#800019', borderColor: '#800019' }}
                                                 onClick={() => handleDeleteStore(store.id)}
                                             >
                                                 刪除

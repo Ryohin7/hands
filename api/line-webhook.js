@@ -26,7 +26,7 @@ export default async function handler(req, res) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
         
-        const color = status === 'approved' ? '#007130' : '#DC2626';
+        const color = status === 'approved' ? '#007130' : '#800019';
         const statusText = status === 'approved' ? '核准透過' : '核准駁回';
         
         const flexBody = {
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
                 spacing: 'sm',
                 contents: [
                     { type: 'text', text: '管理備註', color: '#aaaaaa', size: 'sm', flex: 2 },
-                    { type: 'text', text: note, wrap: true, color: '#dc2626', size: 'sm', flex: 5, weight: 'bold' }
+                    { type: 'text', text: note, wrap: true, color: '#800019', size: 'sm', flex: 5, weight: 'bold' }
                 ]
             });
         }
@@ -130,7 +130,7 @@ async function handleEvent(event) {
 
         // 1. 如果尚未綁定，且輸入的不是「員工綁定」，則提示綁定
         if (!userData && text !== '員工綁定') {
-            return await replyFlex(replyToken, '通知', '您尚未綁定員工帳號。請點擊選單或輸入「員工綁定」進行連動。', '#DC2626');
+            return await replyFlex(replyToken, '通知', '您尚未綁定員工帳號。請點擊選單或輸入「員工綁定」進行連動。', '#800019');
         }
 
         // 2. 處理「員工綁定」指令
@@ -172,7 +172,7 @@ async function handleEvent(event) {
 
         if (session.state === 'WAIT_QTY') {
             const qty = parseInt(text);
-            if (isNaN(qty) || qty <= 0) return await replyFlex(replyToken, '輸入錯誤', '請輸入有效的整數數量。', '#DC2626');
+            if (isNaN(qty) || qty <= 0) return await replyFlex(replyToken, '輸入錯誤', '請輸入有效的整數數量。', '#800019');
             await sessionRef.update({ state: 'WAIT_REASON', quantity: qty });
             return await replyFlex(replyToken, '電子券申請', '請問申請原因為何？\n(例如：檔期結束退貨補券)', '#007130');
         }
@@ -224,7 +224,7 @@ async function handleEvent(event) {
 
         const adminQuery = await db.collection('users').where('lineUserId', '==', lineUserId).get();
         if (adminQuery.empty || !adminQuery.docs[0].data().permissions?.includes('coupon_audit')) {
-            return await replyFlex(replyToken, '權限通知', '您目前的帳號不具備電子券審核權限。', '#DC2626');
+            return await replyFlex(replyToken, '權限通知', '您目前的帳號不具備電子券審核權限。', '#800019');
         }
 
         if (action === 'approve') {
@@ -234,7 +234,7 @@ async function handleEvent(event) {
             const requestRef = db.collection('coupon_requests').doc(requestId);
             const docSnap = await requestRef.get();
             if (!docSnap.exists || docSnap.data().status !== 'pending') {
-                return await replyFlex(replyToken, '處理通知', '此案件已被您或其他主管處裡完成，請勿重複操作。', '#666666');
+                return await replyFlex(replyToken, '處理通知', '此案件已被處理完成。', '#666666');
             }
 
             const adminSessionRef = db.collection('line_sessions').doc(lineUserId);
@@ -258,18 +258,65 @@ async function notifySupervisors(requestId, applicantName, qty, reason, displayI
 
         await pushFlexMessage(adminLineId, {
             type: 'bubble',
-            header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '🔔 電子券申請待審核', weight: 'bold', color: '#ffffff' }], backgroundColor: '#007130' },
+            header: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '🔔 電子券申請待審核', weight: 'bold', color: '#ffffff', size: 'md' }], backgroundColor: '#007130' },
             body: {
-                type: 'box', layout: 'vertical', contents: [
-                    { type: 'text', text: `申請單號：${displayId || requestId.substring(0, 8)}`, size: 'sm', weight: 'bold', color: '#111111' },
-                    { type: 'text', text: `申請人：${applicantName}`, size: 'sm', weight: 'bold', margin: 'sm' },
-                    { type: 'text', text: `申請數量：${qty} 張`, size: 'sm' },
-                    { type: 'text', text: `原因：${reason}`, size: 'sm', wrap: true, margin: 'md' }
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    { type: 'text', text: '收到新的電子券申請', weight: 'bold', size: 'lg', color: '#111111', margin: 'md' },
+                    { type: 'separator', margin: 'lg' },
+                    {
+                        type: 'box',
+                        layout: 'vertical',
+                        margin: 'lg',
+                        spacing: 'sm',
+                        contents: [
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '申請單號', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: displayId || requestId.substring(0, 8), wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            },
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '申請人員', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: applicantName || '-', wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            },
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '申請張數', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: `${qty} 張`, wrap: true, color: '#111111', size: 'sm', flex: 5, weight: 'bold' }
+                                ]
+                            },
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '申請原因', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: reason || '-', wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            }
+                        ]
+                    }
                 ]
             },
             footer: {
-                type: 'box', layout: 'horizontal', spacing: 'sm', contents: [
-                    { type: 'button', action: { type: 'postback', label: '核準', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
+                type: 'box',
+                layout: 'horizontal',
+                spacing: 'sm',
+                contents: [
+                    { type: 'button', action: { type: 'postback', label: '核准', data: `action=approve&id=${requestId}` }, style: 'primary', color: '#007130' },
                     { type: 'button', action: { type: 'postback', label: '駁回', data: `action=reject&id=${requestId}` }, style: 'secondary' }
                 ]
             }
@@ -325,17 +372,63 @@ async function handleApprove(requestId, adminName, replyToken) {
         // 格式化電子券號顯示
         const couponListText = assignedCoupons.join('\n');
 
-        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請\n（單號：${requestData.displayId || requestId}）\n已由 ${adminName} 核准！\n\n【核發券號如下】：\n${couponListText}`, '#007130');
+        const flexBody = {
+            type: 'bubble',
+            header: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [{ type: 'text', text: '申請審核結果', color: '#ffffff', weight: 'bold', size: 'md' }],
+                backgroundColor: '#007130'
+            },
+            body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    { type: 'text', text: '核准透過', weight: 'bold', size: 'xl', color: '#007130', margin: 'md' },
+                    { type: 'text', text: `單號：${requestData.displayId || requestId}`, size: 'sm', color: '#666666', margin: 'xs' },
+                    { type: 'separator', margin: 'lg' },
+                    {
+                        type: 'box',
+                        layout: 'vertical',
+                        margin: 'lg',
+                        spacing: 'sm',
+                        contents: [
+                            {
+                                type: 'box',
+                                layout: 'vertical',
+                                spacing: 'xs',
+                                contents: [
+                                    { type: 'text', text: '已核發電子券號：', color: '#aaaaaa', size: 'sm' },
+                                    { type: 'text', text: assignedCoupons.join('\n'), wrap: true, color: '#111111', size: 'md', weight: 'bold', fontStyle: 'italic' }
+                                ]
+                            },
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                margin: 'md',
+                                contents: [
+                                    { type: 'text', text: '審核人員', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: adminName, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        await pushFlexMessage(requestData.lineUserId, flexBody);
         await replyFlex(replyToken, '核准作業成功', '已順利完成核准作業並發放券號。', '#007130');
 
     } catch (err) {
         if (err.message === 'CaseHandled') {
             await replyFlex(replyToken, '處理通知', '此案件已經處裡完成，請勿重複操作。', '#666666');
         } else if (err.message === 'InsufficientStock') {
-            await replyFlex(replyToken, '庫存不足', '目前電子券沒有庫存，請向企劃部申請電子券撥入。', '#DC2626');
+            await replyFlex(replyToken, '庫存不足', '目前電子券沒有庫存，請向企劃部申請電子券撥入。', '#800019');
         } else {
             console.error('Approval transaction failed:', err);
-            await replyFlex(replyToken, '系統錯誤', '核准作業執行失敗，請聯絡系統管理員。', '#DC2626');
+            await replyFlex(replyToken, '系統錯誤', '核准作業執行失敗，請聯絡系統管理員。', '#800019');
         }
     }
 }
@@ -360,7 +453,51 @@ async function handleReject(requestId, adminName, reason, replyToken) {
 
         const requestDoc = await db.collection('coupon_requests').doc(requestId).get();
         const requestData = requestDoc.data();
-        await pushFlex(requestData.lineUserId, '申請審核結果', `您的電子券申請\n（單號：${requestData.displayId || requestId}）\n已被 ${adminName} 駁回。\n原因：${reason}`, '#DC2626');
+        const flexBody = {
+            type: 'bubble',
+            header: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [{ type: 'text', text: '申請審核結果', color: '#ffffff', weight: 'bold', size: 'md' }],
+                backgroundColor: '#800019'
+            },
+            body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    { type: 'text', text: '申請被駁回', weight: 'bold', size: 'xl', color: '#800019', margin: 'md' },
+                    { type: 'text', text: `單號：${requestData.displayId || requestId}`, size: 'sm', color: '#666666', margin: 'xs' },
+                    { type: 'separator', margin: 'lg' },
+                    {
+                        type: 'box',
+                        layout: 'vertical',
+                        margin: 'lg',
+                        spacing: 'sm',
+                        contents: [
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '駁回原因', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: reason, wrap: true, color: '#800019', size: 'sm', flex: 5, weight: 'bold' }
+                                ]
+                            },
+                            {
+                                type: 'box',
+                                layout: 'baseline',
+                                spacing: 'sm',
+                                contents: [
+                                    { type: 'text', text: '審核人員', color: '#aaaaaa', size: 'sm', flex: 2 },
+                                    { type: 'text', text: adminName, wrap: true, color: '#666666', size: 'sm', flex: 5 }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+        await pushFlexMessage(requestData.lineUserId, flexBody);
         await replyFlex(replyToken, '駁回作業成功', '案件已成功設定為駁回狀態。', '#666666');
 
     } catch (err) {
@@ -368,7 +505,7 @@ async function handleReject(requestId, adminName, reason, replyToken) {
             await replyFlex(replyToken, '處理通知', '此案件已經處裡完成。', '#666666');
         } else {
             console.error('Reject transaction failed:', err);
-            await replyFlex(replyToken, '系統錯誤', '駁回作業執行失敗。', '#DC2626');
+            await replyFlex(replyToken, '系統錯誤', '駁回作業執行失敗。', '#800019');
         }
     }
 }

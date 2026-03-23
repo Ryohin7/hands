@@ -234,7 +234,7 @@ function CouponAuditPage() {
                                         </button>
                                         <button
                                             className="btn btn-outline"
-                                            style={{ flex: 1, height: '40px', color: '#DC2626', borderColor: '#DC2626' }}
+                                            style={{ flex: 1, height: '40px', color: '#800019', borderColor: '#800019' }}
                                             onClick={() => handleReject(req.id, req)}
                                             disabled={loading}
                                         >
@@ -309,7 +309,7 @@ function CouponAuditPage() {
                                                     </button>
                                                     <button
                                                         className="btn btn-sm btn-outline"
-                                                        style={{ color: '#DC2626', borderColor: '#DC2626' }}
+                                                        style={{ color: '#800019', borderColor: '#800019' }}
                                                         onClick={() => handleReject(req.id, req)}
                                                         disabled={loading}
                                                     >

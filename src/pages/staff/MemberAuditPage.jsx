@@ -175,7 +175,7 @@ function MemberAuditPage() {
                                         </button>
                                         <button 
                                             className="btn btn-outline"
-                                            style={{ flex: 1, color: '#DC2626', borderColor: '#DC2626' }}
+                                            style={{ flex: 1, color: '#800019', borderColor: '#800019' }}
                                             onClick={() => handleAction(req.id, 'rejected', req)}
                                             disabled={loading}
                                         >
@@ -190,7 +190,7 @@ function MemberAuditPage() {
                             <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>目前無歷史紀錄</div>
                         ) : (
                             history.map(req => (
-                                <div key={req.id} className="card" style={{ padding: '1.25rem', marginBottom: '1rem', borderLeft: req.status === 'approved' ? '4px solid #007130' : '4px solid #DC2626' }}>
+                                <div key={req.id} className="card" style={{ padding: '1.25rem', marginBottom: '1rem', borderLeft: req.status === 'approved' ? '4px solid #007130' : '4px solid #800019' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                                         <div style={{ fontWeight: '600' }}>{req.submittedByName}</div>
                                         <span className={`tag tag-${req.status}`} style={{ fontSize: '0.7rem' }}>
@@ -277,7 +277,7 @@ function MemberAuditPage() {
                                                         </button>
                                                         <button 
                                                             className="btn btn-sm btn-outline"
-                                                            style={{ color: '#DC2626', borderColor: '#DC2626' }}
+                                                            style={{ color: '#800019', borderColor: '#800019' }}
                                                             onClick={() => handleAction(req.id, 'rejected', req)}
                                                             disabled={loading}
                                                         >
