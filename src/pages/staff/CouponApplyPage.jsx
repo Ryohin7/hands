@@ -11,7 +11,8 @@ import {
     limit,
     writeBatch,
     getDoc,
-    getDocs
+    getDocs,
+    doc
 } from 'firebase/firestore';
 
 function CouponApplyPage() {

@@ -19,6 +19,26 @@ const db = admin.firestore();
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(200).send('OK');
 
+    // 處理內部 API 呼叫：發送會員異動結果的 Flex Message 通知
+    if (req.body.action === 'notify_member_action') {
+        const { to, status, typeName, reviewerName, note, apiKey } = req.body;
+        if (apiKey !== process.env.INTERNAL_API_KEY) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        
+        const color = status === 'approved' ? '#007130' : '#DC2626';
+        let text = `您的會員資料異動申請\n（類型：${typeName}）\n已由 ${reviewerName} ${status === 'approved' ? '核准' : '駁回'}！`;
+        if (note) text += `\n\n備註：${note}`;
+        
+        try {
+            await pushFlex(to, '審核結果通知', text, color);
+            return res.status(200).json({ success: true });
+        } catch (err) {
+            console.error('Push Flex error:', err);
+            return res.status(500).json({ error: err.message });
+        }
+    }
+
     const events = req.body.events;
     if (!events) return res.status(200).send('OK');
 
