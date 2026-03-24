@@ -5,6 +5,7 @@ import { doc, getDoc, updateDoc, collection, getDocs, query, orderBy } from 'fir
 
 function ProfileSettingsPage() {
     const [name, setName] = useState('');
+    const [username, setUsername] = useState(''); // 新增帳號狀態
     const [storeName, setStoreName] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,6 +23,7 @@ function ProfileSettingsPage() {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     setName(data.displayName || '');
+                    setUsername(data.username || data.email?.split('@')[0] || ''); // 獲取帳號
                     setStoreName(data.storeName || '');
                 }
             }
@@ -29,9 +31,9 @@ function ProfileSettingsPage() {
         const fetchStores = async () => {
             const querySnapshot = await getDocs(query(collection(db, 'stores'), orderBy('name', 'asc')));
             let fetchedStores = querySnapshot.docs.map(doc => doc.data().name);
-            // 確保「總部」在選項中
-            if (!fetchedStores.includes('總部')) {
-                fetchedStores.unshift('總部');
+            // 確保「總公司」在選單最後一個選項
+            if (!fetchedStores.includes('總公司')) {
+                fetchedStores.push('總公司');
             }
             setStores(fetchedStores);
         };
@@ -114,6 +116,16 @@ function ProfileSettingsPage() {
                 <div className="card" style={{ padding: '1.5rem' }}>
                     <h3>基本資料</h3>
                     <form onSubmit={handleUpdateProfile} style={{ marginTop: '1rem' }}>
+                        <div className="form-group" style={formGroupStyle}>
+                            <label>帳號 (不可修改)</label>
+                            <input 
+                                type="text" 
+                                value={username} 
+                                readOnly 
+                                disabled
+                                style={{ background: '#f5f5f5', cursor: 'not-allowed' }}
+                            />
+                        </div>
                         <div className="form-group" style={formGroupStyle}>
                             <label>真實姓名</label>
                             <input 

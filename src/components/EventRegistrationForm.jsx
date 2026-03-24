@@ -250,7 +250,7 @@ function EventRegistrationForm({ post }) {
                                 返回修改
                             </button>
                             <button type="button" className="submit-btn" onClick={handleSubmit} disabled={submitting}>
-                                {submitting ? '處理中...' : '確認送出報名'}
+                                {submitting ? '處理中...' : '確認送出'}
                             </button>
                         </div>
                     </div>

@@ -5,7 +5,7 @@ import { auth } from '../firebase';
 
 function LoginPage() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -15,13 +15,18 @@ function LoginPage() {
         setError('');
         setLoading(true);
         try {
+            // 自動判斷：如果輸入已包含 @ 則視為完整 Email，否則補上預設網域
+            const email = username.includes('@') ? username : `${username}@hands.com.tw`;
             await signInWithEmailAndPassword(auth, email, password);
             navigate('/admin');
         } catch (err) {
+            console.error(err);
             if (err.code === 'auth/invalid-credential') {
                 setError('帳號或密碼錯誤');
             } else if (err.code === 'auth/too-many-requests') {
                 setError('登入嘗試次數過多，請稍後再試');
+            } else if (err.code === 'auth/user-not-found') {
+                setError('帳號不存在');
             } else {
                 setError('登入失敗，請重試');
             }
@@ -57,15 +62,14 @@ function LoginPage() {
                     )}
 
                     <div className="form-group">
-                        <label htmlFor="email">電子信箱</label>
+                        <label htmlFor="username">帳號</label>
                         <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@example.com"
+                            id="username"
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="請輸入帳號"
                             required
-                            autoComplete="email"
                         />
                     </div>
 

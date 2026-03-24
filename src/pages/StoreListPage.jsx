@@ -30,9 +30,9 @@ function StoreListPage() {
 
     const areas = ['全部', ...new Set(stores.map(s => s.area).filter(Boolean))];
 
-    const filteredStores = selectedArea === '全部'
+    const filteredStores = (selectedArea === '全部'
         ? stores
-        : stores.filter(s => s.area === selectedArea);
+        : stores.filter(s => s.area === selectedArea)).filter(s => s.name !== '總公司');
 
     if (loading) {
         return (

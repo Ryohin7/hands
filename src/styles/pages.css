@@ -407,7 +407,7 @@
     background: var(--bg-gray);
 }
 
-.converter-upload-zone. drag-over {
+.converter-upload-zone.drag-over {
     border-color: var(--brand);
     background: var(--brand-light);
 }
@@ -836,8 +836,8 @@
     background: #1d1d1f;
     color: #ffffff;
     border: none;
-    padding: 1rem 1.75rem;
-    font-size: 1rem;
+    padding: 0.875rem 1.75rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     border-radius: 12px;
     cursor: pointer;
@@ -848,7 +848,7 @@
 }
 .submit-btn:hover:not(:disabled) {
     background: #424245;
-    transform: scale(0.99);
+    transform: translateY(-1px);
 }
 .submit-btn:disabled {
     opacity: 0.4;
@@ -886,20 +886,39 @@
     padding: 0;
 }
 .edit-btn {
-    flex: 1;
     background: #f5f5f7;
     color: #1d1d1f;
     border: 1px solid transparent;
-    padding: 1rem 1.5rem;
+    padding: 0.875rem 1.5rem;
     font-weight: 500;
     border-radius: 12px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 .edit-btn:hover {
     background: #e8e8ed;
+}
+
+@media (min-width: 641px) {
+    .form-actions {
+        display: flex;
+        justify-content: center;
+    }
+    .form-actions .submit-btn {
+        width: 240px;
+    }
+    
+    .review-actions {
+        justify-content: center;
+        gap: 1.5rem;
+    }
+    .edit-btn, 
+    .review-actions .submit-btn {
+        flex: none;
+        width: 180px;
+    }
 }
 
 /* === 條款彈窗 === */
@@ -965,7 +984,15 @@
     .responsive-form, .review-container { padding: 1rem 1.25rem; }
     .error-message-inline { margin: 0 1.25rem 1rem; }
     .form-actions { padding: 0 1.25rem 1.25rem; }
-    .review-actions { padding: 0 1.25rem 1.25rem; flex-direction: column-reverse; }
+    .review-actions { 
+        padding: 0 1.25rem 1.25rem; 
+        flex-direction: column-reverse; 
+        gap: 0.75rem;
+    }
+    .edit-btn, .review-actions .submit-btn {
+        width: 100%;
+        flex: none;
+    }
     .captcha-section { padding: 0 1.25rem; }
     .form-grid { grid-template-columns: 1fr; }
     .address-selectors { display: grid; grid-template-columns: 1fr 1fr; }

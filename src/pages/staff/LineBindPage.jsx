@@ -11,7 +11,7 @@ function LineBindPage() {
     
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState(''); // 改用帳號
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [binding, setBinding] = useState(false);
@@ -29,6 +29,8 @@ function LineBindPage() {
         setError('');
         setBinding(true);
         try {
+            // 自動判斷：如果輸入已包含 @ 則視為完整 Email，否則補上預設網域
+            const email = username.includes('@') ? username : `${username}@hands.com.tw`; 
             await signInWithEmailAndPassword(auth, email, password);
             // 登入後 useEffect 會捕捉到 user 變化
         } catch (err) {
@@ -102,12 +104,13 @@ function LineBindPage() {
                         </div>
                     )}
                     <div className="form-group" style={{ marginBottom: '1rem' }}>
-                        <label>電子郵件</label>
+                        <label>帳號</label>
                         <input 
-                            type="email" 
+                            type="text" 
                             className="form-control" 
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="請輸入常用員工帳號"
                             required
                         />
                     </div>

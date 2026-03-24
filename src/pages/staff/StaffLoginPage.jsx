@@ -7,7 +7,7 @@ import { auth, db } from '../../firebase';
 function StaffLoginPage() {
     const navigate = useNavigate();
     const [isRegister, setIsRegister] = useState(false);
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState(''); // 改用帳號
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [storeName, setStoreName] = useState('');
@@ -20,7 +20,13 @@ function StaffLoginPage() {
             try {
                 const q = query(collection(db, 'stores'), orderBy('name', 'asc'));
                 const querySnapshot = await getDocs(q);
-                const storeList = querySnapshot.docs.map(doc => doc.data().name);
+                let storeList = querySnapshot.docs.map(doc => doc.data().name);
+                
+                // 確保「總公司」在選單最後一個選項
+                if (!storeList.includes('總公司')) {
+                    storeList.push('總公司');
+                }
+                
                 setStores(storeList);
                 if (storeList.length > 0) setStoreName(storeList[0]);
             } catch (err) {
@@ -35,22 +41,43 @@ function StaffLoginPage() {
         setError('');
         setLoading(true);
 
+        if (isRegister && password.length < 6) {
+            setError('密碼強度不足（至少 6 位元）');
+            setLoading(false);
+            return;
+        }
+
+        // 自動判斷：如果輸入已包含 @ 則視為完整 Email，否則補上預設網域
+        const email = username.includes('@') ? username : `${username}@hands.com.tw`; 
+
         try {
             if (isRegister) {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+                let user;
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    user = userCredential.user;
+                } catch (err) {
+                    if (err.code === 'auth/email-already-in-use') {
+                        // 如果信箱已註冊，嘗試以此密碼登入以完成資料建立 (針對之前權限不足導致寫入失敗的情況)
+                        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                        user = userCredential.user;
+                    } else {
+                        throw err;
+                    }
+                }
 
-                // 建立用戶檔案
+                // 建立/更新用戶檔案
                 await setDoc(doc(db, 'users', user.uid), {
                     uid: user.uid,
                     email,
+                    username, // 儲存帳號
                     displayName: name,
                     storeName,
                     role: 'staff',
                     isApproved: false,
                     permissions: [],
                     createdAt: serverTimestamp()
-                });
+                }, { merge: true });
 
                 // 註冊後會由 ProtectedRoute 攔截顯示審核中
                 navigate('/staff');
@@ -60,12 +87,14 @@ function StaffLoginPage() {
             }
         } catch (err) {
             console.error(err);
-            if (err.code === 'auth/email-already-in-use') {
-                setError('該電子信箱已被註冊');
+            if (err.code === 'auth/email-already-in-use' || err.code === 'auth/account-exists-with-different-credential') {
+                setError('該帳號已被註冊');
             } else if (err.code === 'auth/invalid-credential') {
                 setError('帳號或密碼錯誤');
             } else if (err.code === 'auth/weak-password') {
                 setError('密碼強度不足（至少 6 位元）');
+            } else if (err.code === 'auth/user-not-found') {
+              setError('帳號不存在');
             } else {
                 setError('操作失敗，請重試');
             }
@@ -145,13 +174,13 @@ function StaffLoginPage() {
                     )}
 
                     <div className="form-group">
-                        <label htmlFor="email">電子信箱</label>
+                        <label htmlFor="username">帳號</label>
                         <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="OOOOOO@hands.com.tw"
+                            id="username"
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="請輸入常用員工帳號"
                             required
                         />
                     </div>
