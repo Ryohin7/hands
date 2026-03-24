@@ -74,7 +74,7 @@ function EventRegistrationForm({ post }) {
                     setTermsContent('<p>個資聲明內容載入失敗或頁面不存在。</p>');
                 }
             } catch (err) {
-                console.error('取得聲明失敗:', err);
+                console.error('取得聲明資料失敗:', err);
                 setTermsContent('<p>載入出錯，請稍後再試。</p>');
             }
         }

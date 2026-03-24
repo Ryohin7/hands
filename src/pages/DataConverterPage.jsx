@@ -222,7 +222,19 @@ function DataConverterPage() {
             {/* 資料預覽 */}
             {preview.length > 0 && (
                 <div className="converter-preview">
-                    <h3 className="converter-section-title">📋 資料預覽（前 5 筆）</h3>
+                    <div className="converter-section-header">
+                        <h3 className="converter-section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <path d="M16 13H8"></path>
+                                <path d="M16 17H8"></path>
+                                <path d="M10 9H8"></path>
+                            </svg>
+                            資料預覽（前 5 筆）
+                        </h3>
+                        <span className="preview-badge">僅預覽部分資料</span>
+                    </div>
                     <div className="converter-table-wrap">
                         <table className="converter-table">
                             <thead>
@@ -236,7 +248,7 @@ function DataConverterPage() {
                                 {preview.slice(1).map((row, ri) => (
                                     <tr key={ri}>
                                         {COLUMN_HEADERS.map((_, ci) => (
-                                            <td key={ci}>{row[ci] ?? ''}</td>
+                                            <td key={ci}>{row[ci] ?? <span className="text-muted">無</span>}</td>
                                         ))}
                                     </tr>
                                 ))}

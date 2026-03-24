@@ -8,7 +8,7 @@ function LineBindPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const lineUserId = searchParams.get('lineUserId');
-    
+
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState(''); // 改用帳號
@@ -30,7 +30,7 @@ function LineBindPage() {
         setBinding(true);
         try {
             // 自動判斷：如果輸入已包含 @ 則視為完整 Email，否則補上預設網域
-            const email = username.includes('@') ? username : `${username}@hands.com.tw`; 
+            const email = username.includes('@') ? username : `${username}@hands.com.tw`;
             await signInWithEmailAndPassword(auth, email, password);
             // 登入後 useEffect 會捕捉到 user 變化
         } catch (err) {
@@ -81,15 +81,15 @@ function LineBindPage() {
                         <div style={{ fontSize: '0.875rem', color: '#666' }}>當前登入帳號</div>
                         <div style={{ fontSize: '1.125rem', fontWeight: '600' }}>{user.email}</div>
                     </div>
-                    <button 
-                        className="btn btn-primary btn-full" 
+                    <button
+                        className="btn btn-primary btn-full"
                         onClick={handleBind}
                         disabled={binding}
                     >
                         {binding ? '處理中...' : '確認綁定此 LINE 帳號'}
                     </button>
-                    <button 
-                        className="btn btn-ghost" 
+                    <button
+                        className="btn btn-ghost"
                         style={{ marginTop: '1rem', fontSize: '0.8125rem' }}
                         onClick={() => auth.signOut()}
                     >
@@ -105,20 +105,20 @@ function LineBindPage() {
                     )}
                     <div className="form-group" style={{ marginBottom: '1rem' }}>
                         <label>帳號</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
+                        <input
+                            type="text"
+                            className="form-control"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            placeholder="請輸入常用員工帳號"
+                            placeholder="請輸入帳號"
                             required
                         />
                     </div>
                     <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                         <label>密碼</label>
-                        <input 
-                            type="password" 
-                            className="form-control" 
+                        <input
+                            type="password"
+                            className="form-control"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required

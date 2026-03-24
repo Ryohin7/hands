@@ -21,12 +21,12 @@ function StaffLoginPage() {
                 const q = query(collection(db, 'stores'), orderBy('name', 'asc'));
                 const querySnapshot = await getDocs(q);
                 let storeList = querySnapshot.docs.map(doc => doc.data().name);
-                
+
                 // 確保「總公司」在選單最後一個選項
                 if (!storeList.includes('總公司')) {
                     storeList.push('總公司');
                 }
-                
+
                 setStores(storeList);
                 if (storeList.length > 0) setStoreName(storeList[0]);
             } catch (err) {
@@ -48,7 +48,7 @@ function StaffLoginPage() {
         }
 
         // 自動判斷：如果輸入已包含 @ 則視為完整 Email，否則補上預設網域
-        const email = username.includes('@') ? username : `${username}@hands.com.tw`; 
+        const email = username.includes('@') ? username : `${username}@hands.com.tw`;
 
         try {
             if (isRegister) {
@@ -94,7 +94,7 @@ function StaffLoginPage() {
             } else if (err.code === 'auth/weak-password') {
                 setError('密碼強度不足（至少 6 位元）');
             } else if (err.code === 'auth/user-not-found') {
-              setError('帳號不存在');
+                setError('帳號不存在');
             } else {
                 setError('操作失敗，請重試');
             }
@@ -116,7 +116,7 @@ function StaffLoginPage() {
                         </svg>
                     </div>
                     <h1>員工入口</h1>
-                    <p>{isRegister ? '請填寫註冊資訊，需經管理員審核' : '請輸入您的帳號密碼'}</p>
+                    <p>{isRegister ? '網站限員工註冊，需經管理員審核' : '請輸入您的帳號密碼'}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
@@ -153,7 +153,6 @@ function StaffLoginPage() {
                                         onChange={(e) => setStoreName(e.target.value)}
                                         className="form-control"
                                         required
-                                        style={{ width: '100%', height: '42px', borderRadius: '6px', border: '1px solid #ddd', padding: '0 10px' }}
                                     >
                                         {stores.map(s => (
                                             <option key={s} value={s}>{s}</option>
@@ -180,7 +179,7 @@ function StaffLoginPage() {
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            placeholder="請輸入常用員工帳號"
+                            placeholder="請輸入帳號"
                             required
                         />
                     </div>
