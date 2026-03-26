@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { 
-    collection, 
-    query, 
-    getDocs, 
-    where, 
+import {
+    collection,
+    query,
+    getDocs,
+    where,
     orderBy,
     limit,
     startAt,
@@ -49,7 +49,7 @@ function ReportPage() {
             const collectionName = reportType === 'coupon' ? 'coupon_requests' : 'member_actions';
             const storeField = reportType === 'coupon' ? 'storeName' : 'submittedByStore';
             const nameField = reportType === 'coupon' ? 'userName' : 'submittedByName';
-            
+
             let q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
 
             if (selectedStore !== 'all') {
@@ -72,7 +72,7 @@ function ReportPage() {
             }
             if (searchName.trim()) {
                 const name = searchName.trim().toLowerCase();
-                results = results.filter(item => 
+                results = results.filter(item =>
                     (item[nameField] || '').toLowerCase().includes(name)
                 );
             }
@@ -104,14 +104,14 @@ function ReportPage() {
 
             <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-                    <button 
+                    <button
                         className={`btn ${reportType === 'coupon' ? 'btn-primary' : 'btn-ghost'}`}
                         onClick={() => { setReportType('coupon'); setData([]); }}
                         style={{ flex: 1 }}
                     >
                         電子券申請
                     </button>
-                    <button 
+                    <button
                         className={`btn ${reportType === 'member' ? 'btn-primary' : 'btn-ghost'}`}
                         onClick={() => { setReportType('member'); setData([]); }}
                         style={{ flex: 1 }}
@@ -138,11 +138,11 @@ function ReportPage() {
                     </div>
                     <div className="form-group">
                         <label>員工姓名搜尋</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            value={searchName} 
-                            onChange={(e) => setSearchName(e.target.value)} 
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={searchName}
+                            onChange={(e) => setSearchName(e.target.value)}
                             placeholder="輸入關鍵字"
                         />
                     </div>
@@ -165,7 +165,7 @@ function ReportPage() {
                                 <tr>
                                     <th>單號</th>
                                     <th>日期</th>
-                                    <th>門市 (申請時)</th>
+                                    <th>門市</th>
                                     <th>員工</th>
                                     <th>張數</th>
                                     <th>原因</th>
@@ -175,7 +175,7 @@ function ReportPage() {
                             ) : (
                                 <tr>
                                     <th>日期</th>
-                                    <th>門市 (申請時)</th>
+                                    <th>門市</th>
                                     <th>員工</th>
                                     <th>異動類型</th>
                                     <th>會員ID</th>
