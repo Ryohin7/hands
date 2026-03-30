@@ -203,6 +203,7 @@ function HomePage() {
         const count = event.currentCount || 0;
 
         if (now > eventTime) return { label: '活動已結束', color: '#999' };
+        if (event.isOnsiteRegistration) return { label: '實體報名', color: '#007130' };
         if (now > deadline) return { label: '報名已截止', color: '#d32f2f' };
         if (limit > 0 && count >= limit) {
             return event.allowWaitlist !== false 

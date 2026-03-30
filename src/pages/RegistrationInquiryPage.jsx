@@ -12,6 +12,7 @@ function RegistrationInquiryPage() {
     const [results, setResults] = useState([]);
     const [error, setError] = useState('');
     const [captchaValue, setCaptchaValue] = useState(null);
+    const selectedEvent = events.find(e => e.id === selectedEventId);
 
     useEffect(() => {
         fetchEvents();
@@ -26,7 +27,11 @@ function RegistrationInquiryPage() {
                 orderBy('createdAt', 'desc')
             );
             const snapshot = await getDocs(q);
-            const data = snapshot.docs.map(doc => ({ id: doc.id, title: doc.data().title }));
+            const data = snapshot.docs.map(doc => ({ 
+                id: doc.id, 
+                title: doc.data().title,
+                isOnsiteRegistration: !!doc.data().isOnsiteRegistration
+            }));
             setEvents(data);
         } catch (err) {
             console.error('獲取活動失敗:', err);
@@ -105,6 +110,22 @@ function RegistrationInquiryPage() {
                         />
                     </div>
 
+                    {selectedEvent && selectedEvent.isOnsiteRegistration && (
+                        <div style={{ 
+                            background: '#fff3e0', 
+                            color: '#ef6c00', 
+                            padding: '1rem', 
+                            borderRadius: '8px', 
+                            textAlign: 'center',
+                            marginBottom: '1rem',
+                            border: '1px solid #ffe0b2',
+                            fontWeight: '600'
+                        }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '6px' }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            此活動為現場報名，報名狀況請洽門市確認。
+                        </div>
+                    )}
+
                     <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem 0' }}>
                         <ReCAPTCHA
                             sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
@@ -116,7 +137,7 @@ function RegistrationInquiryPage() {
 
                     <button 
                         type="submit" 
-                        disabled={searching || !captchaValue}
+                        disabled={searching || !captchaValue || (selectedEvent && selectedEvent.isOnsiteRegistration)}
                         style={{ 
                             width: '100%', 
                             padding: '1rem', 
@@ -126,10 +147,10 @@ function RegistrationInquiryPage() {
                             borderRadius: '8px', 
                             fontWeight: 'bold', 
                             cursor: 'pointer',
-                            opacity: (searching || !captchaValue) ? 0.6 : 1
+                            opacity: (searching || !captchaValue || (selectedEvent && selectedEvent.isOnsiteRegistration)) ? 0.6 : 1
                         }}
                     >
-                        {searching ? '查詢中...' : '立即查詢'}
+                        {searching ? '查詢中...' : (selectedEvent && selectedEvent.isOnsiteRegistration ? '不支援現場報名查詢' : '立即查詢')}
                     </button>
                 </form>
 

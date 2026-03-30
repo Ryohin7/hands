@@ -148,7 +148,7 @@ function PostDetailPage() {
                 />
 
                 {post.category === '中獎名單公告' && <WinnerForm post={post} />}
-                {post.category === '實體活動' && <EventRegistrationForm post={post} />}
+                {post.category === '實體活動' && !post.isOnsiteRegistration && <EventRegistrationForm post={post} />}
             </article>
         </div>
     );

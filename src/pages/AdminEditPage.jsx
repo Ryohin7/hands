@@ -29,6 +29,7 @@ function AdminEditPage() {
     });
     const [registrationLimit, setRegistrationLimit] = useState('');
     const [allowWaitlist, setAllowWaitlist] = useState(true);
+    const [isOnsiteRegistration, setIsOnsiteRegistration] = useState(false);
 
     const categories = ['公告', '檔期活動', '新聞發佈', '中獎名單公告', '實體活動'];
 
@@ -64,6 +65,7 @@ function AdminEditPage() {
                 setPinned(!!data.pinned);
                 setRegistrationLimit(data.registrationLimit || '');
                 setAllowWaitlist(data.allowWaitlist !== false);
+                setIsOnsiteRegistration(!!data.isOnsiteRegistration);
 
                 if (data.scheduledAt) {
                     setUseSchedule(true);
@@ -100,7 +102,7 @@ function AdminEditPage() {
             alert('請選擇排程時間');
             return;
         }
-        if ((category === '中獎名單公告' || category === '實體活動') && !formDeadline) {
+        if ((category === '中獎名單公告' || category === '實體活動') && !formDeadline && !isOnsiteRegistration) {
             alert('請選擇表單填寫截止時間');
             return;
         }
@@ -120,6 +122,7 @@ function AdminEditPage() {
                 updatedAt: serverTimestamp(),
                 registrationLimit: category === '實體活動' ? (parseInt(registrationLimit) || 0) : null,
                 allowWaitlist: category === '實體活動' ? allowWaitlist : null,
+                isOnsiteRegistration: category === '實體活動' ? isOnsiteRegistration : false,
             };
 
             if (useSchedule && scheduledAt) {
@@ -365,13 +368,26 @@ function AdminEditPage() {
                                                 onChange={(e) => setRegistrationLimit(e.target.value)}
                                                 placeholder="0 表示不限制"
                                                 className="input-md"
+                                                disabled={isOnsiteRegistration}
                                             />
                                             <div className="schedule-toggle" style={{ marginTop: '1rem' }}>
                                                 <label className="toggle-label" style={{ color: '#007130' }}>
-                                                    <input type="checkbox" checked={allowWaitlist} onChange={(e) => setAllowWaitlist(e.target.checked)} />
-                                                    <span>開放候補登記</span>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={isOnsiteRegistration} 
+                                                        onChange={(e) => setIsOnsiteRegistration(e.target.checked)} 
+                                                    />
+                                                    <span>現場報名（無需填寫表單）</span>
                                                 </label>
                                             </div>
+                                            {!isOnsiteRegistration && (
+                                                <div className="schedule-toggle" style={{ marginTop: '0.75rem' }}>
+                                                    <label className="toggle-label" style={{ color: '#007130' }}>
+                                                        <input type="checkbox" checked={allowWaitlist} onChange={(e) => setAllowWaitlist(e.target.checked)} />
+                                                        <span>開放候補登記</span>
+                                                    </label>
+                                                </div>
+                                            )}
                                         </div>
                                     </>
                                 )}
