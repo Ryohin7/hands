@@ -30,6 +30,7 @@ function AdminEditPage() {
     const [registrationLimit, setRegistrationLimit] = useState('');
     const [allowWaitlist, setAllowWaitlist] = useState(true);
     const [isOnsiteRegistration, setIsOnsiteRegistration] = useState(false);
+    const [isNoFormNeeded, setIsNoFormNeeded] = useState(false);
 
     const categories = ['公告', '檔期活動', '新聞發佈', '中獎名單公告', '實體活動'];
 
@@ -66,6 +67,7 @@ function AdminEditPage() {
                 setRegistrationLimit(data.registrationLimit || '');
                 setAllowWaitlist(data.allowWaitlist !== false);
                 setIsOnsiteRegistration(!!data.isOnsiteRegistration);
+                setIsNoFormNeeded(!!data.isNoFormNeeded);
 
                 if (data.scheduledAt) {
                     setUseSchedule(true);
@@ -102,7 +104,7 @@ function AdminEditPage() {
             alert('請選擇排程時間');
             return;
         }
-        if ((category === '中獎名單公告' || category === '實體活動') && !formDeadline && !isOnsiteRegistration) {
+        if ((category === '中獎名單公告' || category === '實體活動') && !formDeadline && !isOnsiteRegistration && !isNoFormNeeded) {
             alert('請選擇表單填寫截止時間');
             return;
         }
@@ -123,6 +125,7 @@ function AdminEditPage() {
                 registrationLimit: category === '實體活動' ? (parseInt(registrationLimit) || 0) : null,
                 allowWaitlist: category === '實體活動' ? allowWaitlist : null,
                 isOnsiteRegistration: category === '實體活動' ? isOnsiteRegistration : false,
+                isNoFormNeeded: (category === '中獎名單公告' || category === '實體活動') ? isNoFormNeeded : false,
             };
 
             if (useSchedule && scheduledAt) {
@@ -252,7 +255,7 @@ function AdminEditPage() {
                             </div>
                         </div>
                         <div
-                            className="post-detail-content ql-editor"
+                            className="post-detail-content tiptap-content"
                             dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(content)) }}
                         />
                     </article>
@@ -334,16 +337,28 @@ function AdminEditPage() {
                         {(category === '中獎名單公告' || category === '實體活動') && (
                             <div className="edit-section-card">
                                 <h3 className="edit-section-title">特殊設定</h3>
-                                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                                    <label htmlFor="edit-form-deadline" style={{ color: '#d32f2f' }}>表單填寫截止時間</label>
-                                    <input
-                                        id="edit-form-deadline"
-                                        type="datetime-local"
-                                        step="1"
-                                        value={formDeadline}
-                                        onChange={(e) => setFormDeadline(e.target.value)}
-                                        className="schedule-input"
-                                    />
+                                 <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                                    <label className="toggle-label" style={{ color: '#d32f2f', marginBottom: '0.5rem' }}>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={isNoFormNeeded} 
+                                            onChange={(e) => setIsNoFormNeeded(e.target.checked)} 
+                                        />
+                                        <span>無須開放表單</span>
+                                    </label>
+                                    {!isNoFormNeeded && (
+                                        <>
+                                            <label htmlFor="edit-form-deadline" style={{ color: '#d32f2f' }}>表單填寫截止時間</label>
+                                            <input
+                                                id="edit-form-deadline"
+                                                type="datetime-local"
+                                                step="1"
+                                                value={formDeadline}
+                                                onChange={(e) => setFormDeadline(e.target.value)}
+                                                className="schedule-input"
+                                            />
+                                        </>
+                                    )}
                                 </div>
 
                                 {category === '實體活動' && (

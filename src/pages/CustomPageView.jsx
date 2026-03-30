@@ -103,7 +103,7 @@ function CustomPageView() {
                     )}
                 </div>
                 <div
-                    className="post-detail-content ql-editor"
+                    className="post-detail-content tiptap-content"
                     dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(page.content)) }}
                 />
             </article>

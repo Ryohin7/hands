@@ -131,108 +131,131 @@
 
 .post-detail-content {
     padding: 2.5rem 0;
-    font-size: 1rem;
-    line-height: 1.8;
-    color: var(--text);
     overflow-wrap: break-word;
 }
 
-.post-detail-content img {
+/* 統一編輯器與顯示內容的樣式 */
+.tiptap-content,
+.post-detail-content,
+.ProseMirror {
+    font-size: 1.0625rem;
+    line-height: 1.85;
+    color: var(--text);
+    overflow-wrap: break-word;
+    word-break: break-word;
+    font-family: var(--font);
+}
+
+.tiptap-content p,
+.post-detail-content p,
+.ProseMirror p {
+    margin: 1.25rem 0; /* 讓上下 margin 對稱，觸發 CSS Margin Collapse，行為更像文書處理軟體 */
+}
+
+/* 確保內容開頭與結尾不會有額外留白 */
+.tiptap-content > *:first-child,
+.post-detail-content > *:first-child,
+.ProseMirror > *:first-child {
+    margin-top: 0 !important;
+}
+
+.tiptap-content > *:last-child,
+.post-detail-content > *:last-child,
+.ProseMirror > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+.tiptap-content h1, .post-detail-content h1, .ProseMirror h1,
+.tiptap-content h2, .post-detail-content h2, .ProseMirror h2,
+.tiptap-content h3, .post-detail-content h3, .ProseMirror h3 {
+    margin: 2.5rem 0 1.25rem;
+    line-height: 1.4;
+    font-weight: 700;
+}
+
+.tiptap-content h1, .post-detail-content h1, .ProseMirror h1 { font-size: 2rem; }
+.tiptap-content h2, .post-detail-content h2, .ProseMirror h2 { font-size: 1.625rem; }
+.tiptap-content h3, .post-detail-content h3, .ProseMirror h3 { font-size: 1.375rem; }
+
+.tiptap-content a, .post-detail-content a, .ProseMirror a {
+    color: var(--brand);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.tiptap-content img,
+.post-detail-content img,
+.ProseMirror img {
     display: block !important;
-    margin: 1.5rem auto !important;
+    margin: 2rem auto !important;
     max-width: 100% !important;
     height: auto !important;
-    border-radius: 8px; /* 加點細微圓角配合 Apple 風格 */
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.post-detail-content p {
-    margin: 0 0 1rem 0;
-}
-
-.post-detail-content blockquote {
+.tiptap-content blockquote,
+.post-detail-content blockquote,
+.ProseMirror blockquote {
     border-left: 4px solid var(--brand);
-    padding: 1.25rem 1.5rem;
-    background: var(--bg-gray);
-    color: var(--text);
-    margin: 1.5rem 0;
+    padding: 1.5rem 2rem;
+    background: #F9FAFB;
+    color: #4B5563;
+    margin: 2rem 0;
     border-radius: 0 8px 8px 0;
-    line-height: 1.6;
+    font-style: italic;
+    line-height: 1.7;
 }
 
-.post-detail-content img {
-    max-width: 100%;
-    border-radius: var(--radius-sm);
-    margin: 1.5rem 0;
+.tiptap-content ul, .post-detail-content ul, .ProseMirror ul,
+.tiptap-content ol, .post-detail-content ol, .ProseMirror ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
-.post-detail-content table {
+.tiptap-content li, .post-detail-content li, .ProseMirror li {
+    margin-bottom: 0.5rem;
+}
+
+.tiptap-content table,
+.post-detail-content table,
+.ProseMirror table {
     border-collapse: collapse;
-    width: 100%;
-    margin: 1rem 0;
+    table-layout: fixed;
+    width: 100% !important;
+    margin: 2rem 0;
+    border: 1px solid #E5E7EB;
 }
 
-.post-detail-content table th,
-.post-detail-content table td {
-    border: 1px solid #ccc;
-    padding: 0.5rem 0.75rem;
+.tiptap-content th, .post-detail-content th, .ProseMirror th,
+.tiptap-content td, .post-detail-content td, .ProseMirror td {
+    border: 1px solid #E5E7EB;
+    padding: 12px 16px;
+    min-width: 1em;
+    vertical-align: top;
+    text-align: left;
 }
 
-.post-detail-content table th {
-    background: #f5f5f5;
+.tiptap-content th, .post-detail-content th, .ProseMirror th {
+    background: #F3F4F6;
     font-weight: 600;
 }
 
 /* Tiptap 編輯器內容區 (所見即所得) */
 .editor-content-area {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 600px; /* 固定最大高度，防止內容過長導致整個頁面被撐大 */
     width: 100%;
     box-sizing: border-box;
+    background: #fff;
 }
 
 .editor-content-area .ProseMirror {
     min-height: 400px;
-    padding: 24px 30px;
+    padding: 40px; /* 統一與 post-detail-content 的留白感 */
     outline: none;
-    font-family: var(--font);
-    line-height: 1.8;
-    color: var(--text);
-    font-size: 1rem;
-    overflow-wrap: break-word;
-    word-break: break-word;
     box-sizing: border-box;
-}
-
-.ProseMirror blockquote {
-    border-left: 4px solid var(--brand);
-    padding: 1.25rem 1.5rem;
-    background: var(--bg-gray);
-    color: var(--text);
-    margin: 1.5em 0;
-    border-radius: 0 8px 8px 0;
-}
-
-.ProseMirror img {
-    max-width: 100% !important;
-    border-radius: 6px;
-    margin: 1.5rem auto !important;
-    display: block !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.ProseMirror table {
-    border-collapse: collapse;
-    table-layout: fixed;
-    width: 100%;
-    margin: 20px 0;
-    border: 1px solid #ddd;
-}
-
-.ProseMirror td,
-.ProseMirror th {
-    border: 1px solid #ddd;
-    padding: 10px 14px;
-    min-width: 1em;
-    vertical-align: top;
 }
 
 /* === 登入頁 (Modern Upgrade) === */

@@ -143,12 +143,12 @@ function PostDetailPage() {
                     )}
                 </div>
                 <div
-                    className="post-detail-content ql-editor"
+                    className="post-detail-content tiptap-content"
                     dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(post.content)) }}
                 />
 
-                {post.category === '中獎名單公告' && <WinnerForm post={post} />}
-                {post.category === '實體活動' && !post.isOnsiteRegistration && <EventRegistrationForm post={post} />}
+                {post.category === '中獎名單公告' && !post.isNoFormNeeded && <WinnerForm post={post} />}
+                {post.category === '實體活動' && !post.isOnsiteRegistration && !post.isNoFormNeeded && <EventRegistrationForm post={post} />}
             </article>
         </div>
     );
