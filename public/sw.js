@@ -1,4 +1,4 @@
-const CACHE_NAME = 'notice-v5'; // 更新版本號以強制套用新的 Manifest 設定
+const CACHE_NAME = 'notice-v6'; // 版本升級，強制清除舊快取
 const STATIC_ASSETS = [
     '/',
     '/manifest.json',
@@ -38,10 +38,24 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 靜態資源使用 Stale-While-Revalidate (先用快取，但在背景抓新的)
-    // 這樣下次進入頁面時就會是最新版，且不會卡住
+    // JS 腳本使用 Network-First（確保程式碼更新能立即生效，不被舊快取卡住）
+    if (request.destination === 'script') {
+        event.respondWith(
+            fetch(request)
+                .then((networkResponse) => {
+                    if (networkResponse.ok) {
+                        const clone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+                    }
+                    return networkResponse;
+                })
+                .catch(() => caches.match(request))
+        );
+        return;
+    }
+
+    // 樣式、字型、圖片使用 Stale-While-Revalidate（效能優化）
     if (request.destination === 'style' ||
-        request.destination === 'script' ||
         request.destination === 'font' ||
         request.destination === 'image') {
         event.respondWith(
