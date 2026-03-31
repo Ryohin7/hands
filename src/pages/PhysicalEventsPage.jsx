@@ -89,10 +89,13 @@ function PhysicalEventsPage() {
         const deadline = event.formDeadline?.toDate ? event.formDeadline.toDate() : new Date(event.formDeadline);
         const eventTime = event.eventTime?.toDate ? event.eventTime.toDate() : new Date(event.eventTime);
         
-        // 絕對數字轉換
-        const L = Number(event.registrationLimit || 0); // 正取限制
-        const W = Number(event.waitlistLimit || event.waitListLimit || event.registrationWaitlistLimit || 0); // 候補限制
-        const C = Number(event.currentCount || 0); // 報名總數
+        // --- 數字清洗與備援 ---
+        const L = Number(event.registrationLimit) || 0;
+        const W = Number(event.waitlistLimit || event.waitListLimit || event.registrationWaitlistLimit || 0);
+        const C = Number(event.currentCount) || 0;
+
+        // 【診斷用】開啟控制台 (F12) 即可在此處觀察線上抓到的數值，方便後續對齊資料庫
+        // console.log(`[Status Debug] Post: ${event.id}, RegLimit: ${L}, WaitLimit: ${W}, Count: ${C}`);
 
         if (now > eventTime) return { label: '活動已結束', color: '#999' };
         if (event.isOnsiteRegistration) return { label: '實體報名', color: '#007130' };
@@ -100,23 +103,16 @@ function PhysicalEventsPage() {
         
         if (L <= 0) return { label: '熱烈報名中', color: '#007130' };
 
-        // 開放候補判斷
-        const isWaitEnabled = event.allowWaitlist !== false && event.allowWaitlist !== 'false';
-        
-        // --- 核心邏輯重寫：嚴格總量制 ---
+        // 開放候補開關判定 (容錯 boolean/string)
+        const isWaitAct = event.allowWaitlist === true || event.allowWaitlist === 'true' || event.allowWaitlist === undefined;
+
+        // --- 核心判定：只要人數達到正取上限 ---
         if (C >= L) {
-            if (!isWaitEnabled) {
+            // 如果不給候補，或是雖給候補但已滿 (W > 0 & C >= L+W)
+            if (!isWaitAct || (W > 0 && C >= (L + W))) {
                 return { label: '報名已額滿', color: '#d32f2f' };
             }
-            // 開啟候補的情況
-            if (W > 0) {
-                // 有設上限 (1+1=2)
-                const totalCap = L + W;
-                if (C >= totalCap) {
-                    return { label: '報名已額滿', color: '#d32f2f' };
-                }
-            }
-            // 尚未達到總量上限，或是 W 為 0 (無限候補)
+            // 其餘開啟候補的情況下，均為候補中
             return { label: '報名候補中', color: '#ef6c00' };
         }
         
