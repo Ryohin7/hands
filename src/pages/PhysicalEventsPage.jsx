@@ -88,17 +88,36 @@ function PhysicalEventsPage() {
         const now = new Date();
         const deadline = event.formDeadline?.toDate ? event.formDeadline.toDate() : new Date(event.formDeadline);
         const eventTime = event.eventTime?.toDate ? event.eventTime.toDate() : new Date(event.eventTime);
-        const limit = event.registrationLimit || 0;
-        const count = event.currentCount || 0;
+        
+        // 1. 強制過濾為純整數運算
+        const L = parseInt(event.registrationLimit, 10) || 0; // 正取限制
+        const W = parseInt(event.waitlistLimit || event.waitListLimit, 10) || 0; // 候補限制
+        const C = parseInt(event.currentCount, 10) || 0; // 現有報名總數
 
         if (now > eventTime) return { label: '活動已結束', color: '#999' };
         if (event.isOnsiteRegistration) return { label: '實體報名', color: '#007130' };
         if (now > deadline) return { label: '報名已截止', color: '#d32f2f' };
-        if (limit > 0 && count >= limit) {
-            return event.allowWaitlist !== false 
-                ? { label: '報名候補中', color: '#ef6c00' }
-                : { label: '報名已額滿', color: '#d32f2f' };
+        
+        if (L <= 0) return { label: '熱烈報名中', color: '#007130' };
+
+        // 2. 當報名總數達到或超過正取上限
+        if (C >= L) {
+            // 判斷是否開啟候補，預設開啟 (除非明確設定為 false 或 'false')
+            const isWaitActive = event.allowWaitlist !== false && event.allowWaitlist !== 'false';
+            
+            if (isWaitActive) {
+                // 如果有設下確切的候補人數 (W > 0)，且總人數已達 (L + W)
+                if (W > 0 && C >= (L + W)) {
+                    return { label: '報名已額滿', color: '#d32f2f' };
+                }
+                // (W 為 0 代表不限候補人數)
+                return { label: '報名候補中', color: '#ef6c00' };
+            }
+            // 不開放候補
+            return { label: '報名已額滿', color: '#d32f2f' };
         }
+        
+        // 預設狀態
         return { label: '熱烈報名中', color: '#007130' };
     };
 

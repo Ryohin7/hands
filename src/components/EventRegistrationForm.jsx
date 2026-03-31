@@ -103,9 +103,20 @@ function EventRegistrationForm({ post }) {
             setCurrentRegCount(snapshot.size);
 
             // 判斷是否額滿並停止報名
-            if (post?.registrationLimit > 0 && post.allowWaitlist === false) {
-                if (snapshot.size >= post.registrationLimit) {
-                    setIsFull(true);
+            const limit = Number(post?.registrationLimit) || 0;
+            const waitLimit = Number(post?.waitlistLimit) || 0;
+
+            if (limit > 0) {
+                // 如果不開放候補，滿額即停止
+                if (post.allowWaitlist === false) {
+                    if (snapshot.size >= limit) {
+                        setIsFull(true);
+                    }
+                } else if (waitLimit > 0) {
+                    // 如果開放候補且有候補人數限制
+                    if (snapshot.size >= (limit + waitLimit)) {
+                        setIsFull(true);
+                    }
                 }
             }
         } catch (err) {
@@ -215,8 +226,14 @@ function EventRegistrationForm({ post }) {
 
                 {!isReviewing && post?.registrationLimit > 0 && (
                     <div className="limit-info" style={{ margin: '0 2rem 1rem', fontSize: '0.9rem', color: '#666' }}>
-                        目前報名人數：{currentRegCount} / {post.registrationLimit}
-                        {currentRegCount >= post.registrationLimit && <span style={{ color: '#d32f2f', marginLeft: '10px' }}>(目前為候補登記，不代表報名成功)</span>}
+                        <div>正取人數：{Math.min(currentRegCount, post.registrationLimit)} / {post.registrationLimit}</div>
+                        {post.allowWaitlist !== false && (
+                            <div style={{ marginTop: '4px' }}>
+                                候補人數：{Math.max(0, currentRegCount - post.registrationLimit)} 
+                                {post.waitlistLimit > 0 ? ` / ${post.waitlistLimit}` : ' (不限制)'}
+                                {currentRegCount >= post.registrationLimit && <span style={{ color: '#ef6c00', marginLeft: '8px' }}>(目前為候補登記)</span>}
+                            </div>
+                        )}
                     </div>
                 )}
 

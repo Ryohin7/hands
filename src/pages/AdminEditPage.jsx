@@ -29,6 +29,7 @@ function AdminEditPage() {
     });
     const [registrationLimit, setRegistrationLimit] = useState('');
     const [allowWaitlist, setAllowWaitlist] = useState(true);
+    const [waitlistLimit, setWaitlistLimit] = useState('');
     const [isOnsiteRegistration, setIsOnsiteRegistration] = useState(false);
     const [isNoFormNeeded, setIsNoFormNeeded] = useState(false);
 
@@ -64,8 +65,9 @@ function AdminEditPage() {
                 setContent(data.content || '');
                 setCategory(data.category || '公告');
                 setPinned(!!data.pinned);
-                setRegistrationLimit(data.registrationLimit || '');
+                setRegistrationLimit(data.registrationLimit !== undefined ? data.registrationLimit : '');
                 setAllowWaitlist(data.allowWaitlist !== false);
+                setWaitlistLimit(data.waitlistLimit !== undefined ? data.waitlistLimit : '');
                 setIsOnsiteRegistration(!!data.isOnsiteRegistration);
                 setIsNoFormNeeded(!!data.isNoFormNeeded);
 
@@ -122,10 +124,11 @@ function AdminEditPage() {
                 status,
                 pinned,
                 updatedAt: serverTimestamp(),
-                registrationLimit: category === '實體活動' ? (parseInt(registrationLimit) || 0) : null,
-                allowWaitlist: category === '實體活動' ? allowWaitlist : null,
-                isOnsiteRegistration: category === '實體活動' ? isOnsiteRegistration : false,
-                isNoFormNeeded: (category === '中獎名單公告' || category === '實體活動') ? isNoFormNeeded : false,
+                registrationLimit: category === '實體活動' ? (registrationLimit === '' ? 0 : parseInt(registrationLimit, 10)) : 0,
+                allowWaitlist: category === '實體活動' ? !!allowWaitlist : false,
+                waitlistLimit: (category === '實體活動' && allowWaitlist) ? (waitlistLimit === '' ? 0 : parseInt(waitlistLimit, 10)) : 0,
+                isOnsiteRegistration: category === '實體活動' ? !!isOnsiteRegistration : false,
+                isNoFormNeeded: (category === '中獎名單公告' || category === '實體活動') ? !!isNoFormNeeded : false,
             };
 
             if (useSchedule && scheduledAt) {
@@ -396,12 +399,27 @@ function AdminEditPage() {
                                                 </label>
                                             </div>
                                             {!isOnsiteRegistration && (
-                                                <div className="schedule-toggle" style={{ marginTop: '0.75rem' }}>
-                                                    <label className="toggle-label" style={{ color: '#007130' }}>
-                                                        <input type="checkbox" checked={allowWaitlist} onChange={(e) => setAllowWaitlist(e.target.checked)} />
-                                                        <span>開放候補登記</span>
-                                                    </label>
-                                                </div>
+                                                <>
+                                                    <div className="schedule-toggle" style={{ marginTop: '0.75rem' }}>
+                                                        <label className="toggle-label" style={{ color: '#007130' }}>
+                                                            <input type="checkbox" checked={allowWaitlist} onChange={(e) => setAllowWaitlist(e.target.checked)} />
+                                                            <span>開放候補登記</span>
+                                                        </label>
+                                                    </div>
+                                                    {allowWaitlist && (
+                                                        <div style={{ marginTop: '0.75rem', paddingLeft: '1.5rem' }}>
+                                                            <label htmlFor="edit-waitlist-limit" style={{ color: '#007130', fontSize: '0.9rem' }}>候補人數限制</label>
+                                                            <input
+                                                                id="edit-waitlist-limit"
+                                                                type="number"
+                                                                value={waitlistLimit}
+                                                                onChange={(e) => setWaitlistLimit(e.target.value)}
+                                                                placeholder="0 表示不限制"
+                                                                className="input-md"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </>
