@@ -89,35 +89,36 @@ function PhysicalEventsPage() {
         const deadline = event.formDeadline?.toDate ? event.formDeadline.toDate() : new Date(event.formDeadline);
         const eventTime = event.eventTime?.toDate ? event.eventTime.toDate() : new Date(event.eventTime);
         
-        // --- 直接移植與表單一致的數值邏輯 ---
-        const limit = Number(event.registrationLimit) || 0;
-        const waitLimit = Number(event.waitlistLimit || event.waitListLimit) || 0;
-        const currentCount = Number(event.currentCount) || 0;
+        // --- 取得數值 (確保型別與預設值) ---
+        const L = Number(event.registrationLimit) || 0;
+        const W = Number(event.waitlistLimit || event.waitListLimit || 0);
+        const C = Number(event.currentCount) || 0;
 
         if (now > eventTime) return { label: '活動已結束', color: '#999' };
         if (event.isOnsiteRegistration) return { label: '實體報名', color: '#007130' };
         if (now > deadline) return { label: '報名已截止', color: '#d32f2f' };
         
-        // 如果沒有正取限制
-        if (limit <= 0) return { label: '熱烈報名中', color: '#007130' };
+        if (L <= 0) return { label: '熱烈報名中', color: '#007130' };
 
-        // 正取名額已滿
-        if (currentCount >= limit) {
-            // 與表單判定邏輯完全對齊
-            if (event.allowWaitlist === false) {
-                // 不開放候補
+        // --- 強力判定邏輯 ---
+        // 當前人數已達正取上限
+        if (C >= L) {
+            // 如果不給候補 (allowWaitlist 為 false)
+            if (event.allowWaitlist === false || event.allowWaitlist === 'false') {
                 return { label: '報名已額滿', color: '#d32f2f' };
-            } else {
-                // 開放候補中
-                if (waitLimit > 0) {
-                    // 如果有設候補上限
-                    if (currentCount >= (limit + waitLimit)) {
-                        return { label: '報名已額滿', color: '#d32f2f' };
-                    }
-                }
-                // 若 waitLimit 為 0 表示不限人數，或是還沒滿
-                return { label: '報名候補中', color: '#ef6c00' };
             }
+
+            // 既然開啟候補，檢查候補是否已滿
+            if (W > 0) {
+                const totalCap = L + W;
+                // 如果目前的總報名人數已經達到 總容量
+                if (C >= totalCap) {
+                    return { label: '報名已額滿', color: '#d32f2f' };
+                }
+            }
+            
+            // 剩下的情況：還有候補名額，或是不限人數
+            return { label: '報名候補中', color: '#ef6c00' };
         }
         
         return { label: '熱烈報名中', color: '#007130' };
