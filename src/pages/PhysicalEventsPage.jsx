@@ -89,10 +89,13 @@ function PhysicalEventsPage() {
         const deadline = event.formDeadline?.toDate ? event.formDeadline.toDate() : new Date(event.formDeadline);
         const eventTime = event.eventTime?.toDate ? event.eventTime.toDate() : new Date(event.eventTime);
         
-        // 1. 強制過濾為純整數運算
-        const L = parseInt(event.registrationLimit, 10) || 0; // 正取限制
-        const W = parseInt(event.waitlistLimit || event.waitListLimit, 10) || 0; // 候補限制
-        const C = parseInt(event.currentCount, 10) || 0; // 現有報名總數
+        // 正規化數值：嘗試讀取所有可能的候補助欄位拼寫
+        const L = parseInt(event.registrationLimit, 10) || 0;
+        const W = parseInt(event.waitlistLimit || event.waitListLimit || event.registrationWaitlistLimit, 10) || 0;
+        const C = parseInt(event.currentCount, 10) || 0;
+
+        // 除錯用 (管理員開啟控制台可見，協助確認線上資料狀況)
+        // console.log(`Post: ${event.id}, L: ${L}, W: ${W}, C: ${C}`);
 
         if (now > eventTime) return { label: '活動已結束', color: '#999' };
         if (event.isOnsiteRegistration) return { label: '實體報名', color: '#007130' };
@@ -100,24 +103,23 @@ function PhysicalEventsPage() {
         
         if (L <= 0) return { label: '熱烈報名中', color: '#007130' };
 
-        // 2. 當報名總數達到或超過正取上限
+        // 正取已滿情形
         if (C >= L) {
-            // 判斷是否開啟候補，預設開啟 (除非明確設定為 false 或 'false')
+            // 判斷是否開啟候補
             const isWaitActive = event.allowWaitlist !== false && event.allowWaitlist !== 'false';
             
             if (isWaitActive) {
-                // 如果有設下確切的候補人數 (W > 0)，且總人數已達 (L + W)
+                // 如果 W 是有效數字且大於 0，且目前總數已達總上限
                 if (W > 0 && C >= (L + W)) {
                     return { label: '報名已額滿', color: '#d32f2f' };
                 }
-                // (W 為 0 代表不限候補人數)
+                // 否則為候補中 (若 W 為 0 視為不限候補人數)
                 return { label: '報名候補中', color: '#ef6c00' };
             }
             // 不開放候補
             return { label: '報名已額滿', color: '#d32f2f' };
         }
         
-        // 預設狀態
         return { label: '熱烈報名中', color: '#007130' };
     };
 
