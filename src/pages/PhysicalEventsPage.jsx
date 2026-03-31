@@ -62,10 +62,7 @@ function PhysicalEventsPage() {
             const eventsWithCounts = await Promise.all(data.map(async (event) => {
                 const regQ = query(collection(db, 'event_registrations'), where('postId', '==', event.id));
                 const regSnap = await getDocs(regQ);
-                const result = { ...event, currentCount: regSnap.size };
-                // 【診斷 log】請在瀏覽器 F12 Console 查看數值是否正確
-                console.log(`[Event] id=${result.id} | regLimit=${result.registrationLimit} | waitlistLimit=${result.waitlistLimit} | allowWaitlist=${result.allowWaitlist} | count=${result.currentCount}`);
-                return result;
+                return { ...event, currentCount: regSnap.size };
             }));
 
             if (snapshot.docs.length > 0) {
