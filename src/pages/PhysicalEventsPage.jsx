@@ -233,10 +233,6 @@ function PhysicalEventsPage() {
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                             活動日期：{event.eventTime?.toDate ? event.eventTime.toDate().toLocaleDateString() : new Date(event.eventTime).toLocaleDateString()}
                                         </div>
-                                        {/* 【臨時診斷】確認後刪除 */}
-                                        <div style={{ marginTop: '8px', padding: '6px 8px', background: '#fff3cd', borderRadius: '4px', fontSize: '0.75rem', color: '#856404', fontFamily: 'monospace' }}>
-                                            正取限:{String(event.registrationLimit)} | 候補限:{String(event.waitlistLimit)} | 已報:{event.currentCount} | 候補開:{String(event.allowWaitlist)}
-                                        </div>
                                     </div>
                                 </Link>
                             );

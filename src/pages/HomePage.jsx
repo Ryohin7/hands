@@ -199,16 +199,23 @@ function HomePage() {
         const now = new Date();
         const deadline = event.formDeadline?.toDate ? event.formDeadline.toDate() : new Date(event.formDeadline);
         const eventTime = event.eventTime?.toDate ? event.eventTime.toDate() : new Date(event.eventTime);
-        const limit = event.registrationLimit || 0;
-        const count = event.currentCount || 0;
+        const limit = Number(event.registrationLimit) || 0;
+        const waitLimit = Number(event.waitlistLimit) || 0;
+        const count = Number(event.currentCount) || 0;
 
         if (now > eventTime) return { label: '活動已結束', color: '#999' };
         if (event.isOnsiteRegistration) return { label: '實體報名', color: '#007130' };
         if (now > deadline) return { label: '報名已截止', color: '#d32f2f' };
+
         if (limit > 0 && count >= limit) {
-            return event.allowWaitlist !== false 
-                ? { label: '報名候補中', color: '#ef6c00' }
-                : { label: '報名已額滿', color: '#d32f2f' };
+            if (event.allowWaitlist === false) {
+                return { label: '報名已額滿', color: '#d32f2f' };
+            }
+            // 開啟候補：檢查候補是否也滿了
+            if (waitLimit > 0 && count >= (limit + waitLimit)) {
+                return { label: '報名已額滿', color: '#d32f2f' };
+            }
+            return { label: '報名候補中', color: '#ef6c00' };
         }
         return { label: '熱烈報名中', color: '#007130' };
     };
