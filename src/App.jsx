@@ -30,6 +30,7 @@ import WinnerAdminPage from './pages/WinnerAdminPage';
 import EventAdminPage from './pages/EventAdminPage';
 import FormTestPage from './pages/FormTestPage';
 import TravelCampaignPage from './pages/TravelCampaignPage';
+import ExcelDedupePage from './pages/ExcelDedupePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import StaffLayout from './components/StaffLayout';
@@ -125,6 +126,7 @@ function App() {
                         {/* 全域設定 */}
                         <Route path="settings" element={<GlobalSettingsPage />} />
                         <Route path="excel-compare" element={<ExcelComparePage />} />
+                        <Route path="excel-dedupe" element={<ExcelDedupePage />} />
                         <Route path="winners" element={<WinnerAdminPage />} />
                         <Route path="events" element={<EventAdminPage />} />
                     </Route>
