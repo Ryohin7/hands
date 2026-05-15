@@ -49,6 +49,9 @@ import StoreManagePage from './pages/staff/StoreManagePage';
 import ReportPage from './pages/staff/ReportPage';
 import StaffDashboardPage from './pages/staff/StaffDashboardPage';
 import LineBindPage from './pages/staff/LineBindPage';
+import ProjectsPage from './pages/staff/ProjectsPage';
+import ProjectDetailPage from './pages/staff/ProjectDetailPage';
+import ProjectSettingsPage from './pages/staff/ProjectSettingsPage';
 
 function PWAUpdateHandler() {
     useEffect(() => {
@@ -151,6 +154,9 @@ function App() {
                         <Route path="stores" element={<StoreManagePage />} />
                         <Route path="reports" element={<ReportPage />} />
                         <Route path="line-bind" element={<LineBindPage />} />
+                        <Route path="projects" element={<ProjectsPage />} />
+                        <Route path="projects/:id" element={<ProjectDetailPage />} />
+                        <Route path="project-settings" element={<ProjectSettingsPage />} />
                     </Route>
 
 

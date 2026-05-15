@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 
 const AVAILABLE_PERMISSIONS = [
+    { id: 'dashboard_view', label: '儀表板檢視' },
     { id: 'coupon_apply', label: '電子券申請' },
     { id: 'coupon_audit', label: '電子券審核' },
     { id: 'user_audit', label: '員工帳號審核' },
@@ -23,6 +24,8 @@ const AVAILABLE_PERMISSIONS = [
     { id: 'member_audit', label: '會員異動審核' },
     { id: 'store_manage', label: '門市資訊維護' },
     { id: 'data_report', label: '資料報表查詢' },
+    { id: 'project_manage', label: '專案管理（新增/編輯）' },
+    { id: 'project_settings', label: '專案分類設定' },
 ];
 
 function RoleSettingsPage() {
