@@ -516,7 +516,7 @@ function SmsAdminPage() {
                                 <tbody>
                                     {history.map((item, idx) => (
                                         <tr key={item.id || idx}>
-                                            <td className="cell-phone">{item.to}</td>
+                                            <td className="cell-phone">{item.to_phone || item.to}</td>
                                             <td className="cell-body" title={item.body}>{item.body}</td>
                                             <td>
                                                 <span className={`status-badge-row status-${item.status}`}>
