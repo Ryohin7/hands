@@ -40,8 +40,80 @@ export default async function handler(req, res) {
     try {
         switch (action) {
             case 'send': {
-                const { to, body, scheduled_at, isBroadcast } = data;
-                
+                const { to, body, scheduled_at, isBroadcast, isPersonalized, template, recipients } = data;
+
+                // 1. 處理個性化變數批次簡訊發送
+                if (isPersonalized) {
+                    if (!template) {
+                        return res.status(400).json({ error: '簡訊範本不能為空' });
+                    }
+                    if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+                        return res.status(400).json({ error: '收件人名單不能為空' });
+                    }
+
+                    const results = [];
+                    let successCount = 0;
+                    let failedCount = 0;
+                    let lastBalance = null;
+
+                    // 每次最多發送 100 筆個性化簡訊，防範 Serverless 逾時
+                    const listToSend = recipients.slice(0, 100);
+
+                    const sendPromises = listToSend.map(async (item) => {
+                        const { to: phone, variables } = item;
+                        if (!phone) return;
+
+                        // 動態替換變數，替換範本中的 {{姓名}} 與 {{點數}} 等變數
+                        let personalizedBody = template;
+                        if (variables) {
+                            Object.keys(variables).forEach(key => {
+                                const val = variables[key] !== undefined ? variables[key] : '';
+                                const regex = new RegExp(`{{${key}}}`, 'g');
+                                personalizedBody = personalizedBody.replace(regex, val);
+                            });
+                        }
+
+                        try {
+                            const response = await fetch('https://sms.cresclab.com/api/sms/send', {
+                                method: 'POST',
+                                headers,
+                                body: JSON.stringify({
+                                    to: phone,
+                                    body: personalizedBody
+                                })
+                            });
+
+                            const sendData = await response.json();
+                            if (response.ok) {
+                                successCount++;
+                                if (sendData.balance_cents !== undefined) {
+                                    lastBalance = sendData.balance_cents;
+                                }
+                                results.push({ to: phone, success: true, id: sendData.message_id });
+                            } else {
+                                failedCount++;
+                                results.push({ to: phone, success: false, error: sendData.error || '發送失敗' });
+                            }
+                        } catch (err) {
+                            failedCount++;
+                            results.push({ to: phone, success: false, error: err.message });
+                        }
+                    });
+
+                    await Promise.all(sendPromises);
+
+                    return res.status(200).json({
+                        ok: true,
+                        success: true,
+                        type: 'personalized',
+                        total: listToSend.length,
+                        successCount,
+                        failedCount,
+                        balance_cents: lastBalance,
+                        details: results
+                    });
+                }
+
                 if (!body) {
                     return res.status(400).json({ error: '簡訊內容不能為空' });
                 }
@@ -52,20 +124,20 @@ export default async function handler(req, res) {
                 
                 if (isBroadcast || hasSchedule || isArray || (typeof to === 'string' && to.includes(','))) {
                     // 群發或排程群發 -> 調用 /broadcast
-                    let recipients = [];
+                    let recipientsList = [];
                     if (isArray) {
-                        recipients = to;
+                        recipientsList = to;
                     } else if (typeof to === 'string') {
-                        recipients = to.split(',').map(num => num.trim()).filter(Boolean);
+                        recipientsList = to.split(',').map(num => num.trim()).filter(Boolean);
                     }
 
-                    if (recipients.length === 0) {
+                    if (recipientsList.length === 0) {
                         return res.status(400).json({ error: '收件人電話號碼不能為空' });
                     }
 
                     const bodyData = {
                         body: body,
-                        recipients: recipients
+                        recipients: recipientsList
                     };
 
                     if (hasSchedule) {

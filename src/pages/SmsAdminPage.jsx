@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
 
 function SmsAdminPage() {
     // 專案的內部 API KEY，用於安全校驗後端 API
@@ -16,8 +17,14 @@ function SmsAdminPage() {
     const [history, setHistory] = useState([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
     const [walletBalance, setWalletBalance] = useState(null);
+
+    // Excel/CSV 欄位對齊狀態
+    const [excelHeaders, setExcelHeaders] = useState([]);
+    const [excelRows, setExcelRows] = useState([]);
+    const [columnMapping, setColumnMapping] = useState({ phone: '', name: '', points: '' });
     
     const fileInputRef = useRef(null);
+    const textareaRef = useRef(null);
 
     // 載入發送歷史
     const fetchHistory = async () => {
@@ -58,7 +65,7 @@ function SmsAdminPage() {
 
     // 格式化電話號碼
     const formatPhoneNumber = (num) => {
-        let cleaned = num.replace(/\D/g, '');
+        let cleaned = String(num).replace(/\D/g, '');
         // 台灣號碼處理
         if (cleaned.startsWith('886')) {
             return '+' + cleaned;
@@ -76,63 +83,181 @@ function SmsAdminPage() {
         return null;
     };
 
-    // 處理 CSV/TXT 檔案導入
+    // 動態更新有效號碼列表
+    const updateImportedNumbersFromMapping = (rows, headers, mapping) => {
+        if (!mapping.phone) {
+            setImportedNumbers([]);
+            setDuplicateCount(0);
+            return;
+        }
+
+        const phoneIdx = headers.indexOf(mapping.phone);
+        if (phoneIdx === -1) {
+            setImportedNumbers([]);
+            setDuplicateCount(0);
+            return;
+        }
+
+        const validNumbers = [];
+        let duplicates = 0;
+        const uniqueSet = new Set();
+
+        rows.forEach(row => {
+            const rawPhone = row[phoneIdx];
+            if (rawPhone !== undefined && rawPhone !== null) {
+                const formatted = formatPhoneNumber(String(rawPhone));
+                if (formatted) {
+                    if (uniqueSet.has(formatted)) {
+                        duplicates++;
+                    } else {
+                        uniqueSet.add(formatted);
+                        validNumbers.push(formatted);
+                    }
+                }
+            }
+        });
+
+        setImportedNumbers(validNumbers);
+        setDuplicateCount(duplicates);
+    };
+
+    // 處理 Excel/CSV/TXT 檔案導入
     const handleFiles = (files) => {
         const file = files[0];
         if (!file) return;
 
-        if (!file.name.match(/\.(csv|txt)$/i)) {
-            setMessage({ type: 'error', text: '請上傳有效的 CSV 或 TXT 檔案' });
+        if (!file.name.match(/\.(xlsx|xls|csv|txt)$/i)) {
+            setMessage({ type: 'error', text: '請上傳有效的 Excel (.xlsx, .xls) 或 CSV, TXT 檔案' });
             return;
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const text = e.target.result;
-                // 智慧提取：利用正則表達式尋找所有可能是手機號碼的字串 (09xxxxxxxx 或 +8869xxxxxxxx 或 8869xxxxxxxx)
-                const phoneRegex = /(?:\+?886|0)?9\d{8}/g;
-                const matches = text.match(phoneRegex) || [];
-                
-                const validNumbers = [];
-                let duplicates = 0;
-                const uniqueSet = new Set();
 
-                for (const num of matches) {
-                    const formatted = formatPhoneNumber(num);
-                    if (formatted) {
-                        if (uniqueSet.has(formatted)) {
-                            duplicates++;
-                        } else {
-                            uniqueSet.add(formatted);
-                            validNumbers.push(formatted);
+        if (file.name.match(/\.txt$/i)) {
+            // TXT 檔案智慧提取
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    const phoneRegex = /(?:\+?886|0)?9\d{8}/g;
+                    const matches = text.match(phoneRegex) || [];
+                    
+                    const validNumbers = [];
+                    let duplicates = 0;
+                    const uniqueSet = new Set();
+
+                    for (const num of matches) {
+                        const formatted = formatPhoneNumber(num);
+                        if (formatted) {
+                            if (uniqueSet.has(formatted)) {
+                                duplicates++;
+                            } else {
+                                uniqueSet.add(formatted);
+                                validNumbers.push(formatted);
+                            }
                         }
                     }
-                }
 
-                if (validNumbers.length === 0) {
-                    setMessage({ type: 'warning', text: '未在檔案中偵測到任何有效的手機號碼' });
-                    return;
-                }
+                    if (validNumbers.length === 0) {
+                        setMessage({ type: 'warning', text: '未在檔案中偵測到任何有效的手機號碼' });
+                        return;
+                    }
 
-                setImportedNumbers(validNumbers);
-                setDuplicateCount(duplicates);
-                setMessage({
-                    type: 'success',
-                    text: `成功解析 ${validNumbers.length} 筆有效號碼 (已過濾 ${duplicates} 筆重複/無效)`
-                });
-            } catch (err) {
-                console.error(err);
-                setMessage({ type: 'error', text: '檔案解析失敗，請確認檔案格式是否正確。' });
-            }
-        };
-        reader.readAsText(file);
+                    setImportedNumbers(validNumbers);
+                    setDuplicateCount(duplicates);
+                    setExcelHeaders([]);
+                    setExcelRows([]);
+                    setColumnMapping({ phone: '', name: '', points: '' });
+                    setMessage({
+                        type: 'success',
+                        text: `成功解析 ${validNumbers.length} 筆有效號碼 (已過濾 ${duplicates} 筆重複/無效)`
+                    });
+                } catch (err) {
+                    console.error(err);
+                    setMessage({ type: 'error', text: '檔案解析失敗，請確認檔案格式是否正確。' });
+                }
+            };
+            reader.readAsText(file);
+        } else {
+            // Excel & CSV 檔案使用 XLSX 解析
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // 取得二維陣列 (含 header)
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (jsonData.length === 0) {
+                        setMessage({ type: 'error', text: '工作表內容為空' });
+                        return;
+                    }
+
+                    // 第一列作為 Header 欄位
+                    const headers = jsonData[0].map(h => String(h || '').trim()).filter(Boolean);
+                    
+                    // 過濾掉完全空的資料行
+                    const rows = jsonData.slice(1).filter(row => 
+                        row.some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')
+                    );
+
+                    if (rows.length === 0) {
+                        setMessage({ type: 'error', text: '檔案中沒有任何有效的資料列' });
+                        return;
+                    }
+
+                    setExcelHeaders(headers);
+                    setExcelRows(rows);
+
+                    // 自動智慧對齊
+                    const phoneRegex = /電話|手機|號碼|to|phone|mobile|tel/i;
+                    const nameRegex = /姓名|名稱|會員|name|member/i;
+                    const pointsRegex = /點數|點|紅利|point|score/i;
+
+                    let autoPhone = '';
+                    let autoName = '';
+                    let autoPoints = '';
+
+                    headers.forEach(h => {
+                        if (!autoPhone && phoneRegex.test(h)) autoPhone = h;
+                        else if (!autoName && nameRegex.test(h)) autoName = h;
+                        else if (!autoPoints && pointsRegex.test(h)) autoPoints = h;
+                    });
+
+                    // 若手機欄位沒有匹配，預設取第一欄
+                    if (!autoPhone && headers.length > 0) {
+                        autoPhone = headers[0];
+                    }
+
+                    const newMapping = {
+                        phone: autoPhone,
+                        name: autoName,
+                        points: autoPoints
+                    };
+                    setColumnMapping(newMapping);
+                    updateImportedNumbersFromMapping(rows, headers, newMapping);
+
+                    setMessage({
+                        type: 'success',
+                        text: `成功匯入 Excel/CSV 檔案，共 ${rows.length} 筆資料。欄位已自動對齊設定。`
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    setMessage({ type: 'error', text: 'Excel/CSV 檔案解析失敗，請確認檔案格式是否正確。' });
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
     };
 
     // 清除導入的號碼
     const clearImported = () => {
         setImportedNumbers([]);
         setDuplicateCount(0);
+        setExcelHeaders([]);
+        setExcelRows([]);
+        setColumnMapping({ phone: '', name: '', points: '' });
         if (fileInputRef.current) fileInputRef.current.value = '';
         setMessage(null);
     };
@@ -148,74 +273,195 @@ function SmsAdminPage() {
             .filter(Boolean);
     };
 
-    // 簡訊字數與 Segment 計算
+    // 簡訊字數與計費估計
     const getSmsMetrics = () => {
         const length = smsBody.length;
-        if (length === 0) return { chars: 0, segments: 0, cost: 0 };
+        if (length === 0) return { chars: 0, segments: 0, cost: '0.00', isPersonalized: false };
         
-        // MAAC 簡訊 Segment 規則 (含中文 70 字一段，英文/ASCII 160 字一段)
-        const hasChinese = /[\u4e00-\u9fa5]/.test(smsBody);
-        const limitPerSegment = hasChinese ? 70 : 160;
-        
-        let segments = 1;
-        if (length > limitPerSegment) {
-            // 超過第一段時，每段上限會稍微縮減 (中文變 67 字一段，英文變 153 字一段，這是簡訊協定標準)
-            const splitLimit = hasChinese ? 67 : 153;
-            segments = Math.ceil(length / splitLimit);
-        }
-        
-        const costPerSegment = 0.78; // 每段 NT$ 0.78 元
-        const totalNumbers = getFinalRecipients().length || 1;
-        const totalCost = (segments * costPerSegment * totalNumbers).toFixed(2);
+        // 判斷是否啟用了個性化發送 (且內文包含 {{姓名}} 或 {{點數}}，並有 Excel 對齊)
+        const isPersonalizedActive = (smsBody.includes('{{姓名}}') || smsBody.includes('{{點數}}')) && excelRows.length > 0 && columnMapping.phone;
 
-        return {
-            chars: length,
-            segments,
-            cost: totalCost
-        };
+        if (isPersonalizedActive) {
+            let totalSegments = 0;
+            let totalChars = 0;
+            const phoneIdx = excelHeaders.indexOf(columnMapping.phone);
+            const nameIdx = columnMapping.name ? excelHeaders.indexOf(columnMapping.name) : -1;
+            const pointsIdx = columnMapping.points ? excelHeaders.indexOf(columnMapping.points) : -1;
+
+            // 遍歷所有有效資料 (限制前 100 筆)
+            const listToEstimate = excelRows.filter(row => {
+                const rawPhone = phoneIdx !== -1 ? row[phoneIdx] : '';
+                return formatPhoneNumber(String(rawPhone)) !== null;
+            }).slice(0, 100);
+
+            listToEstimate.forEach(row => {
+                const nameVal = nameIdx !== -1 ? String(row[nameIdx] || '') : '';
+                const pointsVal = pointsIdx !== -1 ? String(row[pointsIdx] || '') : '';
+
+                const replacedBody = smsBody
+                    .replace(/{{姓名}}/g, nameVal)
+                    .replace(/{{點數}}/g, pointsVal);
+
+                const rowLen = replacedBody.length;
+                const hasChinese = /[\u4e00-\u9fa5]/.test(replacedBody);
+                const limitPerSegment = hasChinese ? 70 : 160;
+                
+                let segments = 1;
+                if (rowLen > limitPerSegment) {
+                    const splitLimit = hasChinese ? 67 : 153;
+                    segments = Math.ceil(rowLen / splitLimit);
+                }
+                totalSegments += segments;
+                totalChars += rowLen;
+            });
+
+            const avgChars = listToEstimate.length > 0 ? Math.round(totalChars / listToEstimate.length) : 0;
+            const costPerSegment = 0.78;
+            const totalCost = (totalSegments * costPerSegment).toFixed(2);
+
+            return {
+                chars: avgChars,
+                segments: totalSegments,
+                cost: totalCost,
+                isPersonalized: true,
+                totalCount: listToEstimate.length
+            };
+        } else {
+            // 普通發送估算
+            const hasChinese = /[\u4e00-\u9fa5]/.test(smsBody);
+            const limitPerSegment = hasChinese ? 70 : 160;
+            
+            let segments = 1;
+            if (length > limitPerSegment) {
+                const splitLimit = hasChinese ? 67 : 153;
+                segments = Math.ceil(length / splitLimit);
+            }
+            
+            const costPerSegment = 0.78;
+            const totalNumbers = getFinalRecipients().length || 1;
+            const totalCost = (segments * costPerSegment * totalNumbers).toFixed(2);
+
+            return {
+                chars: length,
+                segments: segments * totalNumbers,
+                cost: totalCost,
+                isPersonalized: false,
+                singleSegments: segments
+            };
+        }
     };
 
     const metrics = getSmsMetrics();
 
     // 快速插入行銷警語
     const insertMarketingText = () => {
-        const textToAppend = '【Hands】退訂回覆STOP';
+        const textToAppend = '【台隆手創館】親愛的會員您好';
         if (smsBody.includes(textToAppend)) return;
         setSmsBody(prev => prev ? `${prev} ${textToAppend}` : `【品牌行銷】活動優惠 ${textToAppend}`);
+    };
+
+    // 在游標處插入個性化變數
+    const insertVariable = (variableName) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const before = text.substring(0, start);
+        const after = text.substring(end, text.length);
+        
+        const varText = `{{${variableName}}}`;
+        const newText = before + varText + after;
+        
+        setSmsBody(newText);
+        
+        // 移動游標並重新 focus
+        setTimeout(() => {
+            textarea.focus();
+            const cursorPosition = start + varText.length;
+            textarea.setSelectionRange(cursorPosition, cursorPosition);
+        }, 0);
     };
 
     // 提交發送簡訊
     const handleSend = async (e) => {
         e.preventDefault();
-        const recipients = getFinalRecipients();
         
-        if (recipients.length === 0) {
-            setMessage({ type: 'error', text: '請輸入或匯入至少一個收件人電話號碼' });
-            return;
-        }
+        const isPersonalizedActive = (smsBody.includes('{{姓名}}') || smsBody.includes('{{點數}}')) && excelRows.length > 0 && columnMapping.phone;
+        
+        let requestData = {};
+        let recipientsCount = 0;
 
-        if (!smsBody) {
-            setMessage({ type: 'error', text: '請輸入簡訊內容' });
-            return;
+        if (isPersonalizedActive) {
+            // 個性化變數發送模式
+            const phoneIdx = excelHeaders.indexOf(columnMapping.phone);
+            const nameIdx = columnMapping.name ? excelHeaders.indexOf(columnMapping.name) : -1;
+            const pointsIdx = columnMapping.points ? excelHeaders.indexOf(columnMapping.points) : -1;
+
+            const pRecipients = excelRows.map(row => {
+                const rawPhone = phoneIdx !== -1 ? row[phoneIdx] : '';
+                const formatted = formatPhoneNumber(String(rawPhone));
+                
+                const nameVal = nameIdx !== -1 ? row[nameIdx] : '';
+                const pointsVal = pointsIdx !== -1 ? row[pointsIdx] : '';
+
+                return {
+                    to: formatted,
+                    variables: {
+                        '姓名': nameVal !== undefined && nameVal !== null ? String(nameVal).trim() : '',
+                        '點數': pointsVal !== undefined && pointsVal !== null ? String(pointsVal).trim() : ''
+                    }
+                };
+            }).filter(r => r.to);
+
+            if (pRecipients.length === 0) {
+                setMessage({ type: 'error', text: '請上傳並選擇含有有效手機欄位的名單檔案' });
+                return;
+            }
+
+            if (pRecipients.length > 100) {
+                setMessage({ type: 'warning', text: '個性化簡訊單次發送限制最高 100 筆，系統已自動截取前 100 筆。' });
+            }
+
+            requestData = {
+                isPersonalized: true,
+                template: smsBody,
+                recipients: pRecipients.slice(0, 100)
+            };
+            recipientsCount = Math.min(pRecipients.length, 100);
+
+        } else {
+            // 普通發送模式 (單筆或群發)
+            const recipients = getFinalRecipients();
+            
+            if (recipients.length === 0) {
+                setMessage({ type: 'error', text: '請輸入或匯入至少一個收件人電話號碼' });
+                return;
+            }
+
+            if (!smsBody) {
+                setMessage({ type: 'error', text: '請輸入簡訊內容' });
+                return;
+            }
+
+            requestData = {
+                to: recipients,
+                body: smsBody
+            };
+
+            if (sendType === 'scheduled') {
+                if (!scheduledTime) {
+                    setMessage({ type: 'error', text: '請選擇預約發送的時間' });
+                    return;
+                }
+                requestData.scheduled_at = new Date(scheduledTime).toISOString();
+            }
+            recipientsCount = recipients.length;
         }
 
         setIsSending(true);
         setMessage(null);
-
-        const requestData = {
-            to: recipients,
-            body: smsBody
-        };
-
-        if (sendType === 'scheduled') {
-            if (!scheduledTime) {
-                setMessage({ type: 'error', text: '請選擇預約發送的時間' });
-                setIsSending(false);
-                return;
-            }
-            // 轉換為 ISO 8601
-            requestData.scheduled_at = new Date(scheduledTime).toISOString();
-        }
 
         try {
             const res = await fetch('/api/sms', {
@@ -230,23 +476,37 @@ function SmsAdminPage() {
 
             const result = await res.json();
 
-            if (res.ok) {
-                setMessage({
-                    type: 'success',
-                    text: sendType === 'immediate'
-                        ? '簡訊已成功發送至發送佇列'
-                        : `預約簡訊已排程成功，發送時間為：${new Date(scheduledTime).toLocaleString()}`
-                });
+            if (res.ok && result.ok) {
+                if (isPersonalizedActive) {
+                    setMessage({
+                        type: 'success',
+                        text: `個性化簡訊已成功發送！成功：${result.successCount} 筆，失敗：${result.failedCount} 筆。`
+                    });
+                } else {
+                    setMessage({
+                        type: 'success',
+                        text: sendType === 'immediate'
+                            ? '簡訊已成功發送至發送佇列'
+                            : `預約簡訊已排程成功，發送時間為：${new Date(scheduledTime).toLocaleString()}`
+                    });
+                }
+
+                // 更新餘額
+                if (result.balance_cents !== undefined && result.balance_cents !== null) {
+                    setWalletBalance((result.balance_cents / 100).toFixed(2));
+                }
+
                 // 清除輸入
                 setRecipientInput('');
                 setSmsBody('');
                 clearImported();
+                
                 // 重新整理歷史紀錄
                 setTimeout(fetchHistory, 1000);
             } else {
                 setMessage({
                     type: 'error',
-                    text: result.error || '發送失敗，請檢查 API 額度或 NCC 規章。'
+                    text: result.error || '發送失敗，請檢查 API 額度或密鑰。'
                 });
             }
         } catch (err) {
@@ -263,7 +523,7 @@ function SmsAdminPage() {
         const success = history.filter(item => item.status === 'delivered').length;
         const stopCount = history.filter(item => item.status === 'stop').length;
         const failedOnly = history.filter(item => item.status === 'failed').length;
-        const failed = failedOnly + stopCount; // 失敗數量包含一般失敗與退訂攔截
+        const failed = failedOnly + stopCount;
         const processing = history.filter(item => item.status === 'sent' || item.status === 'queued').length;
         return { total, success, failed, stop: stopCount, failedOnly, processing };
     };
@@ -300,12 +560,48 @@ function SmsAdminPage() {
                         <span className="badge-dot"></span>
                         MAAC 通道正常 (NCC合規)
                     </div>
-                    {walletBalance !== null && (
-                        <div className="status-badge balance-badge">
-                            餘額估算: NT$ {walletBalance}
-                        </div>
-                    )}
                 </div>
+            </div>
+
+            {/* 頂部 MAAC 帳戶餘額看板 (高質感錢包卡片) */}
+            <div className="wallet-balance-card">
+                <div className="wallet-card-content">
+                    <div className="wallet-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="wallet-svg">
+                            <rect x="2" y="4" width="20" height="16" rx="2" />
+                            <path d="M16 8h4v8h-4z" />
+                            <circle cx="18" cy="12" r="1" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <div className="wallet-info-area">
+                        <span className="wallet-card-label">MAAC 簡訊帳戶餘額</span>
+                        <span className="wallet-card-value">
+                            {walletBalance !== null ? `NT$ ${walletBalance}` : '讀取中...'}
+                        </span>
+                    </div>
+                </div>
+                <button 
+                    type="button" 
+                    onClick={fetchHistory} 
+                    disabled={isLoadingHistory} 
+                    className="wallet-refresh-btn"
+                    title="重新整理餘額"
+                >
+                    <svg 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        className={`refresh-svg ${isLoadingHistory ? 'spinning' : ''}`}
+                    >
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    <span>重新整理</span>
+                </button>
             </div>
 
             {/* 訊息提示 */}
@@ -353,7 +649,7 @@ function SmsAdminPage() {
                                 </div>
                             )}
 
-                            {/* CSV 拖曳上傳 */}
+                            {/* Excel / CSV / TXT 上傳 */}
                             {recipientInput.length === 0 && importedNumbers.length === 0 && (
                                 <div 
                                     className={`sms-upload-zone ${dragOver ? 'drag-over' : ''}`}
@@ -365,7 +661,7 @@ function SmsAdminPage() {
                                     <input 
                                         ref={fileInputRef} 
                                         type="file" 
-                                        accept=".csv,.txt" 
+                                        accept=".xlsx,.xls,.csv,.txt" 
                                         onChange={(e) => handleFiles(e.target.files)} 
                                         style={{ display: 'none' }} 
                                     />
@@ -374,7 +670,116 @@ function SmsAdminPage() {
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span>拖曳或點選上傳 CSV / TXT 匯入號碼</span>
+                                    <span>拖曳或點選上傳 Excel / CSV / TXT 匯入名單</span>
+                                </div>
+                            )}
+
+                            {/* 欄位對齊設定 UI 面板 */}
+                            {excelHeaders.length > 0 && (
+                                <div className="column-mapping-panel">
+                                    <h4 className="mapping-title">Excel/CSV 欄位對齊設定</h4>
+                                    <p className="mapping-subtitle">請將匯入檔案的表頭與發送欄位進行映射，以利個性化變數代入。</p>
+                                    <div className="mapping-grid">
+                                        <div className="mapping-item">
+                                            <label className="mapping-label">手機號碼 (必填)</label>
+                                            <select
+                                                className="mapping-select"
+                                                value={columnMapping.phone}
+                                                onChange={(e) => {
+                                                    const newMapping = { ...columnMapping, phone: e.target.value };
+                                                    setColumnMapping(newMapping);
+                                                    updateImportedNumbersFromMapping(excelRows, excelHeaders, newMapping);
+                                                }}
+                                            >
+                                                <option value="">-- 請選擇對應欄位 --</option>
+                                                {excelHeaders.map((h, i) => (
+                                                    <option key={i} value={h}>{h}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="mapping-item">
+                                            <label className="mapping-label">會員姓名 (選填)</label>
+                                            <select
+                                                className="mapping-select"
+                                                value={columnMapping.name}
+                                                onChange={(e) => {
+                                                    setColumnMapping(prev => ({ ...prev, name: e.target.value }));
+                                                }}
+                                            >
+                                                <option value="">-- 不對齊 / 無 --</option>
+                                                {excelHeaders.map((h, i) => (
+                                                    <option key={i} value={h}>{h}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="mapping-item">
+                                            <label className="mapping-label">點數 (選填)</label>
+                                            <select
+                                                className="mapping-select"
+                                                value={columnMapping.points}
+                                                onChange={(e) => {
+                                                    setColumnMapping(prev => ({ ...prev, points: e.target.value }));
+                                                }}
+                                            >
+                                                <option value="">-- 不對齊 / 無 --</option>
+                                                {excelHeaders.map((h, i) => (
+                                                    <option key={i} value={h}>{h}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* 前 3 筆數據映射預覽 */}
+                                    {columnMapping.phone && excelRows.length > 0 && (
+                                        <div className="mapping-preview-section">
+                                            <h5 className="preview-title">名單資料映射預覽 (前 3 筆)</h5>
+                                            <div className="preview-table-wrapper">
+                                                <table className="preview-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>流水號</th>
+                                                            <th>手機號碼 ({columnMapping.phone})</th>
+                                                            <th>會員姓名 {columnMapping.name ? `(${columnMapping.name})` : '(未對齊)'}</th>
+                                                            <th>點數 {columnMapping.points ? `(${columnMapping.points})` : '(未對齊)'}</th>
+                                                            <th>簡訊預覽效果</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {excelRows.slice(0, 3).map((row, idx) => {
+                                                            const phoneIdx = excelHeaders.indexOf(columnMapping.phone);
+                                                            const nameIdx = columnMapping.name ? excelHeaders.indexOf(columnMapping.name) : -1;
+                                                            const pointsIdx = columnMapping.points ? excelHeaders.indexOf(columnMapping.points) : -1;
+
+                                                            const phoneVal = phoneIdx !== -1 ? row[phoneIdx] : '';
+                                                            const nameVal = nameIdx !== -1 ? row[nameIdx] : '';
+                                                            const pointsVal = pointsIdx !== -1 ? row[pointsIdx] : '';
+
+                                                            const formattedPhone = formatPhoneNumber(String(phoneVal)) || '格式不符';
+                                                            
+                                                            let previewText = smsBody;
+                                                            if (smsBody) {
+                                                                previewText = previewText
+                                                                    .replace(/{{姓名}}/g, nameVal !== undefined ? String(nameVal) : '')
+                                                                    .replace(/{{點數}}/g, pointsVal !== undefined ? String(pointsVal) : '');
+                                                            } else {
+                                                                previewText = '(未輸入簡訊內容)';
+                                                            }
+
+                                                            return (
+                                                                <tr key={idx}>
+                                                                    <td>{idx + 1}</td>
+                                                                    <td className="cell-phone">{formattedPhone}</td>
+                                                                    <td>{nameVal !== undefined && nameVal !== null ? String(nameVal) : '-'}</td>
+                                                                    <td>{pointsVal !== undefined && pointsVal !== null ? String(pointsVal) : '-'}</td>
+                                                                    <td className="cell-preview-body" title={previewText}>{previewText}</td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -383,13 +788,24 @@ function SmsAdminPage() {
                         <div className="form-group">
                             <div className="label-with-action">
                                 <label className="form-label">2. 簡訊內容</label>
-                                <button type="button" className="text-action-btn" onClick={insertMarketingText}>
-                                    插入 NCC 行銷警語
-                                </button>
+                                <div className="action-buttons-group">
+                                    <button type="button" className="text-action-btn" onClick={() => insertVariable('姓名')}>
+                                        插入姓名變數
+                                    </button>
+                                    <span className="btn-separator">|</span>
+                                    <button type="button" className="text-action-btn" onClick={() => insertVariable('點數')}>
+                                        插入點數變數
+                                    </button>
+                                    <span className="btn-separator">|</span>
+                                    <button type="button" className="text-action-btn" onClick={insertMarketingText}>
+                                        插入 NCC 行銷警語
+                                    </button>
+                                </div>
                             </div>
                             <textarea
+                                ref={textareaRef}
                                 className="admin-input sms-textarea"
-                                placeholder="輸入簡訊內容... (行銷簡訊必須包含【品牌】抬頭與「退訂回覆STOP」)"
+                                placeholder="輸入簡訊內容... 點擊上方變數按鈕可於游標處插入 {{姓名}} 與 {{點數}}，系統發送時會為每位會員代入專屬內容。"
                                 value={smsBody}
                                 onChange={(e) => setSmsBody(e.target.value)}
                                 rows="4"
@@ -398,15 +814,43 @@ function SmsAdminPage() {
                             {/* 即時字數計算與成本估計 */}
                             {smsBody && (
                                 <div className="sms-metrics-panel">
-                                    <div className="metric-item">
-                                        字數: <strong>{metrics.chars}</strong> 字
-                                    </div>
-                                    <div className="metric-item">
-                                        計費段數: <strong>{metrics.segments}</strong> 段
-                                    </div>
-                                    <div className="metric-item highlight-metric">
-                                        預估費用: <strong>NT$ {metrics.cost}</strong>
-                                    </div>
+                                    {metrics.isPersonalized ? (
+                                        <>
+                                            <div className="metric-item">
+                                                發送模式: <span className="badge-personalized">個性化變數簡訊</span>
+                                            </div>
+                                            <div className="metric-item">
+                                                平均字數: <strong>{metrics.chars}</strong> 字
+                                            </div>
+                                            <div className="metric-item">
+                                                發送名單: <strong>{metrics.totalCount}</strong> 人
+                                            </div>
+                                            <div className="metric-item">
+                                                總計費段數: <strong>{metrics.segments}</strong> 段
+                                            </div>
+                                            <div className="metric-item highlight-metric">
+                                                預估費用: <strong>NT$ {metrics.cost}</strong>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="metric-item">
+                                                字數: <strong>{metrics.chars}</strong> 字
+                                            </div>
+                                            <div className="metric-item">
+                                                單筆段數: <strong>{metrics.singleSegments}</strong> 段
+                                            </div>
+                                            <div className="metric-item">
+                                                收件人: <strong>{getFinalRecipients().length}</strong> 人
+                                            </div>
+                                            <div className="metric-item">
+                                                總計費段數: <strong>{metrics.segments}</strong> 段
+                                            </div>
+                                            <div className="metric-item highlight-metric">
+                                                預估費用: <strong>NT$ {metrics.cost}</strong>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -544,7 +988,7 @@ function SmsAdminPage() {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 2rem;
+                    margin-bottom: 1.5rem;
                     flex-wrap: wrap;
                     gap: 1rem;
                 }
@@ -575,12 +1019,6 @@ function SmsAdminPage() {
                     border-radius: 50%;
                     margin-right: 6px;
                     display: inline-block;
-                }
-                .balance-badge {
-                    background: #e6f4ec;
-                    border-color: #a3d8be;
-                    color: var(--brand);
-                    font-weight: 600;
                 }
                 .sms-container-vertical {
                     display: flex;
@@ -623,6 +1061,16 @@ function SmsAdminPage() {
                 .label-with-action .form-label {
                     margin-bottom: 0;
                 }
+                .action-buttons-group {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                .btn-separator {
+                    color: var(--border);
+                    font-size: 0.8rem;
+                    user-select: none;
+                }
                 .text-action-btn {
                     background: none;
                     border: none;
@@ -655,7 +1103,7 @@ function SmsAdminPage() {
                     margin-top: 0.75rem;
                     border: 2px dashed var(--border);
                     border-radius: var(--radius);
-                    padding: 1rem;
+                    padding: 1.25rem 1rem;
                     text-align: center;
                     cursor: pointer;
                     color: var(--text-secondary);
@@ -738,6 +1186,8 @@ function SmsAdminPage() {
                     margin-top: 0.75rem;
                     font-size: 0.85rem;
                     color: var(--text-secondary);
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
                 }
                 .metric-item strong {
                     color: var(--text);
@@ -798,6 +1248,199 @@ function SmsAdminPage() {
                     border-color: var(--brand-dark);
                 }
                 
+                /* 精美錢包卡片樣式 */
+                .wallet-balance-card {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: #ffffff;
+                    border-radius: 12px;
+                    padding: 1.25rem 1.5rem;
+                    margin-bottom: 1.5rem;
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+                    transition: all 0.3s ease;
+                }
+                .wallet-balance-card:hover {
+                    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+                    transform: translateY(-2px);
+                }
+                .wallet-card-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
+                .wallet-icon-wrapper {
+                    background: rgba(255, 255, 255, 0.15);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 10px;
+                    width: 44px;
+                    height: 44px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .wallet-svg {
+                    stroke: #ffffff;
+                }
+                .wallet-info-area {
+                    display: flex;
+                    flex-direction: column;
+                    text-align: left;
+                }
+                .wallet-card-label {
+                    font-size: 0.8rem;
+                    color: rgba(255, 255, 255, 0.8);
+                    font-weight: 500;
+                    margin-bottom: 0.15rem;
+                }
+                .wallet-card-value {
+                    font-size: 1.6rem;
+                    font-weight: 700;
+                    letter-spacing: -0.5px;
+                }
+                .wallet-refresh-btn {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    color: #ffffff;
+                    padding: 0.45rem 0.75rem;
+                    border-radius: 6px;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    transition: all 0.2s ease;
+                }
+                .wallet-refresh-btn:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: scale(1.02);
+                }
+                .wallet-refresh-btn:active {
+                    transform: scale(0.98);
+                }
+                .refresh-svg.spinning {
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                /* 個性化徽章 */
+                .badge-personalized {
+                    background: #e0f2fe;
+                    color: #0369a1;
+                    border: 1px solid #bae6fd;
+                    padding: 0.15rem 0.4rem;
+                    border-radius: 4px;
+                    font-weight: 600;
+                    font-size: 0.8rem;
+                }
+
+                /* 欄位對齊面板 */
+                .column-mapping-panel {
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    padding: 1.25rem;
+                    margin-top: 1rem;
+                    animation: slideDown 0.3s ease;
+                }
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translateY(-8px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .mapping-title {
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin: 0 0 0.25rem 0;
+                    text-align: left;
+                }
+                .mapping-subtitle {
+                    font-size: 0.8rem;
+                    color: #64748b;
+                    margin: 0 0 1rem 0;
+                    text-align: left;
+                }
+                .mapping-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                    gap: 1rem;
+                    margin-bottom: 1.25rem;
+                }
+                .mapping-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.35rem;
+                    text-align: left;
+                }
+                .mapping-label {
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: #475569;
+                }
+                .mapping-select {
+                    padding: 0.5rem;
+                    font-size: 0.85rem;
+                    border: 1px solid #cbd5e1;
+                    background-color: #ffffff;
+                    border-radius: 6px;
+                    outline: none;
+                    width: 100%;
+                }
+                .mapping-select:focus {
+                    border-color: #10b981;
+                }
+
+                /* 映射預覽表格 */
+                .mapping-preview-section {
+                    border-top: 1px dashed #e2e8f0;
+                    padding-top: 1rem;
+                }
+                .preview-title {
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: #334155;
+                    margin: 0 0 0.75rem 0;
+                    text-align: left;
+                }
+                .preview-table-wrapper {
+                    overflow-x: auto;
+                    border-radius: 6px;
+                    border: 1px solid #e2e8f0;
+                }
+                .preview-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 0.8rem;
+                    text-align: left;
+                    background-color: #ffffff;
+                }
+                .preview-table th {
+                    background: #f1f5f9;
+                    padding: 0.6rem 0.75rem;
+                    font-weight: 600;
+                    color: #475569;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+                .preview-table td {
+                    padding: 0.6rem 0.75rem;
+                    border-bottom: 1px solid #f1f5f9;
+                    color: #334155;
+                    white-space: nowrap;
+                }
+                .cell-preview-body {
+                    max-width: 250px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    color: #64748b;
+                    font-style: italic;
+                }
+
                 /* 歷史紀錄區樣式 */
                 .header-title-group {
                     display: flex;
