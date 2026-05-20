@@ -6,4 +6,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://handstw.vercel.app',
+        changeOrigin: true,
+        secure: true
+      }
+    }
+  }
 })
