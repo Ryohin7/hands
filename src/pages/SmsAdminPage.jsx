@@ -111,7 +111,7 @@ function SmsAdminPage() {
                 }
 
                 if (validNumbers.length === 0) {
-                    setMessage({ type: 'warning', text: '未在檔案中偵測到任何有效的手機號碼！' });
+                    setMessage({ type: 'warning', text: '未在檔案中偵測到任何有效的手機號碼' });
                     return;
                 }
 
@@ -119,7 +119,7 @@ function SmsAdminPage() {
                 setDuplicateCount(duplicates);
                 setMessage({
                     type: 'success',
-                    text: `成功解析 ${validNumbers.length} 筆有效號碼！(已過濾 ${duplicates} 筆重複/無效)`
+                    text: `成功解析 ${validNumbers.length} 筆有效號碼 (已過濾 ${duplicates} 筆重複/無效)`
                 });
             } catch (err) {
                 console.error(err);
@@ -181,7 +181,7 @@ function SmsAdminPage() {
     const insertMarketingText = () => {
         const textToAppend = '【Hands】退訂回覆STOP';
         if (smsBody.includes(textToAppend)) return;
-        setSmsBody(prev => prev ? `${prev} ${textToAppend}` : `【品牌行銷】活動優惠！ ${textToAppend}`);
+        setSmsBody(prev => prev ? `${prev} ${textToAppend}` : `【品牌行銷】活動優惠 ${textToAppend}`);
     };
 
     // 提交發送簡訊
@@ -234,8 +234,8 @@ function SmsAdminPage() {
                 setMessage({
                     type: 'success',
                     text: sendType === 'immediate'
-                        ? '簡訊已成功發送至發送佇列！'
-                        : `預約簡訊已排程成功！發送時間為：${new Date(scheduledTime).toLocaleString()}`
+                        ? '簡訊已成功發送至發送佇列'
+                        : `預約簡訊已排程成功，發送時間為：${new Date(scheduledTime).toLocaleString()}`
                 });
                 // 清除輸入
                 setRecipientInput('');
@@ -254,6 +254,37 @@ function SmsAdminPage() {
             setMessage({ type: 'error', text: '連線後端 API 代理失敗，請稍後再試。' });
         } finally {
             setIsSending(false);
+        }
+    };
+
+    // 歷史發送明細統計數據計算
+    const getHistoryStats = () => {
+        const total = history.length;
+        const success = history.filter(item => item.status === 'delivered').length;
+        const stopCount = history.filter(item => item.status === 'stop').length;
+        const failedOnly = history.filter(item => item.status === 'failed').length;
+        const failed = failedOnly + stopCount; // 失敗數量包含一般失敗與退訂攔截
+        const processing = history.filter(item => item.status === 'sent' || item.status === 'queued').length;
+        return { total, success, failed, stop: stopCount, failedOnly, processing };
+    };
+
+    const stats = getHistoryStats();
+
+    // 狀態轉繁體中文顯示
+    const translateStatus = (status) => {
+        switch (status) {
+            case 'delivered':
+                return '成功送達';
+            case 'failed':
+                return '發送失敗';
+            case 'sent':
+                return '已傳送';
+            case 'queued':
+                return '等待發送';
+            case 'stop':
+                return '退訂攔截';
+            default:
+                return status;
         }
     };
 
@@ -280,14 +311,14 @@ function SmsAdminPage() {
             {/* 訊息提示 */}
             {message && (
                 <div className={`converter-message converter-message-${message.type}`} style={{ margin: '0 0 1.5rem 0' }}>
-                    {message.type === 'success' ? '✅' : message.type === 'warning' ? '⚠️' : '❌'} {message.text}
+                    {message.type === 'success' ? '成功: ' : message.type === 'warning' ? '警告: ' : '錯誤: '} {message.text}
                 </div>
             )}
 
-            <div className="sms-grid">
-                {/* 左側：發送表單 */}
+            <div className="sms-container-vertical">
+                {/* 上方區塊：發送表單 */}
                 <div className="sms-card form-card">
-                    <h3 className="card-title">📝 新增簡訊任務</h3>
+                    <h3 className="card-title">新增簡訊任務</h3>
                     
                     <form onSubmit={handleSend}>
                         {/* 收件人設定 */}
@@ -314,10 +345,10 @@ function SmsAdminPage() {
                                         <button type="button" className="clear-import-btn" onClick={clearImported}>清除匯入</button>
                                     </div>
                                     <div className="imported-chips">
-                                        {importedNumbers.slice(0, 10).map((num, i) => (
+                                        {importedNumbers.slice(0, 15).map((num, i) => (
                                             <span key={i} className="phone-chip">{num}</span>
                                         ))}
-                                        {importedNumbers.length > 10 && <span className="phone-chip more-chip">+{importedNumbers.length - 10} 筆...</span>}
+                                        {importedNumbers.length > 15 && <span className="phone-chip more-chip">+{importedNumbers.length - 15} 筆...</span>}
                                     </div>
                                 </div>
                             )}
@@ -353,7 +384,7 @@ function SmsAdminPage() {
                             <div className="label-with-action">
                                 <label className="form-label">2. 簡訊內容</label>
                                 <button type="button" className="text-action-btn" onClick={insertMarketingText}>
-                                    ✨ 插入 NCC 行銷警語
+                                    插入 NCC 行銷警語
                                 </button>
                             </div>
                             <textarea
@@ -361,7 +392,7 @@ function SmsAdminPage() {
                                 placeholder="輸入簡訊內容... (行銷簡訊必須包含【品牌】抬頭與「退訂回覆STOP」)"
                                 value={smsBody}
                                 onChange={(e) => setSmsBody(e.target.value)}
-                                rows="5"
+                                rows="4"
                                 maxLength="1000"
                             />
                             {/* 即時字數計算與成本估計 */}
@@ -381,7 +412,7 @@ function SmsAdminPage() {
                         </div>
 
                         {/* 發送時間 */}
-                        <div className="form-group">
+                        <div className="form-group text-left">
                             <label className="form-label">3. 發送時間</label>
                             <div className="send-type-toggle">
                                 <button
@@ -419,22 +450,53 @@ function SmsAdminPage() {
                             {isSending ? (
                                 <span className="loading-spinner"></span>
                             ) : sendType === 'immediate' ? (
-                                '🚀 立即發送簡訊'
+                                '立即發送簡訊'
                             ) : (
-                                '📅 排程預約發送'
+                                '排程預約發送'
                             )}
                         </button>
                     </form>
                 </div>
 
-                {/* 右側：發送歷史 */}
-                <div className="sms-card history-card">
+                {/* 下方區塊：發送歷史與統計 */}
+                <div className="sms-card history-card" style={{ marginTop: '1.5rem' }}>
                     <div className="card-header-row">
-                        <h3 className="card-title">📜 發送歷史明細 (最近50筆)</h3>
+                        <h3 className="card-title" style={{ marginBottom: 0, borderBottom: 'none', paddingBottom: 0 }}>發送歷史明細 (最近50筆)</h3>
                         <button onClick={fetchHistory} disabled={isLoadingHistory} className="refresh-btn">
-                            {isLoadingHistory ? '整理中...' : '🔄 整理'}
+                            {isLoadingHistory ? '整理中...' : '重新整理'}
                         </button>
                     </div>
+
+                    {/* 數據統計儀表板 */}
+                    {history.length > 0 && (
+                        <div className="stats-dashboard">
+                            <div className="stat-card">
+                                <div className="stat-label">傳送數量</div>
+                                <div className="stat-value">{stats.total}</div>
+                                <div className="stat-desc">已提交至簡訊通道的總筆數</div>
+                            </div>
+                            <div className="stat-card stat-card-success">
+                                <div className="stat-label">成功數量</div>
+                                <div className="stat-value">{stats.success}</div>
+                                <div className="stat-desc">已成功送達收件人手機</div>
+                            </div>
+                            <div className="stat-card stat-card-failed">
+                                <div className="stat-label">失敗數量</div>
+                                <div className="stat-value">{stats.failed}</div>
+                                <div className="stat-desc">
+                                    發送失敗或退訂攔截的筆數
+                                    {stats.stop > 0 && <span className="stat-sub-desc"> (含 {stats.stop} 筆退訂)</span>}
+                                </div>
+                            </div>
+                            {stats.processing > 0 && (
+                                <div className="stat-card stat-card-processing">
+                                    <div className="stat-label">傳送中</div>
+                                    <div className="stat-value">{stats.processing}</div>
+                                    <div className="stat-desc">正在發送佇列中處理</div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     <div className="history-table-container">
                         {history.length === 0 ? (
@@ -447,8 +509,8 @@ function SmsAdminPage() {
                                     <tr>
                                         <th>收件人</th>
                                         <th>簡訊內容</th>
-                                        <th>狀態</th>
-                                        <th>時間</th>
+                                        <th>送達狀態</th>
+                                        <th>發送時間</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -458,7 +520,7 @@ function SmsAdminPage() {
                                             <td className="cell-body" title={item.body}>{item.body}</td>
                                             <td>
                                                 <span className={`status-badge-row status-${item.status}`}>
-                                                    {item.status}
+                                                    {translateStatus(item.status)}
                                                 </span>
                                             </td>
                                             <td className="cell-time">
@@ -520,16 +582,11 @@ function SmsAdminPage() {
                     color: var(--brand);
                     font-weight: 600;
                 }
-                .sms-grid {
-                    display: grid;
-                    grid-template-columns: 1.1fr 1fr;
-                    gap: 1.5rem;
-                    align-items: start;
-                }
-                @media (max-width: 1024px) {
-                    .sms-grid {
-                        grid-template-columns: 1fr;
-                    }
+                .sms-container-vertical {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    width: 100%;
                 }
                 .sms-card {
                     background: #fff;
@@ -537,6 +594,7 @@ function SmsAdminPage() {
                     border-radius: 12px;
                     padding: 1.75rem;
                     box-shadow: var(--shadow-sm);
+                    width: 100%;
                 }
                 .card-title {
                     font-size: 1.1rem;
@@ -739,6 +797,81 @@ function SmsAdminPage() {
                     background: var(--brand-dark);
                     border-color: var(--brand-dark);
                 }
+                
+                /* 歷史紀錄區樣式 */
+                .header-title-group {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    flex-wrap: wrap;
+                }
+                .header-title-group .card-title {
+                    margin-bottom: 0;
+                    border-bottom: none;
+                    padding-bottom: 0;
+                }
+                /* 數據統計儀表板 */
+                .stats-dashboard {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+                .stat-card {
+                    background: var(--bg-gray);
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    padding: 1.25rem;
+                    text-align: left;
+                    transition: all 0.2s ease;
+                }
+                .stat-card:hover {
+                    box-shadow: var(--shadow-sm);
+                    transform: translateY(-2px);
+                }
+                .stat-label {
+                    font-size: 0.85rem;
+                    color: var(--text-secondary);
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                }
+                .stat-value {
+                    font-size: 1.75rem;
+                    font-weight: 700;
+                    color: var(--text);
+                    line-height: 1.2;
+                }
+                .stat-desc {
+                    font-size: 0.75rem;
+                    color: var(--text-secondary);
+                    margin-top: 0.5rem;
+                }
+                .stat-sub-desc {
+                    color: #ff4d4f;
+                    font-weight: 600;
+                }
+                .stat-card-success {
+                    background: #f6ffed;
+                    border-color: #d9f7be;
+                }
+                .stat-card-success .stat-label, .stat-card-success .stat-value {
+                    color: #389e0d;
+                }
+                .stat-card-failed {
+                    background: #fff1f0;
+                    border-color: #ffa39e;
+                }
+                .stat-card-failed .stat-label, .stat-card-failed .stat-value {
+                    color: #cf1322;
+                }
+                .stat-card-processing {
+                    background: #e6f7ff;
+                    border-color: #91d5ff;
+                }
+                .stat-card-processing .stat-label, .stat-card-processing .stat-value {
+                    color: #096dd9;
+                }
+                
                 .card-header-row {
                     display: flex;
                     justify-content: space-between;
@@ -746,11 +879,8 @@ function SmsAdminPage() {
                     margin-bottom: 1.5rem;
                     border-bottom: 1px solid var(--border-light);
                     padding-bottom: 0.75rem;
-                }
-                .card-header-row .card-title {
-                    margin-bottom: 0;
-                    border-bottom: none;
-                    padding-bottom: 0;
+                    flex-wrap: wrap;
+                    gap: 1rem;
                 }
                 .refresh-btn {
                     background: none;
@@ -769,6 +899,7 @@ function SmsAdminPage() {
                 .history-table-container {
                     max-height: 520px;
                     overflow-y: auto;
+                    width: 100%;
                 }
                 .empty-history {
                     text-align: center;
@@ -797,9 +928,10 @@ function SmsAdminPage() {
                 .cell-phone {
                     font-weight: 600;
                     color: var(--text);
+                    white-space: nowrap;
                 }
                 .cell-body {
-                    max-width: 150px;
+                    max-width: 300px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -808,14 +940,15 @@ function SmsAdminPage() {
                 .cell-time {
                     color: var(--text-secondary);
                     font-size: 0.8rem;
+                    white-space: nowrap;
                 }
                 .status-badge-row {
                     display: inline-block;
-                    padding: 0.2rem 0.5rem;
+                    padding: 0.25rem 0.6rem;
                     border-radius: 4px;
                     font-size: 0.75rem;
                     font-weight: 600;
-                    text-transform: uppercase;
+                    white-space: nowrap;
                 }
                 .status-delivered {
                     background: #f6ffed;
@@ -831,6 +964,11 @@ function SmsAdminPage() {
                     background: #fff1f0;
                     border: 1px solid #ffa39e;
                     color: #cf1322;
+                }
+                .status-stop {
+                    background: #fafafa;
+                    border: 1px solid #d9d9d9;
+                    color: rgba(0, 0, 0, 0.45);
                 }
                 .w-full {
                     width: 100%;
