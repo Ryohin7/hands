@@ -31,6 +31,7 @@ import EventAdminPage from './pages/EventAdminPage';
 import FormTestPage from './pages/FormTestPage';
 import TravelCampaignPage from './pages/TravelCampaignPage';
 import ExcelDedupePage from './pages/ExcelDedupePage';
+import SmsAdminPage from './pages/SmsAdminPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import StaffLayout from './components/StaffLayout';
@@ -107,6 +108,7 @@ function App() {
                         <Route path="edit" element={<AdminEditPage />} />
                         <Route path="edit/:id" element={<AdminEditPage />} />
                         <Route path="converter" element={<DataConverterPage />} />
+                        <Route path="sms" element={<SmsAdminPage />} />
 
                         {/* 門市管理 */}
                         <Route path="stores" element={<StoreAdminPage />} />
