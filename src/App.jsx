@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import AdminEditPage from './pages/AdminEditPage';
 import DataConverterPage from './pages/DataConverterPage';
+import CouponExpiryPage from './pages/CouponExpiryPage';
 import StoreListPage from './pages/StoreListPage';
 import StoreAdminPage from './pages/StoreAdminPage';
 import StoreEditPage from './pages/StoreEditPage';
@@ -108,6 +109,7 @@ function App() {
                         <Route path="edit" element={<AdminEditPage />} />
                         <Route path="edit/:id" element={<AdminEditPage />} />
                         <Route path="converter" element={<DataConverterPage />} />
+                        <Route path="coupon-expiry" element={<CouponExpiryPage />} />
                         <Route path="sms" element={<SmsAdminPage />} />
 
                         {/* 門市管理 */}

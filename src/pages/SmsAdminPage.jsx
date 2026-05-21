@@ -16,7 +16,7 @@ function SmsAdminPage() {
     const [dragOver, setDragOver] = useState(false);
     const [history, setHistory] = useState([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-    const [walletBalance, setWalletBalance] = useState(null);
+    // const [walletBalance, setWalletBalance] = useState(null); // 已移除餘額顯示
 
     // Excel/CSV 欄位對齊狀態
     const [excelHeaders, setExcelHeaders] = useState([]);
@@ -42,15 +42,8 @@ function SmsAdminPage() {
             const data = await res.json();
             if (res.ok && data.ok) {
                 setHistory(data.messages || []);
-                // 從最新的簡訊發送紀錄中提取餘額 (如果有的話)
-                if (data.messages && data.messages.length > 0) {
-                    const latestWithBalance = data.messages.find(m => m.balance_cents !== undefined);
-                    if (latestWithBalance) {
-                        setWalletBalance((latestWithBalance.balance_cents / 100).toFixed(2));
-                    }
-                }
             } else {
-                console.error('無法載入歷史紀錄:', data.error);
+                console.error('無法載入歷史紀錄:', data?.error);
             }
         } catch (err) {
             console.error('載入歷史紀錄發生錯誤:', err);
@@ -355,9 +348,22 @@ function SmsAdminPage() {
 
     // 快速插入行銷警語
     const insertMarketingText = () => {
-        const textToAppend = '【台隆手創館】親愛的會員您好';
-        if (smsBody.includes(textToAppend)) return;
-        setSmsBody(prev => prev ? `${prev} ${textToAppend}` : `【品牌行銷】活動優惠 ${textToAppend}`);
+        const textToInsert = '【HANDS台隆手創館】';
+        const textarea = textareaRef.current;
+        if (textarea) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const newText = text.substring(0, start) + textToInsert + text.substring(end);
+            setSmsBody(newText);
+            setTimeout(() => {
+                textarea.focus();
+                const cursor = start + textToInsert.length;
+                textarea.setSelectionRange(cursor, cursor);
+            }, 0);
+        } else {
+            setSmsBody(prev => prev ? `${textToInsert}${prev}` : textToInsert);
+        }
     };
 
     // 在游標處插入個性化變數
@@ -491,10 +497,7 @@ function SmsAdminPage() {
                     });
                 }
 
-                // 更新餘額
-                if (result.balance_cents !== undefined && result.balance_cents !== null) {
-                    setWalletBalance((result.balance_cents / 100).toFixed(2));
-                }
+                // (已移除餘額更新)
 
                 // 清除輸入
                 setRecipientInput('');
@@ -563,46 +566,7 @@ function SmsAdminPage() {
                 </div>
             </div>
 
-            {/* 頂部 MAAC 帳戶餘額看板 (高質感錢包卡片) */}
-            <div className="wallet-balance-card">
-                <div className="wallet-card-content">
-                    <div className="wallet-icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="wallet-svg">
-                            <rect x="2" y="4" width="20" height="16" rx="2" />
-                            <path d="M16 8h4v8h-4z" />
-                            <circle cx="18" cy="12" r="1" fill="currentColor" />
-                        </svg>
-                    </div>
-                    <div className="wallet-info-area">
-                        <span className="wallet-card-label">MAAC 簡訊帳戶餘額</span>
-                        <span className="wallet-card-value">
-                            {walletBalance !== null ? `NT$ ${walletBalance}` : '讀取中...'}
-                        </span>
-                    </div>
-                </div>
-                <button 
-                    type="button" 
-                    onClick={fetchHistory} 
-                    disabled={isLoadingHistory} 
-                    className="wallet-refresh-btn"
-                    title="重新整理餘額"
-                >
-                    <svg 
-                        width="16" 
-                        height="16" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2.5" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        className={`refresh-svg ${isLoadingHistory ? 'spinning' : ''}`}
-                    >
-                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                    </svg>
-                    <span>重新整理</span>
-                </button>
-            </div>
+            {/* 已移除餘額看板 */}
 
             {/* 訊息提示 */}
             {message && (
