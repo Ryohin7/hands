@@ -33,6 +33,7 @@ import FormTestPage from './pages/FormTestPage';
 import TravelCampaignPage from './pages/TravelCampaignPage';
 import ExcelDedupePage from './pages/ExcelDedupePage';
 import SmsAdminPage from './pages/SmsAdminPage';
+import MemberProfileChangePage from './pages/MemberProfileChangePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import StaffLayout from './components/StaffLayout';
@@ -51,9 +52,7 @@ import StoreManagePage from './pages/staff/StoreManagePage';
 import ReportPage from './pages/staff/ReportPage';
 import StaffDashboardPage from './pages/staff/StaffDashboardPage';
 import LineBindPage from './pages/staff/LineBindPage';
-import ProjectsPage from './pages/staff/ProjectsPage';
-import ProjectDetailPage from './pages/staff/ProjectDetailPage';
-import ProjectSettingsPage from './pages/staff/ProjectSettingsPage';
+
 
 function PWAUpdateHandler() {
     useEffect(() => {
@@ -90,6 +89,7 @@ function App() {
                     <Route path="/p/:id" element={<><Header /><main className="main-content"><CustomPageView /></main><Footer /></>} />
                     <Route path="/test-font" element={<><Header /><main className="main-content"><FontTestPage /></main><Footer /></>} />
                     <Route path="/registration-inquiry" element={<><Header /><main className="main-content"><RegistrationInquiryPage /></main><Footer /></>} />
+                    <Route path="/member-change" element={<main className="campaign-only-content"><MemberProfileChangePage /></main>} />
                     <Route path="/events" element={<><Header /><main className="main-content"><PhysicalEventsPage /></main><Footer /></>} />
                     <Route path="/staff/login" element={<><Header /><main className="main-content"><StaffLoginPage /></main><Footer /></>} />
                     <Route path="/form-test" element={<><Header /><main className="main-content"><FormTestPage /></main><Footer /></>} />
@@ -158,9 +158,7 @@ function App() {
                         <Route path="stores" element={<StoreManagePage />} />
                         <Route path="reports" element={<ReportPage />} />
                         <Route path="line-bind" element={<LineBindPage />} />
-                        <Route path="projects" element={<ProjectsPage />} />
-                        <Route path="projects/:id" element={<ProjectDetailPage />} />
-                        <Route path="project-settings" element={<ProjectSettingsPage />} />
+
                     </Route>
 
 

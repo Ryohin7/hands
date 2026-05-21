@@ -395,11 +395,37 @@ function HomePage() {
                     )}
 
                     <div className="announcement-section">
-                        <div className="page-header">
-                            <h1 className="page-title">最新公告</h1>
-                            {totalCount > 0 && (
-                                <span className="page-count">共 {totalCount} 則</span>
-                            )}
+                        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h1 className="page-title" style={{ margin: 0 }}>最新公告</h1>
+                                {totalCount > 0 && (
+                                    <span className="page-count">共 {totalCount} 則</span>
+                                )}
+                            </div>
+                            <Link 
+                                to="/member-change" 
+                                className="btn btn-outline"
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '6px',
+                                    padding: '0.6rem 1.25rem',
+                                    borderRadius: '20px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    color: '#007130',
+                                    borderColor: '#007130',
+                                    textDecoration: 'none'
+                                }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                    <line x1="19" y1="8" x2="19" y2="14" />
+                                    <line x1="16" y1="11" x2="22" y2="11" />
+                                </svg>
+                                會員資料變更
+                            </Link>
                         </div>
 
                     {/* 置頂公告區塊 */}

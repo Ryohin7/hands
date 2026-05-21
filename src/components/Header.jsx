@@ -61,7 +61,8 @@ function Header() {
                     { id: '1', label: '首頁', path: '/' },
                     { id: '2', label: '門市資訊', path: '/stores' },
                     { id: '3', label: '最新 DM', path: '/dm' },
-                    { id: '4', label: '員工入口', path: '/staff' }
+                    { id: '4', label: '會員資料變更', path: '/member-change' },
+                    { id: '5', label: '員工入口', path: '/staff' }
                 ]);
 
             }
