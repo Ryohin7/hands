@@ -131,15 +131,15 @@ function RoleSettingsPage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="admin-tabs">
+            <div className="tabs">
                 <button
-                    className={`tab-btn ${activeTab === 'roles' ? 'active' : ''}`}
+                    className={`btn ${activeTab === 'roles' ? 'btn-primary' : 'btn-outline tab-btn-outline'}`}
                     onClick={() => setActiveTab('roles')}
                 >
                     角色定義
                 </button>
                 <button
-                    className={`tab-btn ${activeTab === 'assignment' ? 'active' : ''}`}
+                    className={`btn ${activeTab === 'assignment' ? 'btn-primary' : 'btn-outline tab-btn-outline'}`}
                     onClick={() => setActiveTab('assignment')}
                 >
                     用戶角色指派
@@ -247,26 +247,15 @@ function RoleSettingsPage() {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .role-settings-page .admin-tabs {
-                    margin-bottom: 1.5rem;
+                .role-settings-page .tabs {
                     display: flex;
-                    gap: 0.5rem;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
                     border-bottom: 1px solid #ddd;
+                    padding-bottom: 0.5rem;
                 }
-                .role-settings-page .admin-tabs .tab-btn {
-                    padding: 0.75rem 1.5rem;
-                    border: none;
-                    background: none;
-                    cursor: pointer;
-                    border-bottom: 3px solid transparent;
-                    color: #666;
-                    font-weight: normal;
-                    transition: all 0.2s;
-                }
-                .role-settings-page .admin-tabs .tab-btn.active {
-                    border-bottom: 3px solid #007130;
-                    color: #007130;
-                    font-weight: bold;
+                .role-settings-page .tab-btn-outline {
+                    border: 1px solid #ddd;
                 }
                 .role-settings-page .roles-manage-card {
                     max-width: 800px;

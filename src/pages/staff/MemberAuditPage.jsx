@@ -114,15 +114,15 @@ function MemberAuditPage() {
                 <h2 className="admin-content-title">會員異動審核</h2>
             </div>
             
-            <div className="admin-tabs">
+            <div className="tabs">
                 <button 
-                    className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+                    className={`btn ${activeTab === 'pending' ? 'btn-primary' : 'btn-outline tab-btn-outline'}`}
                     onClick={() => setActiveTab('pending')}
                 >
                     待審核 ({requests.length})
                 </button>
                 <button 
-                    className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+                    className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline tab-btn-outline'}`}
                     onClick={() => setActiveTab('history')}
                 >
                     歷史紀錄 (最近50筆)
@@ -317,26 +317,15 @@ function MemberAuditPage() {
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `
-                .member-audit-page .admin-tabs {
-                    margin-bottom: 1.5rem;
+                .member-audit-page .tabs {
                     display: flex;
-                    gap: 0.5rem;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
                     border-bottom: 1px solid #ddd;
+                    padding-bottom: 0.5rem;
                 }
-                .member-audit-page .admin-tabs .tab-btn {
-                    padding: 0.75rem 1.5rem;
-                    border: none;
-                    background: none;
-                    cursor: pointer;
-                    border-bottom: 3px solid transparent;
-                    color: #666;
-                    font-weight: normal;
-                    transition: all 0.2s;
-                }
-                .member-audit-page .admin-tabs .tab-btn.active {
-                    border-bottom: 3px solid #007130;
-                    color: #007130;
-                    font-weight: bold;
+                .member-audit-page .tab-btn-outline {
+                    border: 1px solid #ddd;
                 }
                 .member-audit-page .mobile-only {
                     display: none;
