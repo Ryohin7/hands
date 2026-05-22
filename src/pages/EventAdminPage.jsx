@@ -136,11 +136,11 @@ function EventAdminPage() {
         // 標題與內容
         printContainer.innerHTML = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Hiragino Sans', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; color: #333;">
-                <h2 style="text-align: center; color: #007130; margin-bottom: 20px;">${postTitle} - 報名名單</h2>
+                <h2 style="text-align: center; color: #0071e3; margin-bottom: 20px;">${postTitle} - 報名名單</h2>
                 <p style="font-size: 14px; margin-bottom: 20px; color: #666;">匯出時間：${new Date().toLocaleString()}</p>
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <thead>
-                        <tr style="background: #f8f9fb; border-bottom: 2px solid #007130;">
+                        <tr style="background: #f8f9fb; border-bottom: 2px solid #0071e3;">
                             <th style="padding: 12px 8px; text-align: left; border: 1px solid #eee;">姓名</th>
                             <th style="padding: 12px 8px; text-align: left; border: 1px solid #eee;">性別</th>
                             <th style="padding: 12px 8px; text-align: left; border: 1px solid #eee;">電話</th>

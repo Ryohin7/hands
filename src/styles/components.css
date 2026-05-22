@@ -660,3 +660,327 @@
   max-height: 100px;
   border-radius: 4px;
 }
+
+/* === 後台 (Admin Layout) Apple 風格化組件覆寫 === */
+.admin-layout {
+  --brand: #0071e3;            /* Apple Active Blue */
+  --brand-dark: #0056b3;       /* Apple Active Blue Dark */
+  --brand-light: #e8f2ff;      /* Apple Active Blue Light */
+  --radius: 12px;              /* Card/Container rounded corners */
+  --radius-sm: 8px;            /* Button/Input rounded corners */
+  --bg-gray: #f5f5f7;          /* Apple background gray */
+  --border: #d2d2d7;           /* Apple light border */
+  --border-light: #e5e5e7;     /* Apple lighter border */
+}
+
+/* 按鈕樣式覆寫 */
+.admin-layout .btn-primary {
+  background: #0071e3;
+  color: #ffffff;
+  border-color: transparent;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.admin-layout .btn-primary:hover:not(:disabled) {
+  background: #0077ed;
+  border-color: transparent;
+}
+
+.admin-layout .btn-secondary {
+  background: #e8e8ed;
+  color: #0071e3;
+  border-color: transparent;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.admin-layout .btn-secondary:hover:not(:disabled) {
+  background: #d2d2d7;
+  color: #0071e3;
+}
+
+.admin-layout .btn-outline {
+  background: #ffffff;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.admin-layout .btn-outline:hover:not(:disabled) {
+  background: #f5f5f7;
+  border-color: #86868b;
+}
+
+.admin-layout .btn-ghost {
+  background: transparent;
+  color: #0071e3;
+  border-color: transparent;
+  border-radius: 8px;
+}
+
+.admin-layout .btn-ghost:hover:not(:disabled) {
+  background: #f5f5f7;
+  color: #0071e3;
+  border-color: transparent;
+}
+
+.admin-layout .btn-icon {
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  color: #86868b;
+  transition: all 0.2s ease;
+}
+
+.admin-layout .btn-icon:hover {
+  background: #f5f5f7;
+  border-color: #86868b;
+  color: #1d1d1f;
+}
+
+/* 按鈕圖示與特定按鈕覆寫 */
+.admin-layout .btn-icon-pin:hover,
+.admin-layout .btn-icon-pinned {
+  border-color: #0071e3;
+  color: #0071e3;
+  background: #e8f2ff;
+}
+
+.admin-layout .btn-icon-pinned:hover {
+  border-color: #d2d2d7;
+  color: #86868b;
+  background: #f5f5f7;
+}
+
+/* 表單輸入框與下拉選單覆寫 */
+.admin-layout .form-group label {
+  color: #86868b;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-layout .form-group input:not([type="checkbox"]):not([type="radio"]),
+.admin-layout .form-group select,
+.admin-layout .form-group textarea {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1d1d1f;
+  background: #ffffff;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-layout .form-group input:not([type="checkbox"]):not([type="radio"]):focus,
+.admin-layout .form-group select:focus,
+.admin-layout .form-group textarea:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+  background: #ffffff;
+}
+
+.admin-layout .form-group input::placeholder {
+  color: #c7c7cc;
+}
+
+.admin-layout .form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 32px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.admin-layout .toggle-label input[type="checkbox"] {
+  accent-color: #0071e3;
+}
+
+/* 卡片樣式覆寫 */
+.admin-layout .edit-section-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.02);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-layout .edit-section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #f5f5f7;
+  padding-bottom: 0.5rem;
+}
+
+.admin-layout .info-card {
+  background: rgba(0, 113, 227, 0.04);
+  border: 1px solid rgba(0, 113, 227, 0.08);
+  color: #0071e3;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.admin-layout .card-stat-group {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  padding: 1.25rem;
+}
+
+/* 表格樣式覆寫 */
+.admin-layout .admin-table-wrap {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+}
+
+.admin-layout .admin-table th {
+  background: #f5f5f7;
+  color: #86868b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.admin-layout .admin-table td {
+  padding: 1.125rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  color: #1d1d1f;
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.admin-layout .admin-table tr:hover td {
+  background: #f5f5f7;
+}
+
+/* 狀態徽章覆寫 */
+.admin-layout .status-badge {
+  border-radius: 100px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-layout .status-published {
+  background: rgba(52, 199, 89, 0.12) !important;
+  color: #24b24b !important;
+}
+
+.admin-layout .status-draft {
+  background: rgba(255, 149, 0, 0.12) !important;
+  color: #ff9500 !important;
+}
+
+.admin-layout .status-archived {
+  background: rgba(142, 142, 147, 0.12) !important;
+  color: #8e8e93 !important;
+}
+
+.admin-layout .status-scheduled {
+  background: rgba(88, 86, 214, 0.12) !important;
+  color: #5856d6 !important;
+}
+
+.admin-layout .status-pinned {
+  background: rgba(0, 113, 227, 0.1) !important;
+  color: #0071e3 !important;
+  border-radius: 100px;
+  padding: 0.25rem 0.5rem;
+}
+
+.admin-layout .category-tag {
+  background: rgba(142, 142, 147, 0.08);
+  color: #8e8e93;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* 分頁樣式覆寫 */
+.admin-layout .pagination {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.admin-layout .pagination-btn {
+  background: #ffffff;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  color: #0071e3;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.admin-layout .pagination-btn:hover:not(:disabled) {
+  background: #f5f5f7;
+  border-color: #86868b;
+}
+
+.admin-layout .pagination-btn:disabled {
+  color: #86868b;
+  border-color: #e5e5e7;
+  background: #f5f5f7;
+  opacity: 0.5;
+}
+
+/* Tiptap 富文本編輯器 Apple 化 */
+.admin-layout .tiptap-editor {
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.admin-layout .tiptap-toolbar {
+  background: #f5f5f7;
+  border-bottom: 1px solid #d2d2d7;
+  padding: 8px;
+}
+
+.admin-layout .tiptap-toolbar button {
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.admin-layout .tiptap-toolbar button:hover {
+  background: #e8e8ed;
+}
+
+.admin-layout .tiptap-toolbar button.active {
+  background: #0071e3;
+  color: #ffffff;
+}
+
+.admin-layout .toolbar-select {
+  border: 1px solid #d2d2d7;
+  border-radius: 6px;
+  padding: 0 8px;
+  height: 28px;
+}
+
