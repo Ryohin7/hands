@@ -137,7 +137,8 @@ function MemberProfileChangePage() {
             setModalStep('success');
         } catch (err) {
             console.error('提交資料變更申請失敗:', err);
-            setError('提交失敗，請檢查網路連線後再試。');
+            const errCode = err?.code || err?.message || '未知錯誤';
+            setError(`提交失敗 (${errCode})，請檢查網路連線後再試。`);
             setShowModal(false);
         } finally {
             setSubmitting(false);
