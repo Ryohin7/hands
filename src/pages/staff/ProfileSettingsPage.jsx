@@ -13,8 +13,6 @@ function ProfileSettingsPage() {
     const [message, setMessage] = useState({ type: '', content: '' });
     const [stores, setStores] = useState([]); // 門市清單
 
-    const formGroupStyle = { marginBottom: '1.25rem' };
-
     useEffect(() => {
         const fetchProfile = async () => {
             if (auth.currentUser) {
@@ -94,39 +92,31 @@ function ProfileSettingsPage() {
     };
 
     return (
-        <div className="admin-page-content">
+        <div className="admin-page-content profile-settings-page">
             <div className="admin-content-header">
                 <h2 className="admin-content-title">個人資料變更</h2>
             </div>
 
             {message.content && (
-                <div className={`alert alert-${message.type}`} style={{ 
-                    padding: '1rem', 
-                    marginBottom: '1.5rem', 
-                    borderRadius: '8px',
-                    background: message.type === 'success' ? '#ECFDF5' : '#FEF2F2',
-                    color: message.type === 'success' ? '#065F46' : '#991B1B',
-                    border: `1px solid ${message.type === 'success' ? '#A7F3D0' : '#FECACA'}`
-                }}>
+                <div className={`alert alert-${message.type}`}>
                     {message.content}
                 </div>
             )}
 
-            <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                <div className="card" style={{ padding: '1.5rem' }}>
+            <div className="grid-2">
+                <div className="card">
                     <h3>基本資料</h3>
-                    <form onSubmit={handleUpdateProfile} style={{ marginTop: '1rem' }}>
-                        <div className="form-group" style={formGroupStyle}>
+                    <form onSubmit={handleUpdateProfile}>
+                        <div className="form-group">
                             <label>帳號 (不可修改)</label>
                             <input 
                                 type="text" 
                                 value={username} 
                                 readOnly 
                                 disabled
-                                style={{ background: '#f5f5f5', cursor: 'not-allowed' }}
                             />
                         </div>
-                        <div className="form-group" style={formGroupStyle}>
+                        <div className="form-group">
                             <label>真實姓名</label>
                             <input 
                                 type="text" 
@@ -135,7 +125,7 @@ function ProfileSettingsPage() {
                                 required 
                             />
                         </div>
-                        <div className="form-group" style={formGroupStyle}>
+                        <div className="form-group">
                             <label>所屬門市</label>
                             {stores.length > 0 ? (
                                 <select 
@@ -143,7 +133,6 @@ function ProfileSettingsPage() {
                                     value={storeName} 
                                     onChange={(e) => setStoreName(e.target.value)} 
                                     required 
-                                    style={{ width: '100%', height: '42px' }}
                                 >
                                     {stores.map(s => (
                                         <option key={s} value={s}>{s}</option>
@@ -158,16 +147,16 @@ function ProfileSettingsPage() {
                                 />
                             )}
                         </div>
-                        <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: '1rem' }}>
+                        <button type="submit" className="btn btn-primary" disabled={loading}>
                             {loading ? '儲存中...' : '儲存變更'}
                         </button>
                     </form>
                 </div>
 
-                <div className="card" style={{ padding: '1.5rem' }}>
+                <div className="card">
                     <h3>修改密碼</h3>
-                    <form onSubmit={handleChangePassword} style={{ marginTop: '1rem' }}>
-                        <div className="form-group" style={formGroupStyle}>
+                    <form onSubmit={handleChangePassword}>
+                        <div className="form-group">
                             <label>新密碼 (至少 6 位)</label>
                             <input 
                                 type="password" 
@@ -176,7 +165,7 @@ function ProfileSettingsPage() {
                                 placeholder="請輸入新密碼"
                             />
                         </div>
-                        <div className="form-group" style={formGroupStyle}>
+                        <div className="form-group">
                             <label>確認新密碼</label>
                             <input 
                                 type="password" 
@@ -185,12 +174,60 @@ function ProfileSettingsPage() {
                                 placeholder="請再次輸入新密碼"
                             />
                         </div>
-                        <button type="submit" className="btn btn-outline" disabled={loading} style={{ marginTop: '1rem', width: '100%' }}>
+                        <button type="submit" className="btn btn-outline btn-full" disabled={loading}>
                             {loading ? '修改中...' : '確認修改密碼'}
                         </button>
                     </form>
                 </div>
             </div>
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .profile-settings-page .grid-2 {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 2rem;
+                }
+                .profile-settings-page .card {
+                    padding: 1.5rem;
+                }
+                .profile-settings-page form {
+                    margin-top: 1rem;
+                }
+                .profile-settings-page .form-group {
+                    margin-bottom: 1.25rem;
+                }
+                .profile-settings-page input[disabled] {
+                    background: #f5f5f5;
+                    cursor: not-allowed;
+                }
+                .profile-settings-page select.form-control {
+                    width: 100%;
+                    height: 42px;
+                }
+                .profile-settings-page .btn {
+                    margin-top: 1rem;
+                }
+                .profile-settings-page .btn-full {
+                    width: 100%;
+                }
+                .profile-settings-page .alert {
+                    padding: 1rem;
+                    margin-bottom: 1.5rem;
+                    border-radius: 8px;
+                    border: 1px solid transparent;
+                }
+                .profile-settings-page .alert-success {
+                    background: #ECFDF5;
+                    color: #065F46;
+                    border-color: #A7F3D0;
+                }
+                .profile-settings-page .alert-error {
+                    background: #FEF2F2;
+                    color: #991B1B;
+                    border-color: #FECACA;
+                }
+            `}} />
         </div>
     );
 }

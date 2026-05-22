@@ -122,8 +122,8 @@ function MemberProfileChangePage() {
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
-                padding: '3rem 1.5rem'
+                justifyContent: 'flex-start',
+                padding: '8vh 1.5rem 3rem'
             }}
         >
             <div 
@@ -207,163 +207,166 @@ function MemberProfileChangePage() {
                         </div>
                     </div>
 
-                    {/* 2. 共同欄位 */}
-                    <div style={{ marginBottom: '1.75rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
-                            原手機號碼 或 會員卡號
-                        </label>
-                        <input 
-                            type="text"
-                            value={identifier}
-                            onChange={(e) => setIdentifier(e.target.value)}
-                            placeholder="輸入您的手機號碼或會員卡號"
-                            style={{ 
-                                padding: '0.85rem 1rem', 
-                                border: '1px solid #d2d2d7',
-                                borderRadius: '12px',
-                                fontSize: '1rem',
-                                outline: 'none',
-                                transition: 'all 0.2s',
-                                background: '#ffffff',
-                                fontFamily: 'inherit'
-                            }}
-                            onFocus={(e) => {
-                                e.target.style.borderColor = '#0071e3';
-                                e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
-                            }}
-                            onBlur={(e) => {
-                                e.target.style.borderColor = '#d2d2d7';
-                                e.target.style.boxShadow = 'none';
-                            }}
-                            required
-                        />
+                    {/* 2. 表單欄位容器 - 設定最小高度以避免下方的送出按鈕與上方標題抖動 */}
+                    <div style={{ minHeight: '260px', display: 'flex', flexDirection: 'column' }}>
+                        {/* 2. 共同欄位 */}
+                        <div style={{ marginBottom: '1.75rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
+                                原手機號碼 或 會員卡號
+                            </label>
+                            <input 
+                                type="text"
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
+                                placeholder="輸入您的手機號碼或會員卡號"
+                                style={{ 
+                                    padding: '0.85rem 1rem', 
+                                    border: '1px solid #d2d2d7',
+                                    borderRadius: '12px',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    transition: 'all 0.2s',
+                                    background: '#ffffff',
+                                    fontFamily: 'inherit'
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = '#0071e3';
+                                    e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = '#d2d2d7';
+                                    e.target.style.boxShadow = 'none';
+                                }}
+                                required
+                            />
+                        </div>
+
+                        {/* 3. 動態欄位 */}
+                        {changeType === 'phone' && (
+                            <div style={{ animation: 'fadeIn 0.25s ease both' }}>
+                                <div style={{ marginBottom: '1.75rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
+                                        新手機號碼
+                                    </label>
+                                    <input 
+                                        type="tel"
+                                        value={newPhone}
+                                        onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, ''))}
+                                        placeholder="09開頭的10位數字"
+                                        maxLength={10}
+                                        style={{ 
+                                            padding: '0.85rem 1rem', 
+                                            border: '1px solid #d2d2d7',
+                                            borderRadius: '12px',
+                                            fontSize: '1rem',
+                                            outline: 'none',
+                                            transition: 'all 0.2s',
+                                            background: '#ffffff',
+                                            fontFamily: 'inherit'
+                                        }}
+                                        onFocus={(e) => {
+                                            e.target.style.borderColor = '#0071e3';
+                                            e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = '#d2d2d7';
+                                            e.target.style.boxShadow = 'none';
+                                        }}
+                                        required
+                                    />
+                                </div>
+
+                                <div style={{ marginBottom: '2.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
+                                        確認新手機號碼
+                                    </label>
+                                    <input 
+                                        type="tel"
+                                        value={confirmPhone}
+                                        onChange={(e) => setConfirmPhone(e.target.value.replace(/\D/g, ''))}
+                                        placeholder="再次輸入新手機號碼"
+                                        maxLength={10}
+                                        style={{ 
+                                            padding: '0.85rem 1rem', 
+                                            border: '1px solid #d2d2d7',
+                                            borderRadius: '12px',
+                                            fontSize: '1rem',
+                                            outline: 'none',
+                                            transition: 'all 0.2s',
+                                            background: '#ffffff',
+                                            fontFamily: 'inherit'
+                                        }}
+                                        onFocus={(e) => {
+                                            e.target.style.borderColor = '#0071e3';
+                                            e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = '#d2d2d7';
+                                            e.target.style.boxShadow = 'none';
+                                        }}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {changeType === 'birthday' && (
+                            <div style={{ animation: 'fadeIn 0.25s ease both' }}>
+                                <div style={{ marginBottom: '2.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
+                                        新的生日
+                                    </label>
+                                    <input 
+                                        type="date"
+                                        value={newBirthday}
+                                        onChange={(e) => setNewBirthday(e.target.value)}
+                                        min="1900-01-01"
+                                        max={new Date().toISOString().split('T')[0]}
+                                        style={{ 
+                                            padding: '0.85rem 1rem', 
+                                            border: '1px solid #d2d2d7',
+                                            borderRadius: '12px',
+                                            fontSize: '1rem',
+                                            outline: 'none',
+                                            transition: 'all 0.2s',
+                                            background: '#ffffff',
+                                            fontFamily: 'inherit'
+                                        }}
+                                        onFocus={(e) => {
+                                            e.target.style.borderColor = '#0071e3';
+                                            e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = '#d2d2d7';
+                                            e.target.style.boxShadow = 'none';
+                                        }}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {changeType === 'delete' && (
+                            <div 
+                                style={{ 
+                                    animation: 'fadeIn 0.25s ease both',
+                                    background: '#fff2f2',
+                                    border: '1px solid #ffcfcf',
+                                    borderRadius: '12px',
+                                    padding: '1.25rem',
+                                    color: '#ff3b30',
+                                    fontSize: '0.85rem',
+                                    marginBottom: '2.25rem',
+                                    lineHeight: '1.6'
+                                }}
+                            >
+                                <div style={{ fontWeight: '700', marginBottom: '6px' }}>
+                                    警告：刪除會員權益提示
+                                </div>
+                                刪除會員後，您的會員點數、消費紀錄及相關權益將會一併移除且無法復原。送出此申請即代表您同意刪除會員所有資料。
+                            </div>
+                        )}
                     </div>
-
-                    {/* 3. 動態欄位 */}
-                    {changeType === 'phone' && (
-                        <div style={{ animation: 'fadeIn 0.25s ease both' }}>
-                            <div style={{ marginBottom: '1.75rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
-                                    新手機號碼
-                                </label>
-                                <input 
-                                    type="tel"
-                                    value={newPhone}
-                                    onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, ''))}
-                                    placeholder="09開頭的10位數字"
-                                    maxLength={10}
-                                    style={{ 
-                                        padding: '0.85rem 1rem', 
-                                        border: '1px solid #d2d2d7',
-                                        borderRadius: '12px',
-                                        fontSize: '1rem',
-                                        outline: 'none',
-                                        transition: 'all 0.2s',
-                                        background: '#ffffff',
-                                        fontFamily: 'inherit'
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.borderColor = '#0071e3';
-                                        e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = '#d2d2d7';
-                                        e.target.style.boxShadow = 'none';
-                                    }}
-                                    required
-                                />
-                            </div>
-
-                            <div style={{ marginBottom: '2.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
-                                    確認新手機號碼
-                                </label>
-                                <input 
-                                    type="tel"
-                                    value={confirmPhone}
-                                    onChange={(e) => setConfirmPhone(e.target.value.replace(/\D/g, ''))}
-                                    placeholder="再次輸入新手機號碼"
-                                    maxLength={10}
-                                    style={{ 
-                                        padding: '0.85rem 1rem', 
-                                        border: '1px solid #d2d2d7',
-                                        borderRadius: '12px',
-                                        fontSize: '1rem',
-                                        outline: 'none',
-                                        transition: 'all 0.2s',
-                                        background: '#ffffff',
-                                        fontFamily: 'inherit'
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.borderColor = '#0071e3';
-                                        e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = '#d2d2d7';
-                                        e.target.style.boxShadow = 'none';
-                                    }}
-                                    required
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {changeType === 'birthday' && (
-                        <div style={{ animation: 'fadeIn 0.25s ease both' }}>
-                            <div style={{ marginBottom: '2.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1d1d1f' }}>
-                                    新的生日
-                                </label>
-                                <input 
-                                    type="date"
-                                    value={newBirthday}
-                                    onChange={(e) => setNewBirthday(e.target.value)}
-                                    min="1900-01-01"
-                                    max={new Date().toISOString().split('T')[0]}
-                                    style={{ 
-                                        padding: '0.85rem 1rem', 
-                                        border: '1px solid #d2d2d7',
-                                        borderRadius: '12px',
-                                        fontSize: '1rem',
-                                        outline: 'none',
-                                        transition: 'all 0.2s',
-                                        background: '#ffffff',
-                                        fontFamily: 'inherit'
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.borderColor = '#0071e3';
-                                        e.target.style.boxShadow = '0 0 0 4px rgba(0, 113, 227, 0.12)';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = '#d2d2d7';
-                                        e.target.style.boxShadow = 'none';
-                                    }}
-                                    required
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {changeType === 'delete' && (
-                        <div 
-                            style={{ 
-                                animation: 'fadeIn 0.25s ease both',
-                                background: '#fff2f2',
-                                border: '1px solid #ffcfcf',
-                                borderRadius: '12px',
-                                padding: '1.25rem',
-                                color: '#ff3b30',
-                                fontSize: '0.85rem',
-                                marginBottom: '2.25rem',
-                                lineHeight: '1.6'
-                            }}
-                        >
-                            <div style={{ fontWeight: '700', marginBottom: '6px' }}>
-                                警告：刪除會員權益提示
-                            </div>
-                            刪除會員後，您的會員點數、消費紀錄及相關權益將會一併移除且無法復原。送出此申請即代表您同意刪除會員所有資料。
-                        </div>
-                    )}
 
                     {/* 錯誤提示 */}
                     {error && (

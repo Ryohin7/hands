@@ -235,8 +235,8 @@ function DataConverterPage() {
                         </h3>
                         <span className="preview-badge">僅預覽部分資料</span>
                     </div>
-                    <div className="converter-table-wrap">
-                        <table className="converter-table">
+                    <div className="converter-table-wrap admin-table-wrap">
+                        <table className="admin-table">
                             <thead>
                                 <tr>
                                     {COLUMN_HEADERS.map((h, i) => (

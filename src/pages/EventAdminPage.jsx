@@ -135,7 +135,7 @@ function EventAdminPage() {
         
         // 標題與內容
         printContainer.innerHTML = `
-            <div style="font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; color: #333;">
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Hiragino Sans', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; color: #333;">
                 <h2 style="text-align: center; color: #007130; margin-bottom: 20px;">${postTitle} - 報名名單</h2>
                 <p style="font-size: 14px; margin-bottom: 20px; color: #666;">匯出時間：${new Date().toLocaleString()}</p>
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -208,37 +208,36 @@ function EventAdminPage() {
     }
 
     return (
-        <div className="admin-page-content">
+        <div className="admin-page-content event-admin-page">
             <div className="admin-content-header">
                 <h2 className="admin-content-title">活動報名管理</h2>
+                <p className="admin-content-subtitle">這裡列出了所有「實體活動」的報名情形，您可以查看參加者資料並手動調整狀態。</p>
             </div>
 
-            <p style={{ marginBottom: '1.5rem', opacity: 0.8 }}>這裡列出了所有「實體活動」的報名情形，您可以查看參加者資料並手動調整狀態。</p>
-
-            <div className="admin-table-container">
+            <div className="admin-table-wrap">
                 <table className="admin-table">
                     <thead>
                         <tr>
                             <th>活動名稱</th>
                             <th>報名人數 / 限制</th>
                             <th>截止時間</th>
-                            <th style={{ textAlign: 'right' }}>操作</th>
+                            <th className="text-right">操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         {posts.length === 0 ? (
                             <tr>
-                                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>目前沒有實體活動</td>
+                                <td colSpan="4" className="text-center text-secondary p-5">目前沒有實體活動</td>
                             </tr>
                         ) : (
                             posts.map((post) => (
                                 <React.Fragment key={post.id}>
                                     <tr
-                                        style={{ cursor: 'pointer', background: expandedPostId === post.id ? '#f5f5f5' : 'transparent' }}
+                                        className={expandedPostId === post.id ? 'is-expanded' : ''}
                                         onClick={() => toggleExpand(post.id)}
                                     >
-                                        <td style={{ fontWeight: 'bold' }}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle', transform: expandedPostId === post.id ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                                        <td className="post-title-cell">
+                                            <svg className="expand-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <polyline points="9 18 15 12 9 6" />
                                             </svg>
                                             {post.title}
@@ -251,7 +250,7 @@ function EventAdminPage() {
                                                 ? (post.formDeadline.toDate ? post.formDeadline.toDate().toLocaleString() : new Date(post.formDeadline).toLocaleString())
                                                 : '未設定'}
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>
+                                        <td className="text-right">
                                             <button
                                                 className="btn btn-sm btn-outline"
                                                 onClick={(e) => { e.stopPropagation(); toggleExpand(post.id); }}
@@ -262,11 +261,11 @@ function EventAdminPage() {
                                     </tr>
 
                                     {expandedPostId === post.id && (
-                                        <tr>
-                                            <td colSpan="4" style={{ padding: 0, borderBottom: '2px solid #ddd' }}>
-                                                <div style={{ background: '#fafafa', padding: '1.5rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                        <h4 style={{ margin: 0, color: '#007130' }}>詳細名單 ({registrations[post.id]?.length || 0} 筆)</h4>
+                                        <tr className="detail-row">
+                                            <td colSpan="4" className="detail-cell">
+                                                <div className="detail-container">
+                                                    <div className="detail-header-row">
+                                                        <h4 className="detail-title">詳細名單 ({registrations[post.id]?.length || 0} 筆)</h4>
                                                         {registrations[post.id] && registrations[post.id].length > 0 && (
                                                             <button
                                                                 className="btn btn-sm btn-primary"
@@ -278,10 +277,10 @@ function EventAdminPage() {
                                                     </div>
 
                                                     {loadingRegistrations[post.id] ? (
-                                                        <p>資料載入中...</p>
+                                                        <p className="loading-text">資料載入中...</p>
                                                     ) : registrations[post.id] && registrations[post.id].length > 0 ? (
-                                                        <div style={{ overflowX: 'auto' }}>
-                                                            <table className="admin-table" style={{ background: '#fff', fontSize: '0.9rem' }}>
+                                                        <div className="admin-table-wrap">
+                                                            <table className="admin-table inner-table">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>姓名</th>
@@ -299,34 +298,27 @@ function EventAdminPage() {
                                                                             <td>{reg.name}</td>
                                                                             <td>{reg.gender}</td>
                                                                             <td>{reg.phone}</td>
-                                                                            <td style={{ fontSize: '0.8rem' }}>{reg.email}</td>
+                                                                            <td className="email-cell">{reg.email}</td>
                                                                             <td>{reg.membershipLevel}</td>
                                                                             <td>
-                                                                                <span style={{ 
-                                                                                    padding: '2px 8px', 
-                                                                                    borderRadius: '4px', 
-                                                                                    fontSize: '0.8rem',
-                                                                                    background: reg.status === '報名成功' ? '#e8f5e9' : (reg.status === '候補' ? '#fff3e0' : '#f5f5f5'),
-                                                                                    color: reg.status === '報名成功' ? '#2e7d32' : (reg.status === '候補' ? '#ef6c00' : '#666')
-                                                                                }}>
+                                                                                <span className={`status-badge ${reg.status === '報名成功' ? 'status-success' : (reg.status === '候補' ? 'status-warning' : 'status-default')}`}>
                                                                                     {reg.status}
                                                                                 </span>
                                                                             </td>
-                                                                            <td style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                                            <td className="action-cell">
                                                                                 <select 
                                                                                     value={reg.status} 
                                                                                     onChange={(e) => handleUpdateStatus(post.id, reg.id, e.target.value)}
-                                                                                    style={{ fontSize: '0.8rem', padding: '2px' }}
+                                                                                    className="admin-select-sm"
                                                                                 >
                                                                                     <option value="報名確認中">報名確認中</option>
                                                                                     <option value="報名成功">報名成功</option>
                                                                                     <option value="候補">候補</option>
                                                                                 </select>
                                                                                 <button 
-                                                                                    className="btn btn-sm btn-ghost" 
+                                                                                    className="btn btn-sm btn-ghost delete-btn" 
                                                                                     onClick={() => handleDeleteRegistration(post.id, reg.id, reg.name)}
-                                                                                    style={{ color: '#d32f2f', padding: '2px 4px' }}
-                                                                                    title="刪除員資料"
+                                                                                    title="刪除成員資料"
                                                                                 >
                                                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                                                                                 </button>
@@ -337,7 +329,7 @@ function EventAdminPage() {
                                                             </table>
                                                         </div>
                                                     ) : (
-                                                        <div className="empty-state" style={{ padding: '1rem', background: '#fff' }}>
+                                                        <div className="empty-state inner-empty">
                                                             尚無人報名
                                                         </div>
                                                     )}
@@ -351,6 +343,86 @@ function EventAdminPage() {
                     </tbody>
                 </table>
             </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                .event-admin-page .admin-table tr {
+                    cursor: pointer;
+                }
+                .event-admin-page .admin-table tr.is-expanded {
+                    background: var(--bg-gray);
+                }
+                .event-admin-page .post-title-cell {
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                }
+                .event-admin-page .expand-arrow {
+                    margin-right: 8px;
+                    transition: transform 0.2s;
+                }
+                .event-admin-page tr.is-expanded .expand-arrow {
+                    transform: rotate(90deg);
+                }
+                .event-admin-page .detail-cell {
+                    padding: 0 !important;
+                    border-bottom: 2px solid var(--border-light) !important;
+                }
+                .event-admin-page .detail-container {
+                    background: var(--bg-gray);
+                    padding: 1.5rem;
+                }
+                .event-admin-page .detail-header-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                }
+                .event-admin-page .detail-title {
+                    margin: 0;
+                    color: var(--brand);
+                }
+                .event-admin-page .inner-table {
+                    background: #fff;
+                    font-size: 0.9rem;
+                }
+                .event-admin-page .inner-empty {
+                    padding: 1rem;
+                    background: #fff;
+                }
+                .event-admin-page .email-cell {
+                    font-size: 0.8rem;
+                }
+                .event-admin-page .status-badge {
+                    padding: 2px 8px; 
+                    border-radius: 4px; 
+                    font-size: 0.8rem;
+                }
+                .event-admin-page .status-success {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                }
+                .event-admin-page .status-warning {
+                    background: #fff3e0;
+                    color: #ef6c00;
+                }
+                .event-admin-page .status-default {
+                    background: #f5f5f5;
+                    color: #666;
+                }
+                .event-admin-page .action-cell {
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+                .event-admin-page .admin-select-sm {
+                    font-size: 0.8rem;
+                    padding: 2px;
+                }
+                .event-admin-page .delete-btn {
+                    color: #d32f2f;
+                    padding: 2px 4px;
+                }
+            ` }} />
         </div>
     );
 }

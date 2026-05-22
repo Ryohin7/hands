@@ -51,13 +51,13 @@ function StaffAuditPage() {
     };
 
     return (
-        <div className="admin-page-content">
+        <div className="admin-page-content staff-audit-page">
             <div className="admin-content-header">
                 <h2 className="admin-content-title">員工帳號審核</h2>
             </div>
 
             <div className="card">
-                <div className="table-responsive">
+                <div className="admin-table-wrap">
                     <table className="admin-table">
                         <thead>
                             <tr>
@@ -71,7 +71,7 @@ function StaffAuditPage() {
                         <tbody>
                             {users.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無待審核員工</td>
+                                    <td colSpan="5" className="table-empty">目前無待審核員工</td>
                                 </tr>
                             ) : (
                                 users.map(user => (
@@ -81,7 +81,7 @@ function StaffAuditPage() {
                                         <td>{user.email}</td>
                                         <td>{user.createdAt?.toDate().toLocaleString() || '...'}</td>
                                         <td>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <div className="card-actions-row">
                                                 <button 
                                                     className="btn btn-sm btn-primary"
                                                     onClick={() => handleApprove(user.id)}
@@ -90,8 +90,7 @@ function StaffAuditPage() {
                                                     核准
                                                 </button>
                                                 <button 
-                                                    className="btn btn-sm btn-outline"
-                                                    style={{ color: '#800019', borderColor: '#800019' }}
+                                                    className="btn btn-sm btn-outline btn-reject"
                                                     onClick={() => handleReject(user.id)}
                                                     disabled={loading}
                                                 >
@@ -106,6 +105,23 @@ function StaffAuditPage() {
                     </table>
                 </div>
             </div>
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .staff-audit-page .table-empty {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #999;
+                }
+                .staff-audit-page .card-actions-row {
+                    display: flex;
+                    gap: 0.5rem;
+                }
+                .staff-audit-page .btn-reject {
+                    color: #800019;
+                    border-color: #800019;
+                }
+            `}} />
         </div>
     );
 }

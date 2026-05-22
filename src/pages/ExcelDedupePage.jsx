@@ -163,7 +163,6 @@ function ExcelDedupePage() {
                 onDragLeave={() => setDragOver(false)}
                 onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
                 onClick={() => fileInputRef.current.click()}
-                style={{ marginBottom: '1.5rem', cursor: 'pointer' }}
             >
                 <input ref={fileInputRef} type="file" accept=".xlsx,.xls" multiple onChange={(e) => handleFiles(e.target.files)} style={{ display: 'none' }} />
                 <div className="converter-upload-prompt">
@@ -179,8 +178,8 @@ function ExcelDedupePage() {
                     <h3 className="section-small-title">檔案順序 (首檔為基準)</h3>
                     <div className="file-items-grid">
                         {fileList.map((f, index) => (
-                            <div key={f.id} className="file-item-row" style={index === 0 ? { borderLeft: '4px solid var(--brand)' } : {}}>
-                                <div className="file-index" style={index === 0 ? { background: 'var(--brand)' } : { background: '#666' }}>
+                            <div key={f.id} className={`file-item-row ${index === 0 ? 'is-base' : ''}`}>
+                                <div className="file-index">
                                     {index === 0 ? '基' : '刪'}
                                 </div>
                                 <div className="file-info-main">
@@ -201,21 +200,21 @@ function ExcelDedupePage() {
 
             {/* 訊息提示 */}
             {message && (
-                <div className={`converter-message converter-message-${message.type}`} style={{ margin: '1rem 0' }}>
+                <div className={`converter-message converter-message-${message.type}`}>
                     {message.type === 'success' ? '✅' : message.type === 'warning' ? '⚠️' : '❌'} {message.text}
                 </div>
             )}
 
             {/* 配置與操作區 */}
             {fileList.length >= 2 && (
-                <div className="compare-config-card">
+                <div className="edit-section-card">
                     <div className="config-row">
                         <div className="config-item">
                             <label className="compare-label-text">比對基準欄位：</label>
-                            <select value={compareKey} onChange={(e) => setCompareKey(e.target.value)} className="admin-input" style={{ background: 'white', color: 'black' }}>
+                            <select value={compareKey} onChange={(e) => setCompareKey(e.target.value)} className="admin-input">
                                 {fileList[0].headers.map(h => <option key={h} value={h}>{h}</option>)}
                             </select>
-                            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>* 系統將比對所有檔案中此欄位的值進行移除</p>
+                            <p className="config-help-text">* 系統將比對所有檔案中此欄位的值進行移除</p>
                         </div>
                         <div className="config-actions">
                             <button onClick={handleDedupe} disabled={isProcessing || fileList.some(f => f.isReading)} className="btn btn-primary btn-lg">
@@ -333,13 +332,19 @@ function ExcelDedupePage() {
                     background: var(--brand);
                     transition: width 0.3s ease;
                 }
-                .compare-config-card {
-                    background: #fff;
-                    border: 1px solid var(--border-light);
-                    border-radius: 12px;
-                    padding: 2rem;
-                    margin-bottom: 2rem;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                .file-item-row.is-base {
+                    border-left: 4px solid var(--brand);
+                }
+                .file-item-row.is-base .file-index {
+                    background: var(--brand);
+                }
+                .file-item-row:not(.is-base) .file-index {
+                    background: #666;
+                }
+                .config-help-text {
+                    font-size: 0.8rem;
+                    color: var(--text-secondary);
+                    margin-top: 0.5rem;
                 }
                 .compare-label-text {
                     display: block;

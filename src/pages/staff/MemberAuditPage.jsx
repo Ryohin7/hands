@@ -109,22 +109,20 @@ function MemberAuditPage() {
     };
 
     return (
-        <div className="admin-page-content" style={{ padding: '1rem' }}>
-            <div className="admin-content-header" style={{ marginBottom: '1rem' }}>
-                <h2 className="admin-content-title" style={{ fontSize: '1.5rem' }}>會員異動審核</h2>
+        <div className="admin-page-content member-audit-page">
+            <div className="admin-content-header">
+                <h2 className="admin-content-title">會員異動審核</h2>
             </div>
             
-            <div className="tabs" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem' }}>
+            <div className="admin-tabs">
                 <button 
-                    className={`btn ${activeTab === 'pending' ? 'btn-primary' : 'btn-outline'}`} 
-                    style={{ border: activeTab === 'pending' ? 'none' : '1px solid #ddd' }}
+                    className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
                     onClick={() => setActiveTab('pending')}
                 >
                     待審核 ({requests.length})
                 </button>
                 <button 
-                    className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-outline'}`}
-                    style={{ border: activeTab === 'history' ? 'none' : '1px solid #ddd' }}
+                    className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
                     onClick={() => setActiveTab('history')}
                 >
                     歷史紀錄 (最近50筆)
@@ -133,49 +131,46 @@ function MemberAuditPage() {
 
             <div className="audit-container">
                 {/* 手機版：卡片式列表 */}
-                <div className="mobile-only" style={{ display: 'none' }}>
+                <div className="mobile-only">
                     {activeTab === 'pending' ? (
                         requests.length === 0 ? (
-                            <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>目前無待審核異動</div>
+                            <div className="card list-empty">目前無待審核異動</div>
                         ) : (
                             requests.map(req => (
-                                <div key={req.id} className="card" style={{ padding: '1.25rem', marginBottom: '1rem', borderLeft: '4px solid #007130' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                        <div style={{ fontWeight: '600' }}>{req.submittedByName}</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.createdAt?.toDate().toLocaleDateString()}</div>
+                                <div key={req.id} className="card audit-card card-pending">
+                                    <div className="card-top-row">
+                                        <div className="submitter-name">{req.submittedByName}</div>
+                                        <div className="submit-date">{req.createdAt?.toDate().toLocaleDateString()}</div>
                                     </div>
-                                    <div style={{ fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
-                                        <span style={{ color: '#666' }}>類型：</span>
-                                        <span className="tag tag-pending" style={{ background: '#e6f4ec', color: '#007130' }}>{getTypeName(req.type)}</span>
+                                    <div className="type-row">
+                                        <span className="type-label">類型：</span>
+                                        <span className="tag tag-pending">{getTypeName(req.type)}</span>
                                     </div>
-                                    <div style={{ fontSize: '0.9375rem', marginBottom: '0.5rem' }}>
+                                    <div className="member-id-row">
                                         <strong>{req.memberId}</strong>
                                     </div>
-                                    <div style={{ fontSize: '0.875rem', background: '#f8f9fa', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem' }}>
+                                    <div className="detail-box">
                                         {req.detail}
                                     </div>
-                                    <div style={{ marginBottom: '1rem' }}>
+                                    <div className="note-input-row">
                                         <input 
                                             type="text" 
                                             placeholder="審核備註..."
                                             className="form-control"
-                                            style={{ fontSize: '0.875rem', width: '100%' }}
                                             value={adminNote[req.id] || ''}
                                             onChange={(e) => handleNoteChange(req.id, e.target.value)}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                    <div className="actions-row">
                                         <button 
-                                            className="btn btn-primary"
-                                            style={{ flex: 1 }}
+                                            className="btn btn-primary btn-action"
                                             onClick={() => handleAction(req.id, 'approved', req)}
                                             disabled={loading}
                                         >
                                             核准
                                         </button>
                                         <button 
-                                            className="btn btn-outline"
-                                            style={{ flex: 1, color: '#800019', borderColor: '#800019' }}
+                                            className="btn btn-outline btn-reject btn-action"
                                             onClick={() => handleAction(req.id, 'rejected', req)}
                                             disabled={loading}
                                         >
@@ -187,28 +182,28 @@ function MemberAuditPage() {
                         )
                     ) : (
                         history.length === 0 ? (
-                            <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>目前無歷史紀錄</div>
+                            <div className="card list-empty">目前無歷史紀錄</div>
                         ) : (
                             history.map(req => (
-                                <div key={req.id} className="card" style={{ padding: '1.25rem', marginBottom: '1rem', borderLeft: req.status === 'approved' ? '4px solid #007130' : '4px solid #800019' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                        <div style={{ fontWeight: '600' }}>{req.submittedByName}</div>
-                                        <span className={`tag tag-${req.status}`} style={{ fontSize: '0.7rem' }}>
+                                <div key={req.id} className={`card audit-card ${req.status === 'approved' ? 'card-approved' : 'card-rejected'}`}>
+                                    <div className="card-top-row">
+                                        <div className="submitter-name">{req.submittedByName}</div>
+                                        <span className={`tag tag-${req.status}`}>
                                             {req.status === 'approved' ? '已核准' : '已駁回'}
                                         </span>
                                     </div>
-                                    <div style={{ fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
-                                        <span style={{ color: '#666' }}>類型：</span>
+                                    <div className="type-row">
+                                        <span className="type-label">類型：</span>
                                         <strong>{getTypeName(req.type)}</strong>
                                     </div>
-                                    <div style={{ fontSize: '0.9375rem', marginBottom: '0.5rem' }}>
+                                    <div className="member-id-row">
                                         <strong>{req.memberId}</strong>
                                     </div>
-                                    <div style={{ fontSize: '0.875rem', background: '#f8f9fa', padding: '0.75rem', borderRadius: '4px', marginBottom: '0.5rem' }}>
+                                    <div className="detail-box">
                                         {req.detail}
                                     </div>
-                                    <div style={{ fontSize: '0.8125rem', color: '#444', marginBottom: '0.25rem' }}>審核者：{req.reviewedByName || '管理員'}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>時間：{req.createdAt?.toDate().toLocaleString()}</div>
+                                    <div className="reviewer-info">審核者：{req.reviewedByName || '管理員'}</div>
+                                    <div className="review-time">時間：{req.createdAt?.toDate().toLocaleString()}</div>
                                 </div>
                             ))
                         )
@@ -217,7 +212,7 @@ function MemberAuditPage() {
 
                 {/* 電腦版：表格列表 */}
                 <div className="desktop-only card">
-                    <div className="table-responsive">
+                    <div className="admin-table-wrap">
                         <table className="admin-table">
                             <thead>
                                 <tr>
@@ -243,14 +238,14 @@ function MemberAuditPage() {
                                 {activeTab === 'pending' ? (
                                     requests.length === 0 ? (
                                         <tr>
-                                            <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無待審核異動</td>
+                                            <td colSpan="7" className="table-empty">目前無待審核異動</td>
                                         </tr>
                                     ) : (
                                         requests.map(req => (
                                             <tr key={req.id}>
                                                 <td>
-                                                    <div style={{ fontWeight: '500' }}>{req.submittedByName}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.submittedByStore}</div>
+                                                    <div className="cell-submitter">{req.submittedByName}</div>
+                                                    <div className="cell-store">{req.submittedByStore}</div>
                                                 </td>
                                                 <td>{getTypeName(req.type)}</td>
                                                 <td>{req.memberId}</td>
@@ -260,14 +255,13 @@ function MemberAuditPage() {
                                                     <input 
                                                         type="text" 
                                                         placeholder="輸入紀錄或原因"
-                                                        className="form-control"
-                                                        style={{ fontSize: '0.875rem' }}
+                                                        className="form-control input-note"
                                                         value={adminNote[req.id] || ''}
                                                         onChange={(e) => handleNoteChange(req.id, e.target.value)}
                                                     />
                                                 </td>
                                                 <td>
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <div className="cell-actions">
                                                         <button 
                                                             className="btn btn-sm btn-primary"
                                                             onClick={() => handleAction(req.id, 'approved', req)}
@@ -276,8 +270,7 @@ function MemberAuditPage() {
                                                             核准
                                                         </button>
                                                         <button 
-                                                            className="btn btn-sm btn-outline"
-                                                            style={{ color: '#800019', borderColor: '#800019' }}
+                                                            className="btn btn-sm btn-outline btn-reject"
                                                             onClick={() => handleAction(req.id, 'rejected', req)}
                                                             disabled={loading}
                                                         >
@@ -291,25 +284,25 @@ function MemberAuditPage() {
                                 ) : (
                                     history.length === 0 ? (
                                         <tr>
-                                            <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>目前無歷史紀錄</td>
+                                            <td colSpan="7" className="table-empty">目前無歷史紀錄</td>
                                         </tr>
                                     ) : (
                                         history.map(req => (
                                             <tr key={req.id}>
                                                 <td>
-                                                    <div style={{ fontWeight: '500' }}>{req.submittedByName}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{req.submittedByStore}</div>
+                                                    <div className="cell-submitter">{req.submittedByName}</div>
+                                                    <div className="cell-store">{req.submittedByStore}</div>
                                                 </td>
                                                 <td>{getTypeName(req.type)}</td>
                                                 <td>{req.memberId}</td>
                                                 <td>{req.detail}</td>
                                                 <td>{req.createdAt?.toDate().toLocaleString() || '...'}</td>
                                                 <td>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                        <span className={`tag tag-${req.status}`} style={{ alignSelf: 'flex-start' }}>
+                                                    <div className="cell-reviewer">
+                                                        <span className={`tag tag-${req.status}`}>
                                                             {req.status === 'approved' ? '已核准' : '已駁回'}
                                                         </span>
-                                                        <span style={{ fontSize: '0.85rem' }}>{req.reviewedByName || '管理員'}</span>
+                                                        <span className="reviewer-name">{req.reviewedByName || '管理員'}</span>
                                                     </div>
                                                 </td>
                                                 <td>{req.adminNote || '-'}</td>
@@ -324,9 +317,146 @@ function MemberAuditPage() {
             </div>
 
             <style dangerouslySetInnerHTML={{ __html: `
+                .member-audit-page .admin-tabs {
+                    margin-bottom: 1.5rem;
+                    display: flex;
+                    gap: 0.5rem;
+                    border-bottom: 1px solid #ddd;
+                }
+                .member-audit-page .admin-tabs .tab-btn {
+                    padding: 0.75rem 1.5rem;
+                    border: none;
+                    background: none;
+                    cursor: pointer;
+                    border-bottom: 3px solid transparent;
+                    color: #666;
+                    font-weight: normal;
+                    transition: all 0.2s;
+                }
+                .member-audit-page .admin-tabs .tab-btn.active {
+                    border-bottom: 3px solid #007130;
+                    color: #007130;
+                    font-weight: bold;
+                }
+                .member-audit-page .mobile-only {
+                    display: none;
+                }
+                .member-audit-page .desktop-only {
+                    display: block;
+                }
+                .member-audit-page .list-empty {
+                    padding: 2rem;
+                    text-align: center;
+                    color: #999;
+                }
+                .member-audit-page .audit-card {
+                    padding: 1.25rem;
+                    margin-bottom: 1rem;
+                }
+                .member-audit-page .card-pending {
+                    border-left: 4px solid #007130;
+                }
+                .member-audit-page .card-approved {
+                    border-left: 4px solid #007130;
+                }
+                .member-audit-page .card-rejected {
+                    border-left: 4px solid #800019;
+                }
+                .member-audit-page .card-top-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.75rem;
+                }
+                .member-audit-page .submitter-name {
+                    font-weight: 600;
+                }
+                .member-audit-page .submit-date {
+                    font-size: 0.75rem;
+                    color: #666;
+                }
+                .member-audit-page .type-row {
+                    font-size: 0.8125rem;
+                    margin-bottom: 0.5rem;
+                }
+                .member-audit-page .type-label {
+                    color: #666;
+                }
+                .member-audit-page .member-id-row {
+                    font-size: 0.9375rem;
+                    margin-bottom: 0.5rem;
+                }
+                .member-audit-page .detail-box {
+                    font-size: 0.875rem;
+                    background: #f8f9fa;
+                    padding: 0.75rem;
+                    border-radius: 4px;
+                    margin-bottom: 1rem;
+                }
+                .member-audit-page .note-input-row {
+                    margin-bottom: 1rem;
+                }
+                .member-audit-page .note-input-row .form-control {
+                    font-size: 0.875rem;
+                    width: 100%;
+                }
+                .member-audit-page .actions-row {
+                    display: flex;
+                    gap: 0.75rem;
+                }
+                .member-audit-page .btn-action {
+                    flex: 1;
+                }
+                .member-audit-page .btn-reject {
+                    color: #800019;
+                    border-color: #800019;
+                }
+                .member-audit-page .reviewer-info {
+                    font-size: 0.8125rem;
+                    color: #444;
+                    margin-bottom: 0.25rem;
+                }
+                .member-audit-page .review-time {
+                    font-size: 0.75rem;
+                    color: #666;
+                }
+                .member-audit-page .tag-pending {
+                    background: #e6f4ec;
+                    color: #007130;
+                }
+                .member-audit-page .table-empty {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #999;
+                }
+                .member-audit-page .cell-submitter {
+                    font-weight: 500;
+                }
+                .member-audit-page .cell-store {
+                    font-size: 0.75rem;
+                    color: #666;
+                }
+                .member-audit-page .input-note {
+                    font-size: 0.875rem;
+                }
+                .member-audit-page .cell-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                }
+                .member-audit-page .cell-reviewer {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+                .member-audit-page .cell-reviewer .reviewer-name {
+                    font-size: 0.85rem;
+                }
+                .member-audit-page .cell-reviewer .tag {
+                    align-self: flex-start;
+                }
+
                 @media (max-width: 768px) {
-                    .desktop-only { display: none !important; }
-                    .mobile-only { display: block !important; }
+                    .member-audit-page .desktop-only { display: none !important; }
+                    .member-audit-page .mobile-only { display: block !important; }
                 }
             `}} />
         </div>

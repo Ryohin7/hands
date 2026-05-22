@@ -151,17 +151,17 @@ function NavAdminPage() {
                 </button>
             </div>
 
-            <div className="info-card" style={{ marginBottom: '1.5rem' }}>
+            <div className="info-card mb-5">
                 <p>💡 提示：點擊項目右側「＋」可新增子選單。上下拖動項目可調整排序。</p>
             </div>
 
             {/* 新增連結表單 */}
-            <div className="edit-form" style={{ marginBottom: '2rem', padding: '1.25rem' }}>
-                <h3 style={{ fontSize: '0.9375rem', marginBottom: '1rem', fontWeight: '600' }}>
+            <div className="edit-section-card nav-edit-section">
+                <h3 className="card-stat-title mb-4">
                     {newItem.parentId ? `新增子項目至 [${navItems.find(i => i.id === newItem.parentId)?.label}]` : '新增頂層導航'}
                 </h3>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'end' }}>
-                    <div className="form-group" style={{ marginBottom: 0, flex: '1 1 200px' }}>
+                <div className="nav-form-row">
+                    <div className="form-group nav-fg-select">
                         <label>從現有頁面選取</label>
                         <select onChange={e => {
                             const page = customPages.find(p => p.id === e.target.value);
@@ -171,22 +171,22 @@ function NavAdminPage() {
                             {customPages.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
                         </select>
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0, flex: '1 1 180px' }}>
+                    <div className="form-group nav-fg-name">
                         <label>自訂名稱</label>
                         <input type="text" placeholder="名稱" value={newItem.label} onChange={e => setNewItem({ ...newItem, label: e.target.value })} />
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0, flex: '2 1 240px' }}>
+                    <div className="form-group nav-fg-path">
                         <label>連結網址</label>
                         <input type="text" placeholder="/" value={newItem.path} onChange={e => setNewItem({ ...newItem, path: e.target.value })} />
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0, flex: '0 0 140px' }}>
+                    <div className="form-group nav-fg-parent">
                         <label>所屬層級</label>
                         <select value={newItem.parentId || ''} onChange={e => setNewItem({ ...newItem, parentId: e.target.value || null })}>
                             <option value="">頂層導航</option>
                             {navItems.map(i => <option key={i.id} value={i.id}>{i.label}</option>)}
                         </select>
                     </div>
-                    <button onClick={handleAddLink} className="btn btn-primary" style={{ height: '42px', flex: '0 0 auto', whiteSpace: 'nowrap' }}>加入</button>
+                    <button onClick={handleAddLink} className="btn btn-primary nav-fg-btn">加入</button>
                 </div>
             </div>
 
@@ -240,6 +240,26 @@ function NavAdminPage() {
                     ))}
                 </div>
             )}
+            <style dangerouslySetInnerHTML={{ __html: `
+                .nav-edit-section {
+                    margin-bottom: 2rem;
+                    padding: 1.25rem;
+                }
+                .nav-form-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 1rem;
+                    align-items: flex-end;
+                }
+                .nav-form-row .form-group {
+                    margin-bottom: 0 !important;
+                }
+                .nav-fg-select { flex: 1 1 200px; }
+                .nav-fg-name { flex: 1 1 180px; }
+                .nav-fg-path { flex: 2 1 240px; }
+                .nav-fg-parent { flex: 0 0 140px; }
+                .nav-fg-btn { height: 42px; flex: 0 0 auto; white-space: nowrap; }
+            ` }} />
         </div>
     );
 }

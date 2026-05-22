@@ -202,14 +202,19 @@ function StaffLoginPage() {
 
                     <button
                         type="button"
-                        className="btn btn-ghost btn-full"
+                        className="btn btn-ghost btn-full btn-switch-mode"
                         onClick={() => setIsRegister(!isRegister)}
-                        style={{ marginTop: '0.5rem' }}
                     >
                         {isRegister ? '已有帳號？前往登入' : '還沒有帳號？前往註冊'}
                     </button>
                 </form>
             </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                .login-page .btn-switch-mode {
+                    margin-top: 0.5rem;
+                }
+            `}} />
         </div>
     );
 }

@@ -37,7 +37,7 @@ function HomePage() {
             );
             const snapshot = await getDocs(q);
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
+
             // 取得每個活動的報名人數
             const eventsWithCounts = await Promise.all(data.map(async (event) => {
                 const regQ = query(collection(db, 'event_registrations'), where('postId', '==', event.id));
@@ -237,15 +237,15 @@ function HomePage() {
                         <div className="physical-events-section" style={{ marginBottom: '3rem' }}>
                             <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                                 <h2 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                                     實體活動
                                 </h2>
-                                <Link 
-                                    to="/registration-inquiry" 
+                                <Link
+                                    to="/registration-inquiry"
                                     className="btn btn-outline"
-                                    style={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
                                         gap: '6px',
                                         padding: '0.6rem 1.25rem',
                                         borderRadius: '20px',
@@ -256,14 +256,14 @@ function HomePage() {
                                         textDecoration: 'none'
                                     }}
                                 >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
                                     報名查詢
                                 </Link>
                             </div>
 
-                            <div className="physical-events-grid" style={{ 
-                                display: 'grid', 
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
+                            <div className="physical-events-grid" style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
                                 gap: '1.5rem',
                                 overflowX: 'auto',
                                 paddingBottom: '0.5rem',
@@ -273,12 +273,12 @@ function HomePage() {
                                     const banner = getFirstImage(event.content);
                                     const status = getEventStatus(event);
                                     return (
-                                        <Link 
-                                            to={`/post/${event.id}`} 
-                                            key={event.id} 
+                                        <Link
+                                            to={`/post/${event.id}`}
+                                            key={event.id}
                                             className="event-card"
-                                            style={{ 
-                                                textDecoration: 'none', 
+                                            style={{
+                                                textDecoration: 'none',
                                                 color: 'inherit',
                                                 background: '#fff',
                                                 borderRadius: '12px',
@@ -297,28 +297,28 @@ function HomePage() {
                                                     <img src={banner} alt={event.title} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', filter: status.label === '活動已結束' ? 'grayscale(0.5) brightness(0.7)' : 'none' }} />
                                                 ) : (
                                                     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>
-                                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                                                     </div>
                                                 )}
-                                                
+
                                                 {/* 活動已結束遮罩 */}
                                                 {status.label === '活動已結束' && (
-                                                    <div style={{ 
-                                                        position: 'absolute', 
-                                                        top: 0, 
-                                                        left: 0, 
-                                                        width: '100%', 
-                                                        height: '100%', 
-                                                        background: 'rgba(0,0,0,0.5)', 
-                                                        display: 'flex', 
-                                                        alignItems: 'center', 
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: 0,
+                                                        left: 0,
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        background: 'rgba(0,0,0,0.5)',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
                                                         justifyContent: 'center',
                                                         zIndex: 2
                                                     }}>
-                                                        <span style={{ 
-                                                            color: '#fff', 
-                                                            fontSize: '1.5rem', 
-                                                            fontWeight: '900', 
+                                                        <span style={{
+                                                            color: '#fff',
+                                                            fontSize: '1.5rem',
+                                                            fontWeight: '900',
                                                             letterSpacing: '2px',
                                                             border: '2px solid #fff',
                                                             padding: '8px 16px',
@@ -332,9 +332,9 @@ function HomePage() {
 
                                                 {/* 狀態標籤 (活動已結束時不顯示，改由中央遮罩顯示) */}
                                                 {status.label !== '活動已結束' && (
-                                                    <div style={{ 
-                                                        position: 'absolute', 
-                                                        top: '12px', 
+                                                    <div style={{
+                                                        position: 'absolute',
+                                                        top: '12px',
                                                         right: '12px',
                                                         background: status.color,
                                                         color: '#fff',
@@ -354,7 +354,7 @@ function HomePage() {
                                                     {autoSpace(event.title)}
                                                 </h3>
                                                 <div style={{ fontSize: '0.85rem', color: '#666', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                                                     活動時間：{event.eventTime?.toDate ? event.eventTime.toDate().toLocaleDateString() : new Date(event.eventTime).toLocaleDateString()}
                                                 </div>
                                             </div>
@@ -364,10 +364,10 @@ function HomePage() {
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
-                                <Link 
-                                    to="/events" 
+                                <Link
+                                    to="/events"
                                     className="btn btn-outline"
-                                    style={{ 
+                                    style={{
                                         padding: '0.8rem 2.5rem',
                                         borderRadius: '30px',
                                         fontSize: '1rem',
@@ -402,66 +402,17 @@ function HomePage() {
                                     <span className="page-count">共 {totalCount} 則</span>
                                 )}
                             </div>
-                            <Link 
-                                to="/member-change" 
-                                className="btn btn-outline"
-                                style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '6px',
-                                    padding: '0.6rem 1.25rem',
-                                    borderRadius: '20px',
-                                    fontSize: '0.9rem',
-                                    fontWeight: '600',
-                                    color: '#007130',
-                                    borderColor: '#007130',
-                                    textDecoration: 'none'
-                                }}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                    <circle cx="12" cy="7" r="4" />
-                                    <line x1="19" y1="8" x2="19" y2="14" />
-                                    <line x1="16" y1="11" x2="22" y2="11" />
-                                </svg>
-                                會員資料變更
-                            </Link>
                         </div>
 
-                    {/* 置頂公告區塊 */}
-                    {pinnedPosts.length > 0 && currentPage === 1 && (
-                        <div className="pinned-section">
-                            <div className="pinned-list">
-                                {pinnedPosts.map((post, index) => (
-                                    <Link
-                                        to={`/post/${post.id}`}
-                                        key={post.id}
-                                        className="post-card pinned-card"
-                                        style={{ animationDelay: `${index * 0.03}s` }}
-                                    >
-                                        <div className="post-card-content">
-                                            <div className="post-card-meta">
-                                                <span className="post-date">{formatDate(post.createdAt)}</span>
-                                            </div>
-                                            <h2 className="post-title">{autoSpace(post.title)}</h2>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 一般公告列表 */}
-                    <div className="post-list">
-                        {monthGroups.map((group) => (
-                            <div className="month-group" key={group.yearMonth}>
-                                <div className="month-label">{group.month}</div>
-                                <div className="month-items">
-                                    {group.posts.map((post, index) => (
+                        {/* 置頂公告區塊 */}
+                        {pinnedPosts.length > 0 && currentPage === 1 && (
+                            <div className="pinned-section">
+                                <div className="pinned-list">
+                                    {pinnedPosts.map((post, index) => (
                                         <Link
                                             to={`/post/${post.id}`}
                                             key={post.id}
-                                            className="post-card"
+                                            className="post-card pinned-card"
                                             style={{ animationDelay: `${index * 0.03}s` }}
                                         >
                                             <div className="post-card-content">
@@ -474,27 +425,52 @@ function HomePage() {
                                     ))}
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        )}
 
-                    {totalPages > 1 && (
-                        <div className="pagination">
-                            <button
-                                className="pagination-btn"
-                                disabled={currentPage === 1}
-                                onClick={() => setCurrentPage((p) => p - 1)}
-                            >
-                                ← 上一頁
-                            </button>
-                            <span className="pagination-info">
-                                {currentPage} / {totalPages}
-                            </span>
-                            <button
-                                className="pagination-btn"
-                                disabled={currentPage === totalPages}
-                                onClick={() => setCurrentPage((p) => p + 1)}
-                            >
-                                下一頁 →
+                        {/* 一般公告列表 */}
+                        <div className="post-list">
+                            {monthGroups.map((group) => (
+                                <div className="month-group" key={group.yearMonth}>
+                                    <div className="month-label">{group.month}</div>
+                                    <div className="month-items">
+                                        {group.posts.map((post, index) => (
+                                            <Link
+                                                to={`/post/${post.id}`}
+                                                key={post.id}
+                                                className="post-card"
+                                                style={{ animationDelay: `${index * 0.03}s` }}
+                                            >
+                                                <div className="post-card-content">
+                                                    <div className="post-card-meta">
+                                                        <span className="post-date">{formatDate(post.createdAt)}</span>
+                                                    </div>
+                                                    <h2 className="post-title">{autoSpace(post.title)}</h2>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="pagination">
+                                <button
+                                    className="pagination-btn"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage((p) => p - 1)}
+                                >
+                                    ← 上一頁
+                                </button>
+                                <span className="pagination-info">
+                                    {currentPage} / {totalPages}
+                                </span>
+                                <button
+                                    className="pagination-btn"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage((p) => p + 1)}
+                                >
+                                    下一頁 →
                                 </button>
                             </div>
                         )}

@@ -177,37 +177,36 @@ function WinnerAdminPage() {
     }
 
     return (
-        <div className="admin-page-content">
+        <div className="admin-page-content winner-admin-page">
             <div className="admin-content-header">
                 <h2 className="admin-content-title">中獎表單查詢</h2>
+                <p className="admin-content-subtitle">這裡列出了所有分類為「中獎名單公告」的活動，您可以點擊展開查看得獎者填寫的寄送資料，並匯出郵寄用的 A5 名條。</p>
             </div>
 
-            <p style={{ marginBottom: '1.5rem', opacity: 0.8 }}>這裡列出了所有分類為「中獎名單公告」的活動，您可以點擊展開查看得獎者填寫的寄送資料，並匯出郵寄用的 A5 名條。</p>
-
-            <div className="admin-table-container">
+            <div className="admin-table-wrap">
                 <table className="admin-table">
                     <thead>
                         <tr>
                             <th>活動名稱 (公告標題)</th>
                             <th>發布日期</th>
                             <th>表單截止時間</th>
-                            <th style={{ textAlign: 'right' }}>操作</th>
+                            <th className="text-right">操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         {posts.length === 0 ? (
                             <tr>
-                                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>目前沒有中獎活動</td>
+                                <td colSpan="4" className="text-center text-secondary p-5">目前沒有中獎活動</td>
                             </tr>
                         ) : (
                             posts.map((post) => (
                                 <React.Fragment key={post.id}>
                                     <tr
-                                        style={{ cursor: 'pointer', background: expandedPostId === post.id ? '#f5f5f5' : 'transparent' }}
+                                        className={expandedPostId === post.id ? 'is-expanded' : ''}
                                         onClick={() => toggleExpand(post.id)}
                                     >
-                                        <td style={{ fontWeight: 'bold' }}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', verticalAlign: 'middle', transform: expandedPostId === post.id ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                                        <td className="post-title-cell">
+                                            <svg className="expand-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <polyline points="9 18 15 12 9 6" />
                                             </svg>
                                             {post.title}
@@ -218,7 +217,7 @@ function WinnerAdminPage() {
                                                 ? (post.formDeadline.toDate ? post.formDeadline.toDate().toLocaleString() : new Date(post.formDeadline).toLocaleString())
                                                 : '未設定截止'}
                                         </td>
-                                        <td style={{ textAlign: 'right' }}>
+                                        <td className="text-right">
                                             <button
                                                 className="btn btn-sm btn-outline"
                                                 onClick={(e) => { e.stopPropagation(); toggleExpand(post.id); }}
@@ -229,18 +228,18 @@ function WinnerAdminPage() {
                                     </tr>
 
                                     {expandedPostId === post.id && (
-                                        <tr>
-                                            <td colSpan="4" style={{ padding: 0, borderBottom: '2px solid #ddd' }}>
-                                                <div style={{ background: '#fafafa', padding: '1.5rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                        <h4 style={{ margin: 0, color: '#007130' }}>填寫名單資料 ({submissions[post.id]?.length || 0} 筆)</h4>
+                                        <tr className="detail-row">
+                                            <td colSpan="4" className="detail-cell">
+                                                <div className="detail-container">
+                                                    <div className="detail-header-row">
+                                                        <h4 className="detail-title">填寫名單資料 ({submissions[post.id]?.length || 0} 筆)</h4>
                                                         {submissions[post.id] && submissions[post.id].length > 0 && (
                                                             <button
                                                                 className="btn btn-sm btn-primary"
                                                                 onClick={() => handleExportPDF(post.id, post.title)}
                                                                 disabled={exporting}
                                                             >
-                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                                                                <svg className="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                                                     <polyline points="7 10 12 15 17 10"></polyline>
                                                                     <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -251,10 +250,10 @@ function WinnerAdminPage() {
                                                     </div>
 
                                                     {loadingSubmissions[post.id] ? (
-                                                        <p>資料載入中...</p>
+                                                        <p className="loading-text">資料載入中...</p>
                                                     ) : submissions[post.id] && submissions[post.id].length > 0 ? (
-                                                        <div style={{ overflowX: 'auto' }}>
-                                                            <table className="admin-table" style={{ background: '#fff', fontSize: '0.9rem' }}>
+                                                        <div className="admin-table-wrap">
+                                                            <table className="admin-table inner-table">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>社群名稱</th>
@@ -278,7 +277,7 @@ function WinnerAdminPage() {
                                                             </table>
                                                         </div>
                                                     ) : (
-                                                        <div className="empty-state" style={{ padding: '1rem', background: '#fff' }}>
+                                                        <div className="empty-state inner-empty">
                                                             尚無人填寫此表單
                                                         </div>
                                                     )}
@@ -296,50 +295,129 @@ function WinnerAdminPage() {
             {/* 用於匯出 PDF 的隱藏區域 (置於畫面外) */}
             <div
                 ref={printAreaRef}
-                style={{
-                    position: 'absolute',
-                    top: '-9999px',
-                    left: '-9999px',
-                    width: '210mm',
-                }}
+                className="pdf-print-area"
             >
                 {printData.map((data, idx) => (
                     <div
                         key={idx}
                         className="print-label"
-                        style={{
-                            width: '210mm',
-                            height: '74mm', // 原本148mm，現在變成一半高度
-                            backgroundColor: 'white',
-                            padding: '5mm 20mm', // 減小上下間距避免超出
-                            boxSizing: 'border-box',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            fontFamily: 'sans-serif',
-                            color: 'black',
-                            border: '1px solid white' // 確保沒有外框
-                        }}
                     >
                         {/* 第一行：寄件人資訊 */}
-                        <div style={{ fontSize: '5mm', marginBottom: '8mm', width: '100%', textAlign: 'left' }}>
+                        <div className="print-sender">
                             台北市松江路261號6樓 社群小編陳騏濬 02-25035508
                         </div>
 
                         {/* 第二行：收件地址 */}
-                        <div style={{ fontSize: '8mm', marginBottom: '8mm', width: '100%', textAlign: 'left', lineHeight: '1.4' }}>
+                        <div className="print-address">
                             {data.zipCode} {data.county}{data.district}{data.addressDetail}
                         </div>
 
                         {/* 第三行：收件人資訊置中 */}
-                        <div style={{ fontSize: '12mm', fontWeight: 'bold', width: '100%', textAlign: 'center', display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '5mm' }}>
+                        <div className="print-recipient-row">
                             <span>{data.recipientName} 先生/女士 收</span>
-                            <span style={{ fontSize: '5mm' }}>{data.recipientPhone}</span>
+                            <span className="print-phone">{data.recipientPhone}</span>
                         </div>
                     </div>
                 ))}
             </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                .winner-admin-page .admin-table tr {
+                    cursor: pointer;
+                }
+                .winner-admin-page .admin-table tr.is-expanded {
+                    background: var(--bg-gray);
+                }
+                .winner-admin-page .post-title-cell {
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                }
+                .winner-admin-page .expand-arrow {
+                    margin-right: 8px;
+                    transition: transform 0.2s;
+                }
+                .winner-admin-page tr.is-expanded .expand-arrow {
+                    transform: rotate(90deg);
+                }
+                .winner-admin-page .detail-cell {
+                    padding: 0 !important;
+                    border-bottom: 2px solid var(--border-light) !important;
+                }
+                .winner-admin-page .detail-container {
+                    background: var(--bg-gray);
+                    padding: 1.5rem;
+                }
+                .winner-admin-page .detail-header-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                }
+                .winner-admin-page .detail-title {
+                    margin: 0;
+                    color: var(--brand);
+                }
+                .winner-admin-page .inner-table {
+                    background: #fff;
+                    font-size: 0.9rem;
+                }
+                .winner-admin-page .inner-empty {
+                    padding: 1rem;
+                    background: #fff;
+                }
+                .winner-admin-page .btn-icon {
+                    margin-right: 4px;
+                }
+                
+                /* PDF 列印名條專用 (高精度毫米單位) */
+                .pdf-print-area {
+                    position: absolute;
+                    top: -9999px;
+                    left: -9999px;
+                    width: 210mm;
+                }
+                .print-label {
+                    width: 210mm;
+                    height: 74mm;
+                    background-color: white;
+                    padding: 5mm 20mm;
+                    box-sizing: border-box;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    font-family: sans-serif;
+                    color: black;
+                    border: 1px solid white;
+                }
+                .print-sender {
+                    font-size: 5mm;
+                    margin-bottom: 8mm;
+                    width: 100%;
+                    text-align: left;
+                }
+                .print-address {
+                    font-size: 8mm;
+                    margin-bottom: 8mm;
+                    width: 100%;
+                    text-align: left;
+                    line-height: 1.4;
+                }
+                .print-recipient-row {
+                    font-size: 12mm;
+                    font-weight: bold;
+                    width: 100%;
+                    text-align: center;
+                    display: flex;
+                    align-items: baseline;
+                    justify-content: center;
+                    gap: 5mm;
+                }
+                .print-phone {
+                    font-size: 5mm;
+                }
+            ` }} />
 
         </div>
     );

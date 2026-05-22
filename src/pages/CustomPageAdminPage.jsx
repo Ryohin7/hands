@@ -57,7 +57,7 @@ function CustomPageAdminPage() {
                 </Link>
             </div>
 
-            <div className="info-card" style={{ marginBottom: '1.5rem' }}>
+            <div className="info-card mb-5">
                 <p>💡 您可以建立自訂頁面（如：會員條款、關於我們），並在「導航管理」中將其加入選單。</p>
             </div>
 

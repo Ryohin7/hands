@@ -94,47 +94,31 @@ function StaffDashboardPage() {
     }, []);
 
     return (
-        <div className="admin-page-content">
+        <div className="admin-page-content staff-dashboard-page">
             <div className="admin-content-header">
                 <h2 className="admin-content-title">儀表板</h2>
             </div>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>載入中...</div>
+                <div className="loading-container">
+                    <div className="loading-spinner" />
+                    <p>載入中...</p>
+                </div>
             ) : (
                 <>
                     {!isLineLinked && (
-                        <div className="alert-link-line" style={{
-                            background: '#E8F5E9',
-                            border: '1px solid #C8E6C9',
-                            borderRadius: '12px',
-                            padding: '1rem 1.5rem',
-                            marginBottom: '1.5rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="alert-link-line">
+                            <div className="alert-content-wrap">
                                 <div>
-                                    <h4 style={{ margin: 0, color: '#1B5E20', fontSize: '0.95rem' }}>尚未綁定 LINE 帳號</h4>
-                                    <p style={{ margin: '2px 0 0 0', color: '#2E7D32', fontSize: '0.85rem' }}>請前往 LINE 官方帳號輸入「員工綁定」以接收即時各項通知。</p>
+                                    <h4 className="alert-title">尚未綁定 LINE 帳號</h4>
+                                    <p className="alert-desc">請前往 LINE 官方帳號輸入「員工綁定」以接收即時各項通知。</p>
                                 </div>
                             </div>
                             <a
                                 href="https://line.me/R/ti/p/@143arkhr"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn btn-primary"
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    fontSize: '0.875rem',
-                                    background: '#00B900',
-                                    borderColor: '#00B900',
-                                    whiteSpace: 'nowrap',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '5px'
-                                }}
+                                className="btn alert-btn-line"
                             >
                                 LINE 綁定
                             </a>
@@ -143,7 +127,7 @@ function StaffDashboardPage() {
                     <div className="dashboard-grid">
                         {/* 自己的申請中項目 */}
                         <div className={`card dashboard-card ${myApplyingCoupons > 0 ? 'has-items status-pending' : ''}`}>
-                            <div className="dashboard-card-icon" style={{ background: myApplyingCoupons > 0 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)', color: '#3B82F6' }}>
+                            <div className="dashboard-card-icon icon-blue">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                     <polyline points="14 2 14 8 20 8" />
@@ -163,7 +147,7 @@ function StaffDashboardPage() {
                         {/* 待審核項目 (需要審核權限) */}
                         {hasAuditPermission && (
                             <div className={`card dashboard-card ${pendingCoupons > 0 ? 'has-items status-audit' : ''}`}>
-                                <div className="dashboard-card-icon" style={{ background: pendingCoupons > 0 ? 'rgba(245, 158, 11, 0.2)' : 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>
+                                <div className="dashboard-card-icon icon-warning">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                         <polyline points="22 4 12 14.01 9 11.01" />
@@ -183,7 +167,7 @@ function StaffDashboardPage() {
                         {/* 員工帳號審核項目 (需要審核權限) */}
                         {hasUserAuditPermission && (
                             <div className={`card dashboard-card ${pendingUsers > 0 ? 'has-items status-user-audit' : ''}`}>
-                                <div className="dashboard-card-icon" style={{ background: pendingUsers > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
+                                <div className="dashboard-card-icon icon-success">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                         <circle cx="9" cy="7" r="4" />
@@ -204,7 +188,7 @@ function StaffDashboardPage() {
                         {/* 會員異動審核 (需要審核權限) */}
                         {hasMemberAuditPermission && (
                             <div className={`card dashboard-card ${pendingMemberActions > 0 ? 'has-items status-member-audit' : ''}`}>
-                                <div className="dashboard-card-icon" style={{ background: pendingMemberActions > 0 ? 'rgba(139, 92, 246, 0.2)' : 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6' }}>
+                                <div className="dashboard-card-icon icon-purple">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                                         <line x1="9" y1="9" x2="15" y2="9" />
@@ -243,6 +227,48 @@ function StaffDashboardPage() {
                     overflow: hidden;
                     background: #fff;
                 }
+                .alert-link-line {
+                    background: #E8F5E9;
+                    border: 1px solid #C8E6C9;
+                    border-radius: 12px;
+                    padding: 1rem 1.5rem;
+                    margin-bottom: 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                .alert-content-wrap {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .alert-title {
+                    margin: 0;
+                    color: #1B5E20;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                }
+                .alert-desc {
+                    margin: 2px 0 0 0;
+                    color: #2E7D32;
+                    font-size: 0.85rem;
+                }
+                .alert-btn-line {
+                    padding: 0.5rem 1rem;
+                    font-size: 0.875rem;
+                    background: #00B900;
+                    border-color: #00B900;
+                    color: white !important;
+                    white-space: nowrap;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    transition: opacity 0.2s;
+                }
+                .alert-btn-line:hover {
+                    opacity: 0.9;
+                }
+                
                 .dashboard-card.has-items {
                     border-color: rgba(0,0,0,0.05);
                     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -278,6 +304,34 @@ function StaffDashboardPage() {
                     justify-content: center;
                     margin-right: 1.5rem;
                     flex-shrink: 0;
+                }
+                .dashboard-card-icon.icon-blue {
+                    background: rgba(59, 130, 246, 0.1);
+                    color: #3B82F6;
+                }
+                .dashboard-card.status-pending.has-items .dashboard-card-icon.icon-blue {
+                    background: rgba(59, 130, 246, 0.2);
+                }
+                .dashboard-card-icon.icon-warning {
+                    background: rgba(245, 158, 11, 0.1);
+                    color: #F59E0B;
+                }
+                .dashboard-card.status-audit.has-items .dashboard-card-icon.icon-warning {
+                    background: rgba(245, 158, 11, 0.2);
+                }
+                .dashboard-card-icon.icon-success {
+                    background: rgba(16, 185, 129, 0.1);
+                    color: #10B981;
+                }
+                .dashboard-card.status-user-audit.has-items .dashboard-card-icon.icon-success {
+                    background: rgba(16, 185, 129, 0.2);
+                }
+                .dashboard-card-icon.icon-purple {
+                    background: rgba(139, 92, 246, 0.1);
+                    color: #8B5CF6;
+                }
+                .dashboard-card.status-member-audit.has-items .dashboard-card-icon.icon-purple {
+                    background: rgba(139, 92, 246, 0.2);
                 }
                 .dashboard-card-content {
                     flex: 1;

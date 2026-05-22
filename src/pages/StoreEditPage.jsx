@@ -66,7 +66,7 @@ function StoreEditPage() {
             <form onSubmit={handleSubmit} className="edit-form">
                 <div className="edit-section-card">
                     <h3 className="edit-section-title">門市基本資訊</h3>
-                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <div className="form-group mb-5">
                         <label>門市名稱</label>
                         <input
                             type="text"
@@ -74,8 +74,7 @@ function StoreEditPage() {
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                             placeholder="例如：京站店"
-                            className="input-lg"
-                            style={{ fontSize: '1.25rem', fontWeight: 'bold' }}
+                            className="input-lg input-title"
                         />
                     </div>
 
@@ -108,7 +107,7 @@ function StoreEditPage() {
 
                 <div className="edit-section-card">
                     <h3 className="edit-section-title">聯絡與服務資訊</h3>
-                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <div className="form-group mb-5">
                         <label>地址</label>
                         <input
                             type="text"
@@ -144,7 +143,7 @@ function StoreEditPage() {
 
                 <div className="edit-actions">
                     <button type="submit" className="btn btn-primary" disabled={saving}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:'4px'}}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
                         {saving ? '儲存中...' : '儲存門市設定'}
                     </button>
                     <button type="button" onClick={() => navigate('/admin/stores')} className="btn btn-ghost">取消</button>

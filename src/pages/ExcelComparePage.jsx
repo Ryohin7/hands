@@ -142,7 +142,6 @@ function ExcelComparePage() {
                 onDragLeave={() => setDragOver(false)}
                 onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
                 onClick={() => fileInputRef.current.click()}
-                style={{ marginBottom: '1.5rem', cursor: 'pointer' }}
             >
                 <input ref={fileInputRef} type="file" accept=".xlsx,.xls" multiple onChange={(e) => handleFiles(e.target.files)} style={{ display: 'none' }} />
                 <div className="converter-upload-prompt">
@@ -178,18 +177,18 @@ function ExcelComparePage() {
 
             {/* 訊息提示 */}
             {message && (
-                <div className={`converter-message converter-message-${message.type}`} style={{ margin: '1rem 0' }}>
+                <div className={`converter-message converter-message-${message.type}`}>
                     {message.type === 'success' ? '✅' : '❌'} {message.text}
                 </div>
             )}
 
             {/* 配置與操作區 */}
             {fileList.length >= 2 && (
-                <div className="compare-config-card">
+                <div className="edit-section-card">
                     <div className="config-row">
                         <div className="config-item">
                             <label className="compare-label-text">比對基準欄位 (由首檔讀取)：</label>
-                            <select value={compareKey} onChange={(e) => setCompareKey(e.target.value)} className="admin-input" style={{ background: 'white', color: 'black' }}>
+                            <select value={compareKey} onChange={(e) => setCompareKey(e.target.value)} className="admin-input">
                                 {fileList[0].headers.map(h => <option key={h} value={h}>{h}</option>)}
                             </select>
                         </div>
@@ -309,14 +308,6 @@ function ExcelComparePage() {
                     height: 100%;
                     background: var(--brand);
                     transition: width 0.3s ease;
-                }
-                .compare-config-card {
-                    background: #fff;
-                    border: 1px solid var(--border-light);
-                    border-radius: 12px;
-                    padding: 2rem;
-                    margin-bottom: 2rem;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
                 }
                 .compare-label-text {
                     display: block;

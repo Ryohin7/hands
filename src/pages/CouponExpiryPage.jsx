@@ -346,13 +346,13 @@ function CouponExpiryPage() {
 
             {/* 參數設定 */}
             {fileData && (
-                <div className="compare-config-card" style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
-                    <h3 className="section-small-title" style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text)' }}>
+                <div className="edit-section-card mb-5">
+                    <h3 className="edit-section-title">
                         ⚙️ 篩選參數設定
                     </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                    <div className="grid-2">
                         <div className="config-item">
-                            <label className="compare-label-text" style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                            <label className="compare-label-text">
                                 到期天數 (天後)：
                             </label>
                             <input
@@ -360,16 +360,15 @@ function CouponExpiryPage() {
                                 min="0"
                                 value={days}
                                 onChange={(e) => setDays(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                                className="admin-input"
-                                style={{ width: '100%' }}
+                                className="admin-input w-full"
                             />
-                            <div style={{ fontSize: '0.825rem', color: '#2563eb', marginTop: '0.5rem', fontWeight: '500' }}>
+                            <div className="text-blue font-medium mt-2" style={{ fontSize: '0.825rem' }}>
                                 {dateHint}
                             </div>
                         </div>
 
-                        <div className="config-item" style={{ display: 'flex', alignItems: 'flex-end' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 600, paddingBottom: '0.5rem' }}>
+                        <div className="config-item d-flex align-end">
+                            <label className="cursor-pointer font-bold pb-2" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <input
                                     type="checkbox"
                                     checked={deduplicate}
@@ -398,8 +397,8 @@ function CouponExpiryPage() {
                         </h3>
                         <span className="preview-badge">展示轉換後格式</span>
                     </div>
-                    <div className="converter-table-wrap">
-                        <table className="converter-table">
+                    <div className="admin-table-wrap">
+                        <table className="admin-table">
                             <thead>
                                 <tr>
                                     {COLUMN_HEADERS.map((h, i) => (
@@ -412,10 +411,10 @@ function CouponExpiryPage() {
                                     <tr key={ri}>
                                         <td><strong>{row[0]}</strong></td>
                                         <td>{row[1]}</td>
-                                        <td style={{ color: '#2563eb', fontWeight: '500' }}>{row[2]}</td>
+                                        <td className="text-blue font-medium">{row[2]}</td>
                                         <td>{row[3]}</td>
                                         <td>{row[4]}</td>
-                                        <td>{row[5] || <span style={{ color: '#ef4444', fontStyle: 'italic' }}>空值 (將被排除)</span>}</td>
+                                        <td>{row[5] || <span className="text-danger font-italic">空值 (將被排除)</span>}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -426,16 +425,16 @@ function CouponExpiryPage() {
 
             {/* 下載與轉換動作區 */}
             {fileData && currentCounts && (
-                <div className="converter-actions" style={{ marginTop: '1.5rem' }}>
+                <div className="converter-actions mt-5">
                     <h3 className="converter-section-title">📥 篩選結果與名單導出</h3>
 
                     {/* 目前篩選結果統計 */}
-                    <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
-                        <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text)' }}>
+                    <div className="card-stat-group">
+                        <p className="card-stat-title">
                             符合條件統計結果 (天數: {days} 天內)：
                         </p>
-                        <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                            <span>🟢 綠卡註冊禮：<strong style={{ color: '#10b981' }}>{currentCounts.GREEN50}</strong> 筆</span>
+                        <div className="card-stat-row">
+                            <span>🟢 綠卡註冊禮：<strong className="text-success">{currentCounts.GREEN50}</strong> 筆</span>
                             <span>🟡 白金卡升等禮 ：<strong style={{ color: '#f59e0b' }}>{currentCounts.golden100}</strong> 筆</span>
                             <span>⚫ 黑卡升等禮：<strong style={{ color: '#111827' }}>{currentCounts.black200}</strong> 筆</span>
                             <span style={{ borderLeft: '1px solid #cbd5e1', paddingLeft: '2rem' }}>總計名單：<strong>{currentCounts.total}</strong> 筆</span>
@@ -443,12 +442,11 @@ function CouponExpiryPage() {
                     </div>
 
                     {/* 打包下載按鈕 */}
-                    <div style={{ marginBottom: '1.5rem' }}>
+                    <div className="mb-5">
                         <button
                             onClick={handleConvertZip}
                             disabled={converting || currentCounts.total === 0}
-                            className="btn btn-primary"
-                            style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                            className="btn btn-primary btn-zip-download"
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -460,45 +458,42 @@ function CouponExpiryPage() {
                     </div>
 
                     {/* 單檔下載 */}
-                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <h4 className="mb-3" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
                         個別檔案下載：
                     </h4>
-                    <div className="converter-btn-group" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                    <div className="converter-btn-group grid-3">
                         <button
                             onClick={() => handleDownloadSingle('GREEN50')}
                             disabled={currentCounts.GREEN50 === 0}
-                            className="converter-btn"
-                            style={{ borderLeft: '5px solid #10b981', textAlign: 'left', padding: '1rem', background: '#fff' }}
+                            className="converter-btn coupon-btn-green"
                         >
-                            <div style={{ fontWeight: 'bold', color: 'var(--text)' }}>綠卡註冊禮 (GREEN50)</div>
-                            <small style={{ color: 'var(--text-secondary)' }}>符合：{currentCounts.GREEN50} 筆名單</small>
+                            <div className="font-bold" style={{ color: 'var(--text)' }}>綠卡註冊禮 (GREEN50)</div>
+                            <small className="text-dim">符合：{currentCounts.GREEN50} 筆名單</small>
                         </button>
 
                         <button
                             onClick={() => handleDownloadSingle('golden100')}
                             disabled={currentCounts.golden100 === 0}
-                            className="converter-btn"
-                            style={{ borderLeft: '5px solid #f59e0b', textAlign: 'left', padding: '1rem', background: '#fff' }}
+                            className="converter-btn coupon-btn-gold"
                         >
-                            <div style={{ fontWeight: 'bold', color: 'var(--text)' }}>白金卡升等禮 (golden100)</div>
-                            <small style={{ color: 'var(--text-secondary)' }}>符合：{currentCounts.golden100} 筆名單</small>
+                            <div className="font-bold" style={{ color: 'var(--text)' }}>白金卡升等禮 (golden100)</div>
+                            <small className="text-dim">符合：{currentCounts.golden100} 筆名單</small>
                         </button>
 
                         <button
                             onClick={() => handleDownloadSingle('black200')}
                             disabled={currentCounts.black200 === 0}
-                            className="converter-btn"
-                            style={{ borderLeft: '5px solid #111827', textAlign: 'left', padding: '1rem', background: '#fff' }}
+                            className="converter-btn coupon-btn-black"
                         >
-                            <div style={{ fontWeight: 'bold', color: 'var(--text)' }}>黑卡升等禮 (black200)</div>
-                            <small style={{ color: 'var(--text-secondary)' }}>符合：{currentCounts.black200} 筆名單</small>
+                            <div className="font-bold" style={{ color: 'var(--text)' }}>黑卡升等禮 (black200)</div>
+                            <small className="text-dim">符合：{currentCounts.black200} 筆名單</small>
                         </button>
                     </div>
                 </div>
             )}
 
             {/* 說明區塊 */}
-            <div className="converter-info" style={{ marginTop: '2rem' }}>
+            <div className="converter-info mt-6">
                 <h3 className="converter-section-title">📖 轉換規則說明</h3>
                 <div className="converter-info-cards">
                     <div className="info-card">

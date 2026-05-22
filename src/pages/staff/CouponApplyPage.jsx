@@ -165,27 +165,27 @@ function CouponApplyPage() {
     };
 
     return (
-        <div className="admin-page-content">
+        <div className="admin-page-content coupon-apply-page">
             {/* 彈窗：查看多張券碼 */}
             {viewCoupons && (
-                <div className="modal-overlay" onClick={() => setViewCoupons(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="modal-content card" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '400px', padding: '1.5rem', borderRadius: '12px', background: '#fff' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.25rem' }}>券號清單 ({viewCoupons.length} 張)</h3>
+                <div className="modal-overlay" onClick={() => setViewCoupons(null)}>
+                    <div className="modal-content card" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3 className="modal-title">券號清單 ({viewCoupons.length} 張)</h3>
                             <button onClick={() => setViewCoupons(null)} className="btn-icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
-                        <div style={{ maxHeight: '400px', overflowY: 'auto', background: '#f8f9fa', padding: '1rem', borderRadius: '8px', border: '1px solid #eee' }}>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        <div className="modal-list-wrap">
+                            <ul className="modal-list">
                                 {viewCoupons.map((code, idx) => (
-                                    <li key={idx} style={{ padding: '0.75rem 0', borderBottom: idx === viewCoupons.length - 1 ? 'none' : '1px solid #efefef', fontFamily: 'monospace', fontSize: '1.1rem', textAlign: 'center', color: '#1a1a1a' }}>
+                                    <li key={idx} className="modal-item">
                                         {code}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                        <button className="btn btn-primary btn-full" style={{ marginTop: '1.5rem' }} onClick={() => setViewCoupons(null)}>關閉</button>
+                        <button className="btn btn-primary btn-full modal-close-btn" onClick={() => setViewCoupons(null)}>關閉</button>
                     </div>
                 </div>
             )}
@@ -203,14 +203,13 @@ function CouponApplyPage() {
             </div>
 
             {isAdmin && showImport && (
-                <div className="card" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
-                    <h3 style={{ marginBottom: '1rem' }}>批量導入電子券</h3>
-                    <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
+                <div className="edit-section-card import-card">
+                    <h3 className="card-title">批量導入電子券</h3>
+                    <p className="card-description">
                         請在下方輸入電子券碼，每行一筆。
                     </p>
                     <textarea
-                        className="form-control"
-                        style={{ width: '100%', height: '200px', marginBottom: '1rem', padding: '10px', border: '1px solid #ddd' }}
+                        className="form-control import-textarea"
                         value={importText}
                         onChange={(e) => setImportText(e.target.value)}
                         placeholder="請輸入券碼..."
@@ -226,23 +225,22 @@ function CouponApplyPage() {
             )}
 
             {hasAuditPermission && (
-                <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                    <div className="card" style={{ padding: '1.5rem' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#666' }}>剩餘在庫數量</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: '600' }}>{couponCount}</div>
+                <div className="stats-grid">
+                    <div className="card stat-card">
+                        <div className="stat-label">剩餘在庫數量</div>
+                        <div className="stat-value">{couponCount}</div>
                     </div>
                 </div>
             )}
 
-            <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>申請電子券</h3>
-                <form onSubmit={handleApply} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="edit-section-card apply-form-card">
+                <h3 className="card-title">申請電子券</h3>
+                <form onSubmit={handleApply} className="apply-form">
                     <div className="form-group">
                         <label>申請張數</label>
                         <input
                             type="number"
-                            className="form-control"
-                            style={{ height: '45px', fontSize: '1rem' }}
+                            className="form-control form-input-lg"
                             min="1"
                             value={quantity}
                             onChange={(e) => setQuantity(parseInt(e.target.value))}
@@ -253,58 +251,56 @@ function CouponApplyPage() {
                         <label>申請原因 (必要)</label>
                         <input
                             type="text"
-                            className="form-control"
-                            style={{ height: '45px', fontSize: '1rem' }}
+                            className="form-control form-input-lg"
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="例如：檔期結束退貨補券"
                             required
                         />
                     </div>
-                    <button type="submit" className="btn btn-primary" disabled={loading} style={{ height: '45px' }}>
+                    <button type="submit" className="btn btn-primary btn-submit-lg" disabled={loading}>
                         {loading ? '送出中...' : '確認提交申請'}
                     </button>
                 </form>
             </div>
 
             <div className="history-section">
-                <div style={{ padding: '0 0.5rem 1rem' }}>
-                    <h3 style={{ fontSize: '1.1rem' }}>申請紀錄</h3>
+                <div className="section-header">
+                    <h3 className="section-title">申請紀錄</h3>
                 </div>
 
                 {/* 手機版：卡片式列表 */}
-                <div className="mobile-only" style={{ display: 'none' }}>
+                <div className="mobile-only">
                     {requests.length === 0 ? (
-                        <div className="card" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>暫無紀錄</div>
+                        <div className="card empty-record">暫無紀錄</div>
                     ) : (
                         requests.map(req => (
-                            <div key={req.id} className="card" style={{ padding: '1rem', marginBottom: '0.75rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#111' }}>{req.displayId || req.id.substring(0, 8)}</span>
-                                    <span style={{ fontSize: '0.75rem', color: '#666' }}>{req.createdAt?.toDate().toLocaleDateString()}</span>
-                                    <span className={`tag tag-${req.status}`} style={{ fontSize: '0.7rem' }}>
+                            <div key={req.id} className="card mobile-req-card">
+                                <div className="card-header-row">
+                                    <span className="card-display-id">{req.displayId || req.id.substring(0, 8)}</span>
+                                    <span className="card-date">{req.createdAt?.toDate().toLocaleDateString()}</span>
+                                    <span className={`tag tag-${req.status} card-status`}>
                                         {req.status === 'pending' ? '待審核' : req.status === 'approved' ? '已核准' : '已退回'}
                                     </span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '0.85rem', color: '#666' }}>申請張數：<strong>{req.quantityRequested} 張</strong></div>
-                                        <div style={{ fontSize: '0.8125rem', color: '#888', marginTop: '0.25rem' }}>原因：{req.reason || '未填寫'}</div>
+                                <div className="card-body-row">
+                                    <div className="card-info-col">
+                                        <div className="card-quantity">申請張數：<strong>{req.quantityRequested} 張</strong></div>
+                                        <div className="card-reason">原因：{req.reason || '未填寫'}</div>
                                         {(req.status === 'approved' || req.status === 'rejected') && (
-                                            <div style={{ fontSize: '0.8125rem', color: '#888', marginTop: '0.25rem' }}>審核者：{req.approvedByName || req.rejectedByName || '管理員'}</div>
+                                            <div className="card-auditor">審核者：{req.approvedByName || req.rejectedByName || '管理員'}</div>
                                         )}
                                     </div>
-                                    <div style={{ textAlign: 'right', marginLeft: '0.5rem' }}>
+                                    <div className="card-action-col">
                                         {req.status === 'approved' && req.assignedCoupons && (
                                             req.assignedCoupons.length === 1 ? (
-                                                <code style={{ background: '#f0f0f0', padding: '4px 8px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                                <code className="coupon-code">
                                                     {req.assignedCoupons[0]}
                                                 </code>
                                             ) : (
                                                 <button
-                                                    className="btn btn-sm btn-outline"
+                                                    className="btn btn-sm btn-outline btn-view-coupons"
                                                     onClick={() => setViewCoupons(req.assignedCoupons)}
-                                                    style={{ padding: '4px 8px' }}
                                                 >
                                                     查看券碼 ({req.assignedCoupons.length}張)
                                                 </button>
@@ -319,11 +315,11 @@ function CouponApplyPage() {
 
                 {/* 電腦版：表格列表 */}
                 <div className="desktop-only card">
-                    <div className="table-responsive">
+                    <div className="admin-table-wrap">
                         <table className="admin-table">
                             <thead>
                                 <tr>
-                                    <th style={{ width: '130px' }}>單號</th>
+                                    <th className="col-id">單號</th>
                                     <th>日期</th>
                                     <th>張數</th>
                                     <th>原因</th>
@@ -335,15 +331,15 @@ function CouponApplyPage() {
                             <tbody>
                                 {requests.length === 0 ? (
                                     <tr>
-                                        <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>暫無紀錄</td>
+                                        <td colSpan="7" className="table-empty">暫無紀錄</td>
                                     </tr>
                                 ) : (
                                     requests.map(req => (
                                         <tr key={req.id}>
-                                            <td style={{ fontWeight: '600', color: '#111' }}>{req.displayId || '-'}</td>
+                                            <td className="cell-id">{req.displayId || '-'}</td>
                                             <td>{req.createdAt?.toDate().toLocaleString() || '處理中...'}</td>
                                             <td>{req.quantityRequested}</td>
-                                            <td style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={req.reason}>
+                                            <td className="cell-reason" title={req.reason}>
                                                 {req.reason || '-'}
                                             </td>
                                             <td>
@@ -357,7 +353,7 @@ function CouponApplyPage() {
                                             <td>
                                                 {req.status === 'approved' && req.assignedCoupons && (
                                                     req.assignedCoupons.length === 1 ? (
-                                                        <code style={{ background: '#f0f0f0', padding: '4px 8px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                                        <code className="coupon-code">
                                                             {req.assignedCoupons[0]}
                                                         </code>
                                                     ) : (
@@ -381,11 +377,95 @@ function CouponApplyPage() {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
+                .coupon-apply-page .mobile-only {
+                    display: none;
+                }
+                .coupon-apply-page .empty-record {
+                    padding: 2rem;
+                    text-align: center;
+                    color: #999;
+                }
+                .coupon-apply-page .mobile-req-card {
+                    padding: 1rem;
+                    margin-bottom: 0.75rem;
+                }
+                .coupon-apply-page .card-header-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                }
+                .coupon-apply-page .card-display-id {
+                    font-size: 0.75rem;
+                    font-weight: bold;
+                    color: #111;
+                }
+                .coupon-apply-page .card-date {
+                    font-size: 0.75rem;
+                    color: #666;
+                }
+                .coupon-apply-page .card-status {
+                    font-size: 0.7rem;
+                }
+                .coupon-apply-page .card-body-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .coupon-apply-page .card-info-col {
+                    flex: 1;
+                }
+                .coupon-apply-page .card-quantity {
+                    font-size: 0.85rem;
+                    color: #666;
+                }
+                .coupon-apply-page .card-reason {
+                    font-size: 0.8125rem;
+                    color: #888;
+                    margin-top: 0.25rem;
+                }
+                .coupon-apply-page .card-auditor {
+                    font-size: 0.8125rem;
+                    color: #888;
+                    margin-top: 0.25rem;
+                }
+                .coupon-apply-page .card-action-col {
+                    text-align: right;
+                    margin-left: 0.5rem;
+                }
+                .coupon-apply-page .coupon-code {
+                    background: #f0f0f0;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    font-weight: bold;
+                }
+                .coupon-apply-page .btn-view-coupons {
+                    padding: 4px 8px;
+                }
+                .coupon-apply-page th.col-id {
+                    width: 130px;
+                }
+                .coupon-apply-page td.cell-id {
+                    font-weight: 600;
+                    color: #111;
+                }
+                .coupon-apply-page td.cell-reason {
+                    max-width: 150px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .coupon-apply-page td.table-empty {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #999;
+                }
+
                 @media (max-width: 768px) {
-                    .desktop-only { display: none !important; }
-                    .mobile-only { display: block !important; }
-                    .admin-content-header { margin-bottom: 1rem !important; }
-                    .stats-grid { margin-bottom: 1.5rem !important; }
+                    .coupon-apply-page .desktop-only { display: none !important; }
+                    .coupon-apply-page .mobile-only { display: block !important; }
+                    .coupon-apply-page .admin-content-header { margin-bottom: 1rem !important; }
+                    .coupon-apply-page .stats-grid { margin-bottom: 1.5rem !important; }
                 }
             `}} />
         </div>

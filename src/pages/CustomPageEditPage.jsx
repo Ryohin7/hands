@@ -140,19 +140,18 @@ function CustomPageEditPage() {
             <div className="edit-form">
                 <div className="edit-section-card">
                     <h3 className="edit-section-title">頁面基本資訊</h3>
-                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <div className="form-group mb-5">
                         <label>頁面標題</label>
                         <input
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="請輸入頁面標題"
-                            className="input-lg"
-                            style={{ fontSize: '1.25rem', fontWeight: 'bold' }}
+                            className="input-lg input-title"
                         />
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <div className="form-group mb-5">
                         <label>副標題 (可選)</label>
                         <input
                             type="text"
@@ -165,14 +164,14 @@ function CustomPageEditPage() {
                     <div className="edit-grid">
                         <div className="form-group">
                             <label>頁面路徑 ID (網址標記)</label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ color: '#666', fontWeight: 'bold' }}>/p/</span>
+                            <div className="d-flex align-center gap-2">
+                                <span className="font-bold text-dim">/p/</span>
                                 <input
                                     type="text"
                                     value={pathId}
                                     onChange={(e) => setPathId(e.target.value)}
                                     placeholder={isEdit ? "例如: about-us" : "未填寫將自動產生 (yymm01)"}
-                                    style={{ flex: 1 }}
+                                    className="flex-1"
                                 />
                             </div>
                         </div>
@@ -208,7 +207,7 @@ function CustomPageEditPage() {
 
                 <div className="edit-actions">
                     <button onClick={handleSave} className="btn btn-primary" disabled={saving}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:'4px'}}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
                         {saving ? '儲存中...' : '儲存頁面設定'}
                     </button>
                     <button onClick={() => navigate('/admin/pages')} className="btn btn-ghost" disabled={saving}>

@@ -130,7 +130,7 @@ function AdminPage() {
             ) : posts.length === 0 ? (
                 <div className="empty-state">
                     <p>尚未發布任何公告</p>
-                    <Link to="/admin/edit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+                    <Link to="/admin/edit" className="btn btn-primary">
                         新增第一則公告
                     </Link>
                 </div>

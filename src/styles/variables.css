@@ -14,26 +14,7 @@
   font-style: normal;
 }
 
-@font-face {
-  font-family: 'PingFang TC';
-  src: url('../fonts/PingFangTC-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-}
 
-@font-face {
-  font-family: 'PingFang TC';
-  src: url('../fonts/PingFangTC-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'PingFang TC';
-  src: url('../fonts/PingFangTC-Semibold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-}
 
 :root {
   --brand: #007130;
@@ -51,7 +32,7 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   --transition: 0.2s ease;
-  --font: 'Hiragino Sans', -apple-system, BlinkMacSystemFont, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Hiragino Sans', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
 }
 
 *,

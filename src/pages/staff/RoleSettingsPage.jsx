@@ -125,40 +125,22 @@ function RoleSettingsPage() {
     };
 
     return (
-        <div className="admin-page-content">
-            <div className="admin-content-header" style={{ marginBottom: '1.5rem' }}>
+        <div className="admin-page-content role-settings-page">
+            <div className="admin-content-header">
                 <h2 className="admin-content-title">職能與權限管理</h2>
             </div>
 
             {/* Tab Navigation */}
-            <div className="admin-tabs" style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', borderBottom: '1px solid #ddd' }}>
+            <div className="admin-tabs">
                 <button
                     className={`tab-btn ${activeTab === 'roles' ? 'active' : ''}`}
                     onClick={() => setActiveTab('roles')}
-                    style={{
-                        padding: '0.75rem 1.5rem',
-                        border: 'none',
-                        background: 'none',
-                        cursor: 'pointer',
-                        borderBottom: activeTab === 'roles' ? '3px solid #007130' : '3px solid transparent',
-                        color: activeTab === 'roles' ? '#007130' : '#666',
-                        fontWeight: activeTab === 'roles' ? 'bold' : 'normal'
-                    }}
                 >
                     角色定義
                 </button>
                 <button
                     className={`tab-btn ${activeTab === 'assignment' ? 'active' : ''}`}
                     onClick={() => setActiveTab('assignment')}
-                    style={{
-                        padding: '0.75rem 1.5rem',
-                        border: 'none',
-                        background: 'none',
-                        cursor: 'pointer',
-                        borderBottom: activeTab === 'assignment' ? '3px solid #007130' : '3px solid transparent',
-                        color: activeTab === 'assignment' ? '#007130' : '#666',
-                        fontWeight: activeTab === 'assignment' ? 'bold' : 'normal'
-                    }}
                 >
                     用戶角色指派
                 </button>
@@ -166,44 +148,42 @@ function RoleSettingsPage() {
 
             {activeTab === 'roles' ? (
                 /* 角色管理 */
-                <div className="card" style={{ maxWidth: '800px' }}>
-                    <div style={{ padding: '1.5rem', borderBottom: '1px solid #eee' }}>
-                        <h3 style={{ margin: 0, fontSize: '1.25rem' }}>新增與編輯角色</h3>
+                <div className="card roles-manage-card">
+                    <div className="card-header">
+                        <h3 className="card-title">新增與編輯角色</h3>
                     </div>
-                    <div style={{ padding: '1.5rem' }}>
-                        <form onSubmit={handleAddRole} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+                    <div className="card-body">
+                        <form onSubmit={handleAddRole} className="add-role-form">
                             <input
                                 type="text"
                                 placeholder="角色名稱 (如: 門市主管)"
                                 value={newRoleName}
                                 onChange={(e) => setNewRoleName(e.target.value)}
-                                className="form-control"
-                                style={{ flex: 1, height: '42px' }}
+                                className="form-control role-input"
                             />
-                            <button className="btn btn-primary" disabled={loading} style={{ height: '42px' }}>新增角色</button>
+                            <button className="btn btn-primary btn-add-role" disabled={loading}>新增角色</button>
                         </form>
 
-                        <div className="roles-list-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        <div className="roles-list-grid">
                             {roles.map(role => (
-                                <div key={role.id} className="role-card" style={{ padding: '1.25rem', border: '1px solid #eee', borderRadius: '8px', background: '#fcfcfc' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', alignItems: 'center' }}>
-                                        <strong style={{ fontSize: '1.15rem', color: '#333' }}>{role.name}</strong>
+                                <div key={role.id} className="role-card">
+                                    <div className="role-card-header">
+                                        <strong className="role-name-text">{role.name}</strong>
                                         <button
                                             onClick={() => handleDeleteRole(role.id)}
-                                            className="btn-icon"
-                                            style={{ color: '#800019' }}
+                                            className="btn-icon btn-delete-role"
                                         >
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" /></svg>
                                         </button>
                                     </div>
                                     <div className="role-settings-perms-grid">
                                         {AVAILABLE_PERMISSIONS.map(perm => (
-                                            <label key={perm.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.875rem', padding: '0.4rem 0', cursor: 'pointer' }}>
+                                            <label key={perm.id} className="perm-label">
                                                 <input
                                                     type="checkbox"
                                                     checked={role.permissions.includes(perm.id)}
                                                     onChange={() => togglePermission(role, perm.id)}
-                                                    style={{ width: '16px', height: '16px', accentColor: '#007130' }}
+                                                    className="perm-checkbox"
                                                 />
                                                 {perm.label}
                                             </label>
@@ -217,7 +197,7 @@ function RoleSettingsPage() {
             ) : (
                 /* 用戶指派 */
                 <div className="card">
-                    <div className="table-responsive">
+                    <div className="admin-table-wrap">
                         <table className="admin-table">
                             <thead>
                                 <tr>
@@ -225,32 +205,31 @@ function RoleSettingsPage() {
                                     <th>門市</th>
                                     <th>職務</th>
                                     <th>LINE 綁定狀態</th>
-                                    <th style={{ minWidth: '150px' }}>變更職能角色</th>
+                                    <th className="col-role-select">變更職能角色</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {users.filter(u => u.role !== 'admin').map(user => (
                                     <tr key={user.id}>
-                                        <td style={{ fontWeight: '500' }}>{user.displayName || '未設定'}</td>
+                                        <td className="cell-name">{user.displayName || '未設定'}</td>
                                         <td>{user.storeName || '-'}</td>
                                         <td>
-                                            <span className="tag" style={{ background: user.roleId ? '#E1F5FE' : '#F5F5F5', color: user.roleId ? '#0288D1' : '#757575', border: 'none' }}>
+                                            <span className={`tag ${user.roleId ? 'tag-blue' : 'tag-gray'}`}>
                                                 {user.roleName || '未指派'}
                                             </span>
                                         </td>
                                         <td>
                                             {user.lineUserId ? (
-                                                <span className="tag" style={{ background: '#E8F5E9', color: '#2E7D32', border: 'none' }}>● 已綁定</span>
+                                                <span className="tag tag-green">● 已綁定</span>
                                             ) : (
-                                                <span className="tag" style={{ background: '#FFF3E0', color: '#E65100', border: 'none' }}>○ 未綁定</span>
+                                                <span className="tag tag-orange">○ 未綁定</span>
                                             )}
                                         </td>
                                         <td>
                                             <select
-                                                className="form-control"
+                                                className="form-control select-role"
                                                 value={user.roleId || ''}
                                                 onChange={(e) => handleAssignRole(user.id, e.target.value)}
-                                                style={{ padding: '6px 10px', fontSize: '0.875rem' }}
                                             >
                                                 <option value="" disabled>指派新角色</option>
                                                 {roles.map(r => (
@@ -268,6 +247,121 @@ function RoleSettingsPage() {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
+                .role-settings-page .admin-tabs {
+                    margin-bottom: 1.5rem;
+                    display: flex;
+                    gap: 0.5rem;
+                    border-bottom: 1px solid #ddd;
+                }
+                .role-settings-page .admin-tabs .tab-btn {
+                    padding: 0.75rem 1.5rem;
+                    border: none;
+                    background: none;
+                    cursor: pointer;
+                    border-bottom: 3px solid transparent;
+                    color: #666;
+                    font-weight: normal;
+                    transition: all 0.2s;
+                }
+                .role-settings-page .admin-tabs .tab-btn.active {
+                    border-bottom: 3px solid #007130;
+                    color: #007130;
+                    font-weight: bold;
+                }
+                .role-settings-page .roles-manage-card {
+                    max-width: 800px;
+                }
+                .role-settings-page .card-header {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid #eee;
+                }
+                .role-settings-page .card-title {
+                    margin: 0;
+                    font-size: 1.25rem;
+                }
+                .role-settings-page .card-body {
+                    padding: 1.5rem;
+                }
+                .role-settings-page .add-role-form {
+                    display: flex;
+                    gap: 0.5rem;
+                    margin-bottom: 2rem;
+                }
+                .role-settings-page .role-input {
+                    flex: 1;
+                    height: 42px;
+                }
+                .role-settings-page .btn-add-role {
+                    height: 42px;
+                }
+                .role-settings-page .roles-list-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 1.5rem;
+                }
+                .role-settings-page .role-card {
+                    padding: 1.25rem;
+                    border: 1px solid #eee;
+                    border-radius: 8px;
+                    background: #fcfcfc;
+                }
+                .role-settings-page .role-card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 1.25rem;
+                    align-items: center;
+                }
+                .role-settings-page .role-name-text {
+                    font-size: 1.15rem;
+                    color: #333;
+                }
+                .role-settings-page .btn-delete-role {
+                    color: #800019;
+                }
+                .role-settings-page .perm-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.6rem;
+                    font-size: 0.875rem;
+                    padding: 0.4rem 0;
+                    cursor: pointer;
+                }
+                .role-settings-page .perm-checkbox {
+                    width: 16px;
+                    height: 16px;
+                    accent-color: #007130;
+                }
+                .role-settings-page .col-role-select {
+                    min-width: 150px;
+                }
+                .role-settings-page .cell-name {
+                    font-weight: 500;
+                }
+                .role-settings-page .select-role {
+                    padding: 6px 10px;
+                    font-size: 0.875rem;
+                }
+                .role-settings-page .tag-blue {
+                    background: #E1F5FE;
+                    color: #0288D1;
+                    border: none;
+                }
+                .role-settings-page .tag-gray {
+                    background: #F5F5F5;
+                    color: #757575;
+                    border: none;
+                }
+                .role-settings-page .tag-green {
+                    background: #E8F5E9;
+                    color: #2E7D32;
+                    border: none;
+                }
+                .role-settings-page .tag-orange {
+                    background: #FFF3E0;
+                    color: #E65100;
+                    border: none;
+                }
+
                 .role-settings-perms-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;

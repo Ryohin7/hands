@@ -243,7 +243,7 @@ function AdminEditPage() {
             </div>
 
             {showPreview ? (
-                <div className="page-container preview-mode" style={{ background: '#fff', marginTop: '1rem', borderRadius: '8px', border: '1px solid #eee' }}>
+                <div className="preview-mode">
                     <article className="post-detail">
                         <div className="post-detail-header">
                             {category && <span className="post-detail-category">{category}</span>}
@@ -267,7 +267,7 @@ function AdminEditPage() {
                 <div className="edit-form">
                     <div className="edit-section-card">
                         <h3 className="edit-section-title">基本內容</h3>
-                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <div className="form-group">
                             <label htmlFor="edit-title">主標題</label>
                             <input
                                 id="edit-title"
@@ -275,12 +275,11 @@ function AdminEditPage() {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="請輸入主標題"
-                                className="input-lg"
-                                style={{ fontSize: '1.25rem', fontWeight: 'bold' }}
+                                className="input-lg input-title"
                             />
                         </div>
 
-                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <div className="form-group">
                             <label htmlFor="edit-subtitle">副標題</label>
                             <input
                                 id="edit-subtitle"
@@ -302,7 +301,7 @@ function AdminEditPage() {
                     <div className="edit-grid">
                         <div className="edit-section-card">
                             <h3 className="edit-section-title">發布與狀態</h3>
-                            <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                            <div className="form-group">
                                 <div className="schedule-toggle">
                                     <label className="toggle-label">
                                         <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
@@ -330,8 +329,7 @@ function AdminEditPage() {
                                         type="datetime-local"
                                         value={scheduledAt}
                                         onChange={(e) => setScheduledAt(e.target.value)}
-                                        className="schedule-input"
-                                        style={{ marginTop: '0.75rem' }}
+                                        className="schedule-input mt-3"
                                     />
                                 )}
                             </div>
@@ -340,8 +338,8 @@ function AdminEditPage() {
                         {(category === '中獎名單公告' || category === '實體活動') && (
                             <div className="edit-section-card">
                                 <h3 className="edit-section-title">特殊設定</h3>
-                                 <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                                    <label className="toggle-label" style={{ color: '#d32f2f', marginBottom: '0.5rem' }}>
+                                 <div className="form-group">
+                                    <label className="toggle-label text-danger mb-2">
                                         <input 
                                             type="checkbox" 
                                             checked={isNoFormNeeded} 
@@ -351,7 +349,7 @@ function AdminEditPage() {
                                     </label>
                                     {!isNoFormNeeded && (
                                         <>
-                                            <label htmlFor="edit-form-deadline" style={{ color: '#d32f2f' }}>表單填寫截止時間</label>
+                                            <label htmlFor="edit-form-deadline" className="text-danger">表單填寫截止時間</label>
                                             <input
                                                 id="edit-form-deadline"
                                                 type="datetime-local"
@@ -366,8 +364,8 @@ function AdminEditPage() {
 
                                 {category === '實體活動' && (
                                     <>
-                                        <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                                            <label htmlFor="edit-event-time" style={{ color: '#007130' }}>活動開始日期</label>
+                                        <div className="form-group">
+                                            <label htmlFor="edit-event-time" className="text-success">活動開始日期</label>
                                             <input
                                                 id="edit-event-time"
                                                 type="date"
@@ -378,7 +376,7 @@ function AdminEditPage() {
                                         </div>
 
                                         <div className="form-group">
-                                            <label htmlFor="edit-registration-limit" style={{ color: '#007130' }}>報名人數限制</label>
+                                            <label htmlFor="edit-registration-limit" className="text-success">報名人數限制</label>
                                             <input
                                                 id="edit-registration-limit"
                                                 type="number"
@@ -388,8 +386,8 @@ function AdminEditPage() {
                                                 className="input-md"
                                                 disabled={isOnsiteRegistration}
                                             />
-                                            <div className="schedule-toggle" style={{ marginTop: '1rem' }}>
-                                                <label className="toggle-label" style={{ color: '#007130' }}>
+                                            <div className="schedule-toggle mt-4">
+                                                <label className="toggle-label text-success">
                                                     <input 
                                                         type="checkbox" 
                                                         checked={isOnsiteRegistration} 
@@ -400,15 +398,15 @@ function AdminEditPage() {
                                             </div>
                                             {!isOnsiteRegistration && (
                                                 <>
-                                                    <div className="schedule-toggle" style={{ marginTop: '0.75rem' }}>
-                                                        <label className="toggle-label" style={{ color: '#007130' }}>
+                                                    <div className="schedule-toggle mt-3">
+                                                        <label className="toggle-label text-success">
                                                             <input type="checkbox" checked={allowWaitlist} onChange={(e) => setAllowWaitlist(e.target.checked)} />
                                                             <span>開放候補登記</span>
                                                         </label>
                                                     </div>
                                                     {allowWaitlist && (
-                                                        <div style={{ marginTop: '0.75rem', paddingLeft: '1.5rem' }}>
-                                                            <label htmlFor="edit-waitlist-limit" style={{ color: '#007130', fontSize: '0.9rem' }}>候補人數限制</label>
+                                                        <div className="mt-3 pl-4">
+                                                            <label htmlFor="edit-waitlist-limit" className="text-success font-medium" style={{ fontSize: '0.9rem' }}>候補人數限制</label>
                                                             <input
                                                                 id="edit-waitlist-limit"
                                                                 type="number"

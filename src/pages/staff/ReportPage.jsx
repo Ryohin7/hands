@@ -97,30 +97,28 @@ function ReportPage() {
     };
 
     return (
-        <div className="admin-page-content">
+        <div className="admin-page-content report-page">
             <div className="admin-content-header">
                 <h2 className="admin-content-title">資料報表</h2>
             </div>
 
-            <div className="card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
+            <div className="card filter-card">
+                <div className="report-tabs">
                     <button
-                        className={`btn ${reportType === 'coupon' ? 'btn-primary' : 'btn-ghost'}`}
+                        className={`btn ${reportType === 'coupon' ? 'btn-primary' : 'btn-ghost'} tab-btn`}
                         onClick={() => { setReportType('coupon'); setData([]); }}
-                        style={{ flex: 1 }}
                     >
                         電子券申請
                     </button>
                     <button
-                        className={`btn ${reportType === 'member' ? 'btn-primary' : 'btn-ghost'}`}
+                        className={`btn ${reportType === 'member' ? 'btn-primary' : 'btn-ghost'} tab-btn`}
                         onClick={() => { setReportType('member'); setData([]); }}
-                        style={{ flex: 1 }}
                     >
                         會員資料異動
                     </button>
                 </div>
 
-                <form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <form onSubmit={handleSearch} className="filter-form">
                     <div className="form-group">
                         <label>門市篩選</label>
                         <select className="form-control" value={selectedStore} onChange={(e) => setSelectedStore(e.target.value)}>
@@ -146,19 +144,19 @@ function ReportPage() {
                             placeholder="輸入關鍵字"
                         />
                     </div>
-                    <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '42px' }} disabled={loading}>
+                    <div className="form-group search-btn-group">
+                        <button type="submit" className="btn btn-primary btn-search" disabled={loading}>
                             {loading ? '搜尋中...' : '執行查詢'}
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div className="card">
-                <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0 }}>查詢結果 ({data.length})</h3>
+            <div className="card result-card">
+                <div className="card-header">
+                    <h3 className="card-title">查詢結果 ({data.length})</h3>
                 </div>
-                <div className="table-responsive">
+                <div className="admin-table-wrap">
                     <table className="admin-table">
                         <thead>
                             {reportType === 'coupon' ? (
@@ -188,7 +186,7 @@ function ReportPage() {
                         <tbody>
                             {data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={reportType === 'coupon' ? 8 : 8} style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>
+                                    <td colSpan={8} className="table-empty">
                                         無符合條件之資料
                                     </td>
                                 </tr>
@@ -197,9 +195,9 @@ function ReportPage() {
                                     <tr key={item.id}>
                                         {reportType === 'coupon' ? (
                                             <>
-                                                <td style={{ fontWeight: '600' }}>{item.displayId || '-'}</td>
+                                                <td className="cell-id">{item.displayId || '-'}</td>
                                                 <td>{formatDate(item.createdAt)}</td>
-                                                <td style={{ fontWeight: 500 }}>{item.storeName || '未設定'}</td>
+                                                <td className="cell-store">{item.storeName || '未設定'}</td>
                                                 <td>{item.userName}</td>
                                                 <td>{item.quantityRequested}</td>
                                                 <td>{item.reason || '-'}</td>
@@ -207,7 +205,7 @@ function ReportPage() {
                                         ) : (
                                             <>
                                                 <td>{formatDate(item.createdAt)}</td>
-                                                <td style={{ fontWeight: 500 }}>{item.submittedByStore || '未設定'}</td>
+                                                <td className="cell-store">{item.submittedByStore || '未設定'}</td>
                                                 <td>{item.submittedByName}</td>
                                                 <td>{formatType(item.type)}</td>
                                                 <td>{item.memberId}</td>
@@ -229,6 +227,57 @@ function ReportPage() {
                     </table>
                 </div>
             </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+                .report-page .filter-card {
+                    padding: 1.5rem;
+                    margin-bottom: 1.5rem;
+                }
+                .report-page .report-tabs {
+                    display: flex;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 1rem;
+                }
+                .report-page .report-tabs .tab-btn {
+                    flex: 1;
+                }
+                .report-page .filter-form {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 1rem;
+                }
+                .report-page .search-btn-group {
+                    display: flex;
+                    align-items: flex-end;
+                }
+                .report-page .btn-search {
+                    width: 100%;
+                    height: 42px;
+                }
+                .report-page .result-card .card-header {
+                    padding: 1rem 1.5rem;
+                    border-bottom: 1px solid #eee;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .report-page .result-card .card-title {
+                    margin: 0;
+                }
+                .report-page .table-empty {
+                    text-align: center;
+                    padding: 3rem;
+                    color: #999;
+                }
+                .report-page .cell-id {
+                    font-weight: 600;
+                }
+                .report-page .cell-store {
+                    font-weight: 500;
+                }
+            `}} />
         </div>
     );
 }

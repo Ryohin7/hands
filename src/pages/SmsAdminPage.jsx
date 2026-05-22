@@ -570,7 +570,7 @@ function SmsAdminPage() {
 
             {/* 訊息提示 */}
             {message && (
-                <div className={`converter-message converter-message-${message.type}`} style={{ margin: '0 0 1.5rem 0' }}>
+                <div className={`converter-message converter-message-${message.type} mb-5`}>
                     {message.type === 'success' ? '成功: ' : message.type === 'warning' ? '警告: ' : '錯誤: '} {message.text}
                 </div>
             )}
@@ -867,9 +867,9 @@ function SmsAdminPage() {
                 </div>
 
                 {/* 下方區塊：發送歷史與統計 */}
-                <div className="sms-card history-card" style={{ marginTop: '1.5rem' }}>
+                <div className="sms-card history-card mt-5">
                     <div className="card-header-row">
-                        <h3 className="card-title" style={{ marginBottom: 0, borderBottom: 'none', paddingBottom: 0 }}>發送歷史明細 (最近50筆)</h3>
+                        <h3 className="card-title">發送歷史明細 (最近50筆)</h3>
                         <button onClick={fetchHistory} disabled={isLoadingHistory} className="refresh-btn">
                             {isLoadingHistory ? '整理中...' : '重新整理'}
                         </button>
@@ -906,13 +906,13 @@ function SmsAdminPage() {
                         </div>
                     )}
 
-                    <div className="history-table-container">
+                    <div className="history-table-container admin-table-wrap">
                         {history.length === 0 ? (
                             <div className="empty-history">
                                 {isLoadingHistory ? '正在載入歷史明細...' : '尚無簡訊發送紀錄'}
                             </div>
                         ) : (
-                            <table className="history-table">
+                            <table className="admin-table history-table">
                                 <thead>
                                     <tr>
                                         <th>收件人</th>
@@ -1488,6 +1488,11 @@ function SmsAdminPage() {
                     padding-bottom: 0.75rem;
                     flex-wrap: wrap;
                     gap: 1rem;
+                }
+                .card-header-row .card-title {
+                    margin-bottom: 0 !important;
+                    border-bottom: none !important;
+                    padding-bottom: 0 !important;
                 }
                 .refresh-btn {
                     background: none;

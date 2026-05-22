@@ -28,7 +28,7 @@
 .travel-campaign-container {
   background-color: var(--hands-green);
   color: var(--hands-white);
-  font-family: 'Hiragino Sans', 'Noto Sans TC', sans-serif;
+  font-family: var(--font);
   overflow-x: hidden;
   width: 100%;
 }
