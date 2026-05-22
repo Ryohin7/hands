@@ -566,8 +566,6 @@ function SmsAdminPage() {
                 </div>
             </div>
 
-            {/* 已移除餘額看板 */}
-
             {/* 訊息提示 */}
             {message && (
                 <div className={`converter-message converter-message-${message.type} mb-5`}>
@@ -575,8 +573,8 @@ function SmsAdminPage() {
                 </div>
             )}
 
-            <div className="sms-container-vertical">
-                {/* 上方區塊：發送表單 */}
+            <div className="sms-container-grid">
+                {/* 左邊欄：發送表單 */}
                 <div className="sms-card form-card">
                     <h3 className="card-title">新增簡訊任務</h3>
                     
@@ -605,10 +603,10 @@ function SmsAdminPage() {
                                         <button type="button" className="clear-import-btn" onClick={clearImported}>清除匯入</button>
                                     </div>
                                     <div className="imported-chips">
-                                        {importedNumbers.slice(0, 15).map((num, i) => (
+                                        {importedNumbers.slice(0, 10).map((num, i) => (
                                             <span key={i} className="phone-chip">{num}</span>
                                         ))}
-                                        {importedNumbers.length > 15 && <span className="phone-chip more-chip">+{importedNumbers.length - 15} 筆...</span>}
+                                        {importedNumbers.length > 10 && <span className="phone-chip more-chip">+{importedNumbers.length - 10} 筆...</span>}
                                     </div>
                                 </div>
                             )}
@@ -629,20 +627,20 @@ function SmsAdminPage() {
                                         onChange={(e) => handleFiles(e.target.files)} 
                                         style={{ display: 'none' }} 
                                     />
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="upload-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="upload-icon">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                         <polyline points="17 8 12 3 7 8" />
                                         <line x1="12" y1="3" x2="12" y2="15" />
                                     </svg>
-                                    <span>拖曳或點選上傳 Excel / CSV / TXT 匯入名單</span>
+                                    <span>匯入 Excel / CSV / TXT 名單</span>
                                 </div>
                             )}
 
                             {/* 欄位對齊設定 UI 面板 */}
                             {excelHeaders.length > 0 && (
                                 <div className="column-mapping-panel">
-                                    <h4 className="mapping-title">Excel/CSV 欄位對齊設定</h4>
-                                    <p className="mapping-subtitle">請將匯入檔案的表頭與發送欄位進行映射，以利個性化變數代入。</p>
+                                    <h4 className="mapping-title">Excel 欄位對齊設定</h4>
+                                    <p className="mapping-subtitle">請映射表頭欄位，以利代入個性化變數。</p>
                                     <div className="mapping-grid">
                                         <div className="mapping-item">
                                             <label className="mapping-label">手機號碼 (必填)</label>
@@ -655,7 +653,7 @@ function SmsAdminPage() {
                                                     updateImportedNumbersFromMapping(excelRows, excelHeaders, newMapping);
                                                 }}
                                             >
-                                                <option value="">-- 請選擇對應欄位 --</option>
+                                                <option value="">-- 請選擇 --</option>
                                                 {excelHeaders.map((h, i) => (
                                                     <option key={i} value={h}>{h}</option>
                                                 ))}
@@ -670,7 +668,7 @@ function SmsAdminPage() {
                                                     setColumnMapping(prev => ({ ...prev, name: e.target.value }));
                                                 }}
                                             >
-                                                <option value="">-- 不對齊 / 無 --</option>
+                                                <option value="">-- 無 --</option>
                                                 {excelHeaders.map((h, i) => (
                                                     <option key={i} value={h}>{h}</option>
                                                 ))}
@@ -685,7 +683,7 @@ function SmsAdminPage() {
                                                     setColumnMapping(prev => ({ ...prev, points: e.target.value }));
                                                 }}
                                             >
-                                                <option value="">-- 不對齊 / 無 --</option>
+                                                <option value="">-- 無 --</option>
                                                 {excelHeaders.map((h, i) => (
                                                     <option key={i} value={h}>{h}</option>
                                                 ))}
@@ -696,16 +694,14 @@ function SmsAdminPage() {
                                     {/* 前 3 筆數據映射預覽 */}
                                     {columnMapping.phone && excelRows.length > 0 && (
                                         <div className="mapping-preview-section">
-                                            <h5 className="preview-title">名單資料映射預覽 (前 3 筆)</h5>
+                                            <h5 className="preview-title">資料預覽 (前 3 筆)</h5>
                                             <div className="preview-table-wrapper">
                                                 <table className="preview-table">
                                                     <thead>
                                                         <tr>
-                                                            <th>流水號</th>
-                                                            <th>手機號碼 ({columnMapping.phone})</th>
-                                                            <th>會員姓名 {columnMapping.name ? `(${columnMapping.name})` : '(未對齊)'}</th>
-                                                            <th>點數 {columnMapping.points ? `(${columnMapping.points})` : '(未對齊)'}</th>
-                                                            <th>簡訊預覽效果</th>
+                                                            <th>姓名</th>
+                                                            <th>手機</th>
+                                                            <th>預覽內文</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -718,7 +714,7 @@ function SmsAdminPage() {
                                                             const nameVal = nameIdx !== -1 ? row[nameIdx] : '';
                                                             const pointsVal = pointsIdx !== -1 ? row[pointsIdx] : '';
 
-                                                            const formattedPhone = formatPhoneNumber(String(phoneVal)) || '格式不符';
+                                                            const formattedPhone = formatPhoneNumber(String(phoneVal)) || '格式錯誤';
                                                             
                                                             let previewText = smsBody;
                                                             if (smsBody) {
@@ -726,15 +722,13 @@ function SmsAdminPage() {
                                                                     .replace(/{{姓名}}/g, nameVal !== undefined ? String(nameVal) : '')
                                                                     .replace(/{{點數}}/g, pointsVal !== undefined ? String(pointsVal) : '');
                                                             } else {
-                                                                previewText = '(未輸入簡訊內容)';
+                                                                previewText = '(請輸入簡訊內容)';
                                                             }
 
                                                             return (
                                                                 <tr key={idx}>
-                                                                    <td>{idx + 1}</td>
-                                                                    <td className="cell-phone">{formattedPhone}</td>
                                                                     <td>{nameVal !== undefined && nameVal !== null ? String(nameVal) : '-'}</td>
-                                                                    <td>{pointsVal !== undefined && pointsVal !== null ? String(pointsVal) : '-'}</td>
+                                                                    <td>{formattedPhone}</td>
                                                                     <td className="cell-preview-body" title={previewText}>{previewText}</td>
                                                                 </tr>
                                                             );
@@ -752,27 +746,25 @@ function SmsAdminPage() {
                         <div className="form-group">
                             <div className="label-with-action">
                                 <label className="form-label">2. 簡訊內容</label>
-                                <div className="action-buttons-group">
-                                    <button type="button" className="text-action-btn" onClick={() => insertVariable('姓名')}>
-                                        插入姓名變數
-                                    </button>
-                                    <span className="btn-separator">|</span>
-                                    <button type="button" className="text-action-btn" onClick={() => insertVariable('點數')}>
-                                        插入點數變數
-                                    </button>
-                                    <span className="btn-separator">|</span>
-                                    <button type="button" className="text-action-btn" onClick={insertMarketingText}>
-                                        插入 NCC 行銷警語
-                                    </button>
-                                </div>
+                            </div>
+                            <div className="action-buttons-group mb-2">
+                                <button type="button" className="text-action-btn" onClick={() => insertVariable('姓名')}>
+                                    + 姓名變數
+                                </button>
+                                <button type="button" className="text-action-btn" onClick={() => insertVariable('點數')}>
+                                    + 點數變數
+                                </button>
+                                <button type="button" className="text-action-btn text-action-btn-secondary" onClick={insertMarketingText}>
+                                    + NCC行銷警語
+                                </button>
                             </div>
                             <textarea
                                 ref={textareaRef}
                                 className="admin-input sms-textarea"
-                                placeholder="輸入簡訊內容... 點擊上方變數按鈕可於游標處插入 {{姓名}} 與 {{點數}}，系統發送時會為每位會員代入專屬內容。"
+                                placeholder="請在此輸入簡訊內容，可代入上方變數做個人化群發。"
                                 value={smsBody}
                                 onChange={(e) => setSmsBody(e.target.value)}
-                                rows="4"
+                                rows="5"
                                 maxLength="1000"
                             />
                             {/* 即時字數計算與成本估計 */}
@@ -780,38 +772,24 @@ function SmsAdminPage() {
                                 <div className="sms-metrics-panel">
                                     {metrics.isPersonalized ? (
                                         <>
-                                            <div className="metric-item">
-                                                發送模式: <span className="badge-personalized">個性化變數簡訊</span>
+                                            <div className="metric-row">
+                                                <span>模式：</span>
+                                                <span className="badge-personalized">個性化簡訊</span>
                                             </div>
-                                            <div className="metric-item">
-                                                平均字數: <strong>{metrics.chars}</strong> 字
-                                            </div>
-                                            <div className="metric-item">
-                                                發送名單: <strong>{metrics.totalCount}</strong> 人
-                                            </div>
-                                            <div className="metric-item">
-                                                總計費段數: <strong>{metrics.segments}</strong> 段
-                                            </div>
-                                            <div className="metric-item highlight-metric">
-                                                預估費用: <strong>NT$ {metrics.cost}</strong>
+                                            <div className="metric-grid-2">
+                                                <div className="metric-item">平均字數: <strong>{metrics.chars}</strong> 字</div>
+                                                <div className="metric-item">發送名單: <strong>{metrics.totalCount}</strong> 人</div>
+                                                <div className="metric-item">總段數: <strong>{metrics.segments}</strong> 段</div>
+                                                <div className="metric-item highlight-metric">預估費用: <strong>NT$ {metrics.cost}</strong></div>
                                             </div>
                                         </>
                                     ) : (
                                         <>
-                                            <div className="metric-item">
-                                                字數: <strong>{metrics.chars}</strong> 字
-                                            </div>
-                                            <div className="metric-item">
-                                                單筆段數: <strong>{metrics.singleSegments}</strong> 段
-                                            </div>
-                                            <div className="metric-item">
-                                                收件人: <strong>{getFinalRecipients().length}</strong> 人
-                                            </div>
-                                            <div className="metric-item">
-                                                總計費段數: <strong>{metrics.segments}</strong> 段
-                                            </div>
-                                            <div className="metric-item highlight-metric">
-                                                預估費用: <strong>NT$ {metrics.cost}</strong>
+                                            <div className="metric-grid-2">
+                                                <div className="metric-item">字數: <strong>{metrics.chars}</strong> 字</div>
+                                                <div className="metric-item">單筆計費段數: <strong>{metrics.singleSegments}</strong> 段</div>
+                                                <div className="metric-item">收件人: <strong>{getFinalRecipients().length}</strong> 人</div>
+                                                <div className="metric-item highlight-metric">預估總費用: <strong>NT$ {metrics.cost}</strong></div>
                                             </div>
                                         </>
                                     )}
@@ -835,7 +813,7 @@ function SmsAdminPage() {
                                     className={`toggle-btn ${sendType === 'scheduled' ? 'active' : ''}`}
                                     onClick={() => setSendType('scheduled')}
                                 >
-                                    預約發送 (排程)
+                                    預約發送
                                 </button>
                             </div>
 
@@ -846,9 +824,9 @@ function SmsAdminPage() {
                                         className="admin-input datetime-input"
                                         value={scheduledTime}
                                         onChange={(e) => setScheduledTime(e.target.value)}
-                                        min={new Date(Date.now() + 600000).toISOString().slice(0, 16)} // 限制預約最快 10 分鐘後
+                                        min={new Date(Date.now() + 600000).toISOString().slice(0, 16)} 
                                     />
-                                    <p className="helper-text">* 根據 NCC 規範，預約發送時間建議為每日 09:00 - 20:00 間，以防干擾會員。</p>
+                                    <p className="helper-text">* 建議預約於每日 09:00 - 20:00，避免干擾會員。</p>
                                 </div>
                             )}
                         </div>
@@ -866,725 +844,808 @@ function SmsAdminPage() {
                     </form>
                 </div>
 
-                {/* 下方區塊：發送歷史與統計 */}
-                <div className="sms-card history-card mt-5">
-                    <div className="card-header-row">
-                        <h3 className="card-title">發送歷史明細 (最近50筆)</h3>
-                        <button onClick={fetchHistory} disabled={isLoadingHistory} className="refresh-btn">
-                            {isLoadingHistory ? '整理中...' : '重新整理'}
-                        </button>
-                    </div>
-
+                {/* 右邊欄：數據統計與發送歷史 */}
+                <div className="sms-right-column">
                     {/* 數據統計儀表板 */}
                     {history.length > 0 && (
                         <div className="stats-dashboard">
                             <div className="stat-card">
                                 <div className="stat-label">傳送數量</div>
                                 <div className="stat-value">{stats.total}</div>
-                                <div className="stat-desc">已提交至簡訊通道的總筆數</div>
+                                <div className="stat-desc">總筆數</div>
                             </div>
                             <div className="stat-card stat-card-success">
                                 <div className="stat-label">成功數量</div>
                                 <div className="stat-value">{stats.success}</div>
-                                <div className="stat-desc">已成功送達收件人手機</div>
+                                <div className="stat-desc">已送達</div>
                             </div>
                             <div className="stat-card stat-card-failed">
-                                <div className="stat-label">失敗數量</div>
+                                <div className="stat-label">失敗/退訂</div>
                                 <div className="stat-value">{stats.failed}</div>
                                 <div className="stat-desc">
-                                    發送失敗或退訂攔截的筆數
-                                    {stats.stop > 0 && <span className="stat-sub-desc"> (含 {stats.stop} 筆退訂)</span>}
+                                    失敗 {stats.failedOnly} | 退訂 {stats.stop}
                                 </div>
                             </div>
-                            {stats.processing > 0 && (
-                                <div className="stat-card stat-card-processing">
-                                    <div className="stat-label">傳送中</div>
-                                    <div className="stat-value">{stats.processing}</div>
-                                    <div className="stat-desc">正在發送佇列中處理</div>
-                                </div>
-                            )}
                         </div>
                     )}
 
-                    <div className="history-table-container admin-table-wrap">
-                        {history.length === 0 ? (
-                            <div className="empty-history">
-                                {isLoadingHistory ? '正在載入歷史明細...' : '尚無簡訊發送紀錄'}
-                            </div>
-                        ) : (
-                            <table className="admin-table history-table">
-                                <thead>
-                                    <tr>
-                                        <th>收件人</th>
-                                        <th>簡訊內容</th>
-                                        <th>送達狀態</th>
-                                        <th>發送時間</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {history.map((item, idx) => (
-                                        <tr key={item.id || idx}>
-                                            <td className="cell-phone">{item.to_phone || item.to}</td>
-                                            <td className="cell-body" title={item.body}>{item.body}</td>
-                                            <td>
-                                                <span className={`status-badge-row status-${item.status}`}>
-                                                    {translateStatus(item.status)}
-                                                </span>
-                                            </td>
-                                            <td className="cell-time">
-                                                {item.sent_at ? new Date(item.sent_at).toLocaleString() : '-'}
-                                            </td>
+                    {/* 歷史明細卡片 */}
+                    <div className="sms-card history-card">
+                        <div className="card-header-row">
+                            <h3 className="card-title">發送歷史明細 (最近50筆)</h3>
+                            <button onClick={fetchHistory} disabled={isLoadingHistory} className="refresh-btn">
+                                {isLoadingHistory ? '整理中...' : '重新整理'}
+                            </button>
+                        </div>
+
+                        <div className="history-table-container admin-table-wrap">
+                            {history.length === 0 ? (
+                                <div className="empty-history">
+                                    {isLoadingHistory ? '正在載入歷史明細...' : '尚無簡訊發送紀錄'}
+                                </div>
+                            ) : (
+                                <table className="admin-table history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>收件人</th>
+                                            <th>簡訊內容</th>
+                                            <th>送達狀態</th>
+                                            <th>發送時間</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
+                                    </thead>
+                                    <tbody>
+                                        {history.map((item, idx) => (
+                                            <tr key={item.id || idx}>
+                                                <td className="cell-phone">{item.to_phone || item.to}</td>
+                                                <td className="cell-body" title={item.body}>{item.body}</td>
+                                                <td>
+                                                    <span className={`status-badge-row status-${item.status}`}>
+                                                        {translateStatus(item.status)}
+                                                    </span>
+                                                </td>
+                                                <td className="cell-time">
+                                                    {item.sent_at ? new Date(item.sent_at).toLocaleString() : '-'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* 注入高質感日系簡約風格 CSS 樣式 */}
+            {/* Apple 亮藍簡約風格 CSS 樣式 */}
             <style dangerouslySetInnerHTML={{ __html: `
                 .sms-admin-page {
-                    font-family: var(--font);
+                    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+                    letter-spacing: -0.01em;
                 }
-                .admin-content-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 1.5rem;
-                    flex-wrap: wrap;
-                    gap: 1rem;
-                }
-                .status-badges {
-                    display: flex;
-                    gap: 0.75rem;
+                .admin-content-subtitle {
+                    font-size: 0.875rem;
+                    color: #86868b;
+                    margin-top: 0.35rem;
                 }
                 .status-badge {
                     display: flex;
                     align-items: center;
-                    background: #fff;
-                    border: 1px solid var(--border);
-                    padding: 0.5rem 0.85rem;
-                    border-radius: 6px;
-                    font-size: 0.85rem;
+                    background: #ffffff;
+                    border: 1px solid #d2d2d7;
+                    padding: 6px 14px;
+                    border-radius: 980px;
+                    font-size: 0.8rem;
                     font-weight: 500;
-                    color: var(--text);
+                    color: #1d1d1f;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
                 }
                 .status-active {
-                    border-color: #d9f7be;
-                    background: #f6ffed;
-                    color: #389e0d;
+                    background: rgba(52, 199, 89, 0.08);
+                    border-color: rgba(52, 199, 89, 0.3);
+                    color: #1a8f30;
                 }
                 .badge-dot {
-                    width: 6px;
-                    height: 6px;
-                    background: #52c41a;
+                    width: 7px;
+                    height: 7px;
+                    background: #34c759;
                     border-radius: 50%;
-                    margin-right: 6px;
+                    margin-right: 8px;
                     display: inline-block;
+                    box-shadow: 0 0 4px #34c759;
                 }
-                .sms-container-vertical {
+                
+                /* 響應式左右雙欄 Grid */
+                .sms-container-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 1.5rem;
+                    width: 100%;
+                    align-items: flex-start;
+                    margin-top: 1.5rem;
+                }
+
+                @media (min-width: 1024px) {
+                    .sms-container-grid {
+                        grid-template-columns: 440px 1fr;
+                    }
+                }
+
+                .sms-right-column {
                     display: flex;
                     flex-direction: column;
-                    gap: 1rem;
-                    width: 100%;
+                    gap: 1.5rem;
                 }
+
                 .sms-card {
-                    background: #fff;
-                    border: 1px solid var(--border-light);
-                    border-radius: 12px;
+                    background: #ffffff;
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    border-radius: 16px;
                     padding: 1.75rem;
-                    box-shadow: var(--shadow-sm);
-                    width: 100%;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+                    transition: box-shadow 0.3s ease;
                 }
+                .sms-card:hover {
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                }
+
                 .card-title {
-                    font-size: 1.1rem;
-                    font-weight: 700;
-                    color: var(--text);
-                    margin-bottom: 1.5rem;
-                    border-bottom: 1px solid var(--border-light);
-                    padding-bottom: 0.75rem;
+                    font-size: 1.05rem;
+                    font-weight: 600;
+                    color: #1d1d1f;
+                    margin-top: 0;
+                    margin-bottom: 1.25rem;
+                    padding-bottom: 0.85rem;
+                    border-bottom: 1px solid #f5f5f7;
+                    text-align: left;
                 }
+
                 .form-group {
                     margin-bottom: 1.5rem;
+                    text-align: left;
                 }
+
                 .form-label {
                     display: block;
                     font-weight: 600;
-                    margin-bottom: 0.5rem;
-                    font-size: 0.9rem;
-                    color: var(--text);
+                    margin-bottom: 0.6rem;
+                    font-size: 0.825rem;
+                    color: #86868b;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
                 }
+
                 .label-with-action {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     margin-bottom: 0.5rem;
                 }
-                .label-with-action .form-label {
-                    margin-bottom: 0;
-                }
+
+                /* Apple 質感膠囊按鈕 */
                 .action-buttons-group {
                     display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
+                    flex-wrap: wrap;
+                    gap: 6px;
                 }
-                .btn-separator {
-                    color: var(--border);
-                    font-size: 0.8rem;
-                    user-select: none;
-                }
+
                 .text-action-btn {
-                    background: none;
-                    border: none;
-                    color: var(--brand);
-                    font-size: 0.85rem;
-                    font-weight: 600;
+                    background-color: #f5f5f7;
+                    border: 1px solid #d2d2d7;
+                    color: #1d1d1f;
+                    font-size: 0.775rem;
+                    font-weight: 500;
                     cursor: pointer;
-                    padding: 0;
+                    padding: 5px 12px;
+                    border-radius: 980px;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    outline: none;
                 }
+
                 .text-action-btn:hover {
-                    color: var(--brand-dark);
-                    text-decoration: underline;
+                    background-color: #0071e3;
+                    border-color: #0071e3;
+                    color: #ffffff;
                 }
+
+                .text-action-btn:active {
+                    transform: scale(0.96);
+                }
+
+                .text-action-btn-secondary {
+                    background-color: rgba(0, 113, 227, 0.05);
+                    border-color: rgba(0, 113, 227, 0.15);
+                    color: #0071e3;
+                }
+
+                .text-action-btn-secondary:hover {
+                    background-color: #0071e3;
+                    border-color: #0071e3;
+                    color: #ffffff;
+                }
+
                 .sms-textarea {
                     width: 100%;
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius);
-                    padding: 0.75rem;
+                    border: 1px solid #d2d2d7;
+                    border-radius: 10px;
+                    padding: 0.85rem;
                     font-family: inherit;
-                    font-size: 0.95rem;
-                    background: #Fafafa;
+                    font-size: 0.9rem;
+                    background: #f5f5f7;
                     resize: vertical;
-                }
-                .sms-textarea:focus {
                     outline: none;
-                    border-color: var(--brand);
-                    background: #fff;
+                    transition: all 0.2s ease;
+                    box-sizing: border-box;
                 }
+
+                .sms-textarea:focus {
+                    border-color: #0071e3;
+                    background: #ffffff;
+                    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
+                }
+
+                /* Apple 質感上傳區 */
                 .sms-upload-zone {
                     margin-top: 0.75rem;
-                    border: 2px dashed var(--border);
-                    border-radius: var(--radius);
-                    padding: 1.25rem 1rem;
+                    border: 1.5px dashed #c7c7cc;
+                    border-radius: 12px;
+                    padding: 1.25rem;
                     text-align: center;
                     cursor: pointer;
-                    color: var(--text-secondary);
-                    font-size: 0.85rem;
-                    transition: all 0.2s;
+                    color: #86868b;
+                    font-size: 0.825rem;
+                    font-weight: 500;
+                    transition: all 0.25s ease;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 0.5rem;
+                    justify-content: center;
+                    gap: 8px;
+                    background: #fafafa;
                 }
+
                 .sms-upload-zone:hover, .sms-upload-zone.drag-over {
-                    border-color: var(--brand);
-                    background: var(--brand-light);
-                    color: var(--brand);
+                    border-color: #0071e3;
+                    background: rgba(0, 113, 227, 0.03);
+                    color: #0071e3;
+                    transform: translateY(-1px);
                 }
+
                 .upload-icon {
-                    stroke: var(--text-secondary);
+                    stroke: #86868b;
+                    transition: stroke 0.2s, transform 0.2s;
                 }
+
                 .sms-upload-zone:hover .upload-icon {
-                    stroke: var(--brand);
+                    stroke: #0071e3;
+                    transform: translateY(-2px);
                 }
+
                 .imported-preview-box {
-                    background: var(--bg-gray);
-                    border: 1px dashed var(--brand);
-                    border-radius: var(--radius);
-                    padding: 1rem;
+                    background: rgba(0, 113, 227, 0.03);
+                    border: 1px solid rgba(0, 113, 227, 0.12);
+                    border-radius: 10px;
+                    padding: 0.85rem 1.1rem;
                 }
+
                 .imported-info-row {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 0.75rem;
+                    margin-bottom: 0.6rem;
                 }
+
                 .imported-count {
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     font-weight: 600;
-                    color: var(--brand);
+                    color: #0071e3;
                 }
+
                 .clear-import-btn {
                     background: none;
                     border: none;
-                    color: #ff4d4f;
-                    font-size: 0.8rem;
+                    color: #ff3b30;
+                    font-size: 0.775rem;
                     font-weight: 600;
                     cursor: pointer;
+                    padding: 0;
+                    transition: opacity 0.2s;
                 }
+
                 .clear-import-btn:hover {
+                    opacity: 0.8;
                     text-decoration: underline;
                 }
+
                 .imported-chips {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 0.5rem;
-                }
-                .phone-chip {
-                    background: #fff;
-                    border: 1px solid var(--border);
-                    border-radius: 4px;
-                    padding: 0.2rem 0.5rem;
-                    font-size: 0.8rem;
-                    color: var(--text);
-                }
-                .more-chip {
-                    background: var(--brand);
-                    color: #fff;
-                    border-color: var(--brand);
-                    font-weight: 600;
-                }
-                .import-status-text {
-                    color: var(--brand);
-                    font-weight: 600;
-                }
-                .sms-metrics-panel {
-                    display: flex;
-                    justify-content: space-between;
-                    background: var(--bg-gray);
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius);
-                    padding: 0.75rem 1rem;
-                    margin-top: 0.75rem;
-                    font-size: 0.85rem;
-                    color: var(--text-secondary);
-                    flex-wrap: wrap;
-                    gap: 0.5rem;
-                }
-                .metric-item strong {
-                    color: var(--text);
-                    font-size: 0.95rem;
-                }
-                .highlight-metric {
-                    color: var(--brand);
-                }
-                .highlight-metric strong {
-                    color: var(--brand);
-                    font-size: 1rem;
-                }
-                .send-type-toggle {
-                    display: flex;
-                    border: 1px solid var(--border);
-                    border-radius: var(--radius);
-                    overflow: hidden;
-                    margin-bottom: 0.75rem;
-                }
-                .toggle-btn {
-                    flex: 1;
-                    background: #fff;
-                    border: none;
-                    padding: 0.65rem;
-                    font-size: 0.9rem;
-                    cursor: pointer;
-                    color: var(--text-secondary);
-                    font-weight: 500;
-                    transition: all 0.2s;
-                }
-                .toggle-btn.active {
-                    background: var(--brand);
-                    color: #fff;
-                    font-weight: 600;
-                }
-                .datetime-picker-container {
-                    animation: fadeIn 0.2s ease;
-                }
-                .datetime-input {
-                    width: 100%;
-                    padding: 0.65rem;
-                    font-size: 0.95rem;
-                }
-                .helper-text {
-                    font-size: 0.75rem;
-                    color: var(--text-secondary);
-                    margin-top: 0.5rem;
-                }
-                .send-action-btn {
-                    padding: 0.85rem;
-                    font-size: 1rem;
-                    font-weight: 600;
-                    background: var(--brand);
-                    border-color: var(--brand);
-                }
-                .send-action-btn:hover {
-                    background: var(--brand-dark);
-                    border-color: var(--brand-dark);
-                }
-                
-                /* 精美錢包卡片樣式 */
-                .wallet-balance-card {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                    color: #ffffff;
-                    border-radius: 12px;
-                    padding: 1.25rem 1.5rem;
-                    margin-bottom: 1.5rem;
-                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-                    transition: all 0.3s ease;
-                }
-                .wallet-balance-card:hover {
-                    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
-                    transform: translateY(-2px);
-                }
-                .wallet-card-content {
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                }
-                .wallet-icon-wrapper {
-                    background: rgba(255, 255, 255, 0.15);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    border-radius: 10px;
-                    width: 44px;
-                    height: 44px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .wallet-svg {
-                    stroke: #ffffff;
-                }
-                .wallet-info-area {
-                    display: flex;
-                    flex-direction: column;
-                    text-align: left;
-                }
-                .wallet-card-label {
-                    font-size: 0.8rem;
-                    color: rgba(255, 255, 255, 0.8);
-                    font-weight: 500;
-                    margin-bottom: 0.15rem;
-                }
-                .wallet-card-value {
-                    font-size: 1.6rem;
-                    font-weight: 700;
-                    letter-spacing: -0.5px;
-                }
-                .wallet-refresh-btn {
-                    background: rgba(255, 255, 255, 0.2);
-                    border: 1px solid rgba(255, 255, 255, 0.3);
-                    color: #ffffff;
-                    padding: 0.45rem 0.75rem;
-                    border-radius: 6px;
-                    font-size: 0.8rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.4rem;
-                    transition: all 0.2s ease;
-                }
-                .wallet-refresh-btn:hover {
-                    background: rgba(255, 255, 255, 0.3);
-                    transform: scale(1.02);
-                }
-                .wallet-refresh-btn:active {
-                    transform: scale(0.98);
-                }
-                .refresh-svg.spinning {
-                    animation: spin 1s linear infinite;
-                }
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
+                    gap: 5px;
                 }
 
-                /* 個性化徽章 */
-                .badge-personalized {
-                    background: #e0f2fe;
-                    color: #0369a1;
-                    border: 1px solid #bae6fd;
-                    padding: 0.15rem 0.4rem;
-                    border-radius: 4px;
+                .phone-chip {
+                    background: #ffffff;
+                    border: 1px solid #e5e5ea;
+                    border-radius: 6px;
+                    padding: 3px 8px;
+                    font-size: 0.75rem;
+                    color: #1d1d1f;
+                    font-weight: 500;
+                }
+
+                .more-chip {
+                    background: #0071e3;
+                    color: #ffffff;
+                    border-color: #0071e3;
                     font-weight: 600;
-                    font-size: 0.8rem;
+                }
+
+                .import-status-text {
+                    color: #0071e3;
+                    font-weight: 600;
+                }
+
+                /* 發送估計資訊面板 */
+                .sms-metrics-panel {
+                    background: #f5f5f7;
+                    border: 1px solid #e5e5ea;
+                    border-radius: 10px;
+                    padding: 0.85rem 1.1rem;
+                    margin-top: 0.85rem;
+                    font-size: 0.825rem;
+                    color: #86868b;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    text-align: left;
+                }
+
+                .metric-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    border-bottom: 1px dashed #e5e5ea;
+                    padding-bottom: 6px;
+                    margin-bottom: 2px;
+                }
+
+                .metric-grid-2 {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 6px;
+                }
+
+                .metric-item strong {
+                    color: #1d1d1f;
+                    font-size: 0.875rem;
+                }
+
+                .highlight-metric {
+                    color: #0071e3;
+                }
+
+                .highlight-metric strong {
+                    color: #0071e3;
+                    font-size: 0.95rem;
+                }
+
+                .badge-personalized {
+                    background: rgba(0, 113, 227, 0.08);
+                    color: #0071e3;
+                    border: 1px solid rgba(0, 113, 227, 0.15);
+                    padding: 2px 8px;
+                    border-radius: 980px;
+                    font-weight: 600;
+                    font-size: 0.725rem;
+                }
+
+                /* Apple Segmented Control */
+                .send-type-toggle {
+                    display: flex;
+                    background: #f5f5f7;
+                    border-radius: 10px;
+                    padding: 2px;
+                    margin-bottom: 0.85rem;
+                    border: 1px solid #e5e5ea;
+                }
+
+                .toggle-btn {
+                    flex: 1;
+                    background: transparent;
+                    border: none;
+                    padding: 7px;
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                    color: #86868b;
+                    font-weight: 500;
+                    border-radius: 8px;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    outline: none;
+                }
+
+                .toggle-btn.active {
+                    background: #ffffff;
+                    color: #1d1d1f;
+                    font-weight: 600;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+                }
+
+                .datetime-picker-container {
+                    animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .datetime-input {
+                    width: 100%;
+                    padding: 10px;
+                    font-size: 0.875rem;
+                    border: 1px solid #d2d2d7;
+                    background-color: #f5f5f7;
+                    border-radius: 10px;
+                    outline: none;
+                    box-sizing: border-box;
+                    transition: all 0.2s;
+                }
+
+                .datetime-input:focus {
+                    border-color: #0071e3;
+                    background-color: #ffffff;
+                    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+                }
+
+                .helper-text {
+                    font-size: 0.75rem;
+                    color: #86868b;
+                    margin-top: 6px;
+                }
+
+                .send-action-btn {
+                    padding: 11px;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    background: linear-gradient(180deg, #3595ff 0%, #0071e3 100%);
+                    border: 1px solid #0066d6;
+                    border-radius: 10px;
+                    color: #ffffff;
+                    cursor: pointer;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 2px 6px rgba(0, 113, 227, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+                }
+
+                .send-action-btn:hover {
+                    background: linear-gradient(180deg, #4ca3ff 0%, #007df2 100%);
+                    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+                }
+
+                .send-action-btn:active {
+                    transform: scale(0.98);
+                    box-shadow: 0 1px 3px rgba(0, 113, 227, 0.15);
+                }
+
+                .send-action-btn:disabled {
+                    background: #e5e5ea;
+                    border-color: #e5e5ea;
+                    color: #aeaea2;
+                    cursor: not-allowed;
+                    box-shadow: none;
                 }
 
                 /* 欄位對齊面板 */
                 .column-mapping-panel {
-                    background: #f8fafc;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 8px;
-                    padding: 1.25rem;
-                    margin-top: 1rem;
-                    animation: slideDown 0.3s ease;
+                    background: #f5f5f7;
+                    border: 1px solid #e5e5ea;
+                    border-radius: 10px;
+                    padding: 1rem;
+                    margin-top: 0.85rem;
                 }
-                @keyframes slideDown {
-                    from { opacity: 0; transform: translateY(-8px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
+
                 .mapping-title {
-                    font-size: 0.95rem;
-                    font-weight: 700;
-                    color: #1e293b;
-                    margin: 0 0 0.25rem 0;
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    color: #1d1d1f;
+                    margin: 0 0 2px 0;
                     text-align: left;
                 }
+
                 .mapping-subtitle {
-                    font-size: 0.8rem;
-                    color: #64748b;
-                    margin: 0 0 1rem 0;
+                    font-size: 0.775rem;
+                    color: #86868b;
+                    margin: 0 0 0.85rem 0;
                     text-align: left;
                 }
+
                 .mapping-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                    gap: 1rem;
-                    margin-bottom: 1.25rem;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 8px;
+                    margin-bottom: 0.85rem;
                 }
+
                 .mapping-item {
                     display: flex;
                     flex-direction: column;
-                    gap: 0.35rem;
+                    gap: 5px;
                     text-align: left;
                 }
+
                 .mapping-label {
-                    font-size: 0.8rem;
-                    font-weight: 600;
-                    color: #475569;
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                    color: #86868b;
                 }
+
                 .mapping-select {
-                    padding: 0.5rem;
-                    font-size: 0.85rem;
+                    padding: 7px;
+                    font-size: 0.8rem;
                     border: 1px solid #cbd5e1;
                     background-color: #ffffff;
-                    border-radius: 6px;
+                    border-radius: 8px;
                     outline: none;
                     width: 100%;
+                    transition: border-color 0.2s;
                 }
+
                 .mapping-select:focus {
-                    border-color: #10b981;
+                    border-color: #0071e3;
                 }
 
                 /* 映射預覽表格 */
                 .mapping-preview-section {
-                    border-top: 1px dashed #e2e8f0;
-                    padding-top: 1rem;
+                    border-top: 1px dashed #e5e5ea;
+                    padding-top: 0.85rem;
                 }
+
                 .preview-title {
-                    font-size: 0.85rem;
-                    font-weight: 700;
-                    color: #334155;
-                    margin: 0 0 0.75rem 0;
+                    font-size: 0.775rem;
+                    font-weight: 600;
+                    color: #1d1d1f;
+                    margin: 0 0 0.6rem 0;
                     text-align: left;
                 }
+
                 .preview-table-wrapper {
                     overflow-x: auto;
-                    border-radius: 6px;
-                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    border: 1px solid #e5e5ea;
                 }
+
                 .preview-table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 0.8rem;
+                    font-size: 0.75rem;
                     text-align: left;
                     background-color: #ffffff;
                 }
+
                 .preview-table th {
-                    background: #f1f5f9;
-                    padding: 0.6rem 0.75rem;
+                    background: #f5f5f7;
+                    padding: 8px 10px;
                     font-weight: 600;
-                    color: #475569;
-                    border-bottom: 1px solid #e2e8f0;
+                    color: #86868b;
+                    border-bottom: 1px solid #e5e5ea;
                 }
+
                 .preview-table td {
-                    padding: 0.6rem 0.75rem;
-                    border-bottom: 1px solid #f1f5f9;
-                    color: #334155;
+                    padding: 8px 10px;
+                    border-bottom: 1px solid #f5f5f7;
+                    color: #1d1d1f;
                     white-space: nowrap;
                 }
+
                 .cell-preview-body {
-                    max-width: 250px;
+                    max-width: 160px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
-                    color: #64748b;
+                    color: #86868b;
                     font-style: italic;
                 }
 
-                /* 歷史紀錄區樣式 */
-                .header-title-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 1.5rem;
-                    flex-wrap: wrap;
-                }
-                .header-title-group .card-title {
-                    margin-bottom: 0;
-                    border-bottom: none;
-                    padding-bottom: 0;
-                }
                 /* 數據統計儀表板 */
                 .stats-dashboard {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                    gap: 1rem;
-                    margin-bottom: 1.5rem;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 10px;
+                    width: 100%;
                 }
+
                 .stat-card {
-                    background: var(--bg-gray);
-                    border: 1px solid var(--border);
-                    border-radius: 8px;
-                    padding: 1.25rem;
+                    background: #ffffff;
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    border-radius: 16px;
+                    padding: 1.15rem;
                     text-align: left;
-                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.015);
+                    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
                 }
+
                 .stat-card:hover {
-                    box-shadow: var(--shadow-sm);
                     transform: translateY(-2px);
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
                 }
+
                 .stat-label {
-                    font-size: 0.85rem;
-                    color: var(--text-secondary);
+                    font-size: 0.775rem;
+                    color: #86868b;
                     font-weight: 600;
-                    margin-bottom: 0.5rem;
+                    margin-bottom: 6px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.03em;
                 }
+
                 .stat-value {
-                    font-size: 1.75rem;
+                    font-size: 1.65rem;
                     font-weight: 700;
-                    color: var(--text);
-                    line-height: 1.2;
+                    color: #1d1d1f;
+                    line-height: 1.1;
                 }
+
                 .stat-desc {
-                    font-size: 0.75rem;
-                    color: var(--text-secondary);
-                    margin-top: 0.5rem;
+                    font-size: 0.725rem;
+                    color: #86868b;
+                    margin-top: 6px;
                 }
-                .stat-sub-desc {
-                    color: #ff4d4f;
-                    font-weight: 600;
-                }
+
                 .stat-card-success {
-                    background: #f6ffed;
-                    border-color: #d9f7be;
+                    background: rgba(52, 199, 89, 0.06);
+                    border-color: rgba(52, 199, 89, 0.15);
                 }
+
                 .stat-card-success .stat-label, .stat-card-success .stat-value {
-                    color: #389e0d;
+                    color: #1a8f30;
                 }
+
                 .stat-card-failed {
-                    background: #fff1f0;
-                    border-color: #ffa39e;
+                    background: rgba(255, 59, 48, 0.06);
+                    border-color: rgba(255, 59, 48, 0.15);
                 }
+
                 .stat-card-failed .stat-label, .stat-card-failed .stat-value {
-                    color: #cf1322;
+                    color: #d7271e;
                 }
-                .stat-card-processing {
-                    background: #e6f7ff;
-                    border-color: #91d5ff;
-                }
-                .stat-card-processing .stat-label, .stat-card-processing .stat-value {
-                    color: #096dd9;
-                }
-                
+
+                /* 歷史列表區 */
                 .card-header-row {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 1.5rem;
-                    border-bottom: 1px solid var(--border-light);
-                    padding-bottom: 0.75rem;
-                    flex-wrap: wrap;
-                    gap: 1rem;
+                    margin-bottom: 1.15rem;
+                    border-bottom: 1px solid #f5f5f7;
+                    padding-bottom: 0.85rem;
                 }
+
                 .card-header-row .card-title {
                     margin-bottom: 0 !important;
                     border-bottom: none !important;
                     padding-bottom: 0 !important;
                 }
+
                 .refresh-btn {
-                    background: none;
-                    border: 1px solid var(--border);
-                    border-radius: 4px;
-                    padding: 0.35rem 0.75rem;
-                    font-size: 0.8rem;
+                    background: #f5f5f7;
+                    border: 1px solid #d2d2d7;
+                    border-radius: 8px;
+                    padding: 5px 12px;
+                    font-size: 0.775rem;
+                    font-weight: 500;
+                    color: #1d1d1f;
                     cursor: pointer;
-                    color: var(--text);
                     transition: all 0.2s;
                 }
+
                 .refresh-btn:hover {
-                    background: var(--bg-gray);
-                    border-color: var(--text-secondary);
+                    background: #e5e5ea;
                 }
+
+                .refresh-btn:active {
+                    transform: scale(0.97);
+                }
+
                 .history-table-container {
                     max-height: 520px;
                     overflow-y: auto;
                     width: 100%;
                 }
+
                 .empty-history {
                     text-align: center;
-                    padding: 3rem;
-                    color: var(--text-secondary);
-                    font-size: 0.9rem;
+                    padding: 3rem 1.5rem;
+                    color: #86868b;
+                    font-size: 0.85rem;
                 }
+
                 .history-table {
                     width: 100%;
                     border-collapse: collapse;
                     text-align: left;
-                    font-size: 0.85rem;
+                    font-size: 0.8rem;
                 }
+
                 .history-table th {
-                    background: var(--bg-gray);
-                    padding: 0.75rem;
+                    background: #f5f5f7;
+                    padding: 10px 12px;
                     font-weight: 600;
-                    color: var(--text-secondary);
-                    border-bottom: 1px solid var(--border);
+                    color: #86868b;
+                    border-bottom: 1px solid #e5e5ea;
                 }
+
                 .history-table td {
-                    padding: 0.85rem 0.75rem;
-                    border-bottom: 1px solid var(--border-light);
+                    padding: 12px 12px;
+                    border-bottom: 1px solid #f5f5f7;
                     vertical-align: middle;
                 }
+
+                .history-table tbody tr {
+                    transition: background-color 0.15s ease;
+                }
+
+                .history-table tbody tr:hover {
+                    background-color: #fafafa;
+                }
+
                 .cell-phone {
                     font-weight: 600;
-                    color: var(--text);
+                    color: #1d1d1f;
                     white-space: nowrap;
                 }
+
                 .cell-body {
-                    max-width: 300px;
+                    max-width: 220px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
-                    color: #555;
+                    color: #424245;
                 }
+
                 .cell-time {
-                    color: var(--text-secondary);
-                    font-size: 0.8rem;
+                    color: #86868b;
+                    font-size: 0.75rem;
                     white-space: nowrap;
                 }
+
                 .status-badge-row {
                     display: inline-block;
-                    padding: 0.25rem 0.6rem;
-                    border-radius: 4px;
-                    font-size: 0.75rem;
+                    padding: 3px 10px;
+                    border-radius: 980px;
+                    font-size: 0.725rem;
                     font-weight: 600;
                     white-space: nowrap;
                 }
+
                 .status-delivered {
-                    background: #f6ffed;
-                    border: 1px solid #b7eb8f;
-                    color: #389e0d;
+                    background: rgba(52, 199, 89, 0.08);
+                    color: #1a8f30;
                 }
+
                 .status-sent, .status-queued {
-                    background: #e6f7ff;
-                    border: 1px solid #91d5ff;
-                    color: #096dd9;
+                    background: rgba(0, 113, 227, 0.08);
+                    color: #0071e3;
                 }
+
                 .status-failed {
-                    background: #fff1f0;
-                    border: 1px solid #ffa39e;
-                    color: #cf1322;
+                    background: rgba(255, 59, 48, 0.08);
+                    color: #ff3b30;
                 }
+
                 .status-stop {
-                    background: #fafafa;
-                    border: 1px solid #d9d9d9;
-                    color: rgba(0, 0, 0, 0.45);
+                    background: #f5f5f7;
+                    color: #86868b;
                 }
-                .w-full {
-                    width: 100%;
+
+                .loading-spinner {
+                    width: 14px;
+                    height: 14px;
+                    border: 2px solid rgba(255,255,255,0.3);
+                    border-top-color: #ffffff;
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                    display: inline-block;
                 }
+                
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+
+                .mb-2 { margin-bottom: 0.5rem; }
+                .mb-5 { margin-bottom: 1.25rem; }
+                .w-full { width: 100%; }
             ` }} />
         </div>
     );
