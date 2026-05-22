@@ -234,7 +234,7 @@ function AdminEditPage() {
                     onClick={() => setShowPreview(!showPreview)}
                     className={`btn ${showPreview ? 'btn-primary' : 'btn-outline'}`}
                 >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                         <circle cx="12" cy="12" r="3" />
                     </svg>
@@ -406,7 +406,7 @@ function AdminEditPage() {
                                                     </div>
                                                     {allowWaitlist && (
                                                         <div className="mt-3 pl-4">
-                                                            <label htmlFor="edit-waitlist-limit" className="text-success font-medium" style={{ fontSize: '0.9rem' }}>候補人數限制</label>
+                                                            <label htmlFor="edit-waitlist-limit" className="text-success font-medium">候補人數限制</label>
                                                             <input
                                                                 id="edit-waitlist-limit"
                                                                 type="number"

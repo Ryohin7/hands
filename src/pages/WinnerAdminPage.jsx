@@ -97,7 +97,7 @@ function WinnerAdminPage() {
             return;
         }
 
-        const confirmExport = window.confirm(`將匯出 ${dataList.length} 筆名單的 A5 郵寄名條，這可能需要一點時間。確定匯出？`);
+        const confirmExport = window.confirm(`將匯出 ${dataList.length} 筆名單的 A5 郵寄名條，匯出需要一點時間，請稍候`);
         if (!confirmExport) return;
 
         setExporting(true);
@@ -239,12 +239,12 @@ function WinnerAdminPage() {
                                                                 onClick={() => handleExportPDF(post.id, post.title)}
                                                                 disabled={exporting}
                                                             >
-                                                                <svg className="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                                                     <polyline points="7 10 12 15 17 10"></polyline>
                                                                     <line x1="12" y1="15" x2="12" y2="3"></line>
                                                                 </svg>
-                                                                {exporting ? '名條匯出中...' : '匯出名條 (A5 PDF)'}
+                                                                {exporting ? '名條匯出中...' : '匯出名條 (PDF)'}
                                                             </button>
                                                         )}
                                                     </div>
@@ -321,7 +321,8 @@ function WinnerAdminPage() {
                 ))}
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .winner-admin-page .admin-table tr {
                     cursor: pointer;
                 }
@@ -365,9 +366,6 @@ function WinnerAdminPage() {
                 .winner-admin-page .inner-empty {
                     padding: 1rem;
                     background: #fff;
-                }
-                .winner-admin-page .btn-icon {
-                    margin-right: 4px;
                 }
                 
                 /* PDF 列印名條專用 (高精度毫米單位) */

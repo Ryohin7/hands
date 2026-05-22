@@ -984,3 +984,23 @@
   height: 28px;
 }
 
+/* 覆寫預覽徽章與上傳區 */
+.admin-layout .preview-badge {
+  color: #0071e3 !important;
+  background: rgba(0, 113, 227, 0.08) !important;
+}
+
+.admin-layout .converter-upload-zone.has-file {
+  border-color: #0071e3 !important;
+  background: rgba(0, 113, 227, 0.04) !important;
+}
+
+.admin-layout .text-success {
+  color: #34c759 !important; /* Apple iOS Green */
+}
+
+.admin-layout .text-danger {
+  color: #ff3b30 !important; /* Apple iOS Red */
+}
+
+

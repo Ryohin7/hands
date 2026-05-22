@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
 function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -18,7 +19,10 @@ function LoginPage() {
             // 自動判斷：如果輸入已包含 @ 則視為完整 Email，否則補上預設網域
             const email = username.includes('@') ? username : `${username}@hands.com.tw`;
             await signInWithEmailAndPassword(auth, email, password);
-            navigate('/admin');
+            const from = location.state?.from
+                ? (location.state.from.pathname + (location.state.from.search || ''))
+                : '/admin';
+            navigate(from, { replace: true });
         } catch (err) {
             console.error(err);
             if (err.code === 'auth/invalid-credential') {

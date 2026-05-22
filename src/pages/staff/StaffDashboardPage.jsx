@@ -212,6 +212,10 @@ function StaffDashboardPage() {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
+                .staff-dashboard-page {
+                    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+                    letter-spacing: -0.01em;
+                }
                 .dashboard-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -222,166 +226,192 @@ function StaffDashboardPage() {
                     align-items: center;
                     padding: 2rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 2px solid transparent;
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    border-radius: 16px;
                     position: relative;
                     overflow: hidden;
-                    background: #fff;
+                    background: #ffffff;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
                 }
                 .alert-link-line {
-                    background: #E8F5E9;
-                    border: 1px solid #C8E6C9;
-                    border-radius: 12px;
-                    padding: 1rem 1.5rem;
+                    background: rgba(250, 250, 250, 0.8);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    border-radius: 14px;
+                    padding: 1.15rem 1.5rem;
                     margin-bottom: 1.5rem;
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
                 }
                 .alert-content-wrap {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    gap: 12px;
                 }
                 .alert-title {
                     margin: 0;
-                    color: #1B5E20;
+                    color: #1d1d1f;
                     font-size: 0.95rem;
                     font-weight: 600;
+                    text-align: left;
                 }
                 .alert-desc {
-                    margin: 2px 0 0 0;
-                    color: #2E7D32;
+                    margin: 4px 0 0 0;
+                    color: #86868b;
                     font-size: 0.85rem;
+                    text-align: left;
                 }
                 .alert-btn-line {
-                    padding: 0.5rem 1rem;
-                    font-size: 0.875rem;
-                    background: #00B900;
-                    border-color: #00B900;
+                    padding: 6px 16px;
+                    font-size: 0.825rem;
+                    font-weight: 600;
+                    background: #06c755;
+                    border: 1px solid #05b04b;
+                    border-radius: 980px;
                     color: white !important;
                     white-space: nowrap;
                     display: flex;
                     align-items: center;
                     gap: 5px;
-                    transition: opacity 0.2s;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 4px rgba(6, 199, 85, 0.15);
+                    text-decoration: none;
                 }
                 .alert-btn-line:hover {
-                    opacity: 0.9;
+                    background: #05b04b;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(6, 199, 85, 0.2);
+                }
+                .alert-btn-line:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 4px rgba(6, 199, 85, 0.1);
                 }
                 
                 .dashboard-card.has-items {
-                    border-color: rgba(0,0,0,0.05);
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                    border-color: rgba(0, 0, 0, 0.12);
+                    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
                 }
                 .dashboard-card.status-pending.has-items {
-                    background: linear-gradient(135deg, #fff 0%, #eff6ff 100%);
-                    border-color: #bfdbfe;
+                    border-left: 4px solid #0071e3;
                 }
                 .dashboard-card.status-audit.has-items {
-                    background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
-                    border-color: #fde68a;
+                    border-left: 4px solid #ff9500;
                 }
                 .dashboard-card.status-user-audit.has-items {
-                    background: linear-gradient(135deg, #fff 0%, #ecfdf5 100%);
-                    border-color: #a7f3d0;
+                    border-left: 4px solid #34c759;
                 }
                 .dashboard-card.status-member-audit.has-items {
-                    background: linear-gradient(135deg, #fff 0%, #f5f3ff 100%);
-                    border-color: #ddd6fe;
+                    border-left: 4px solid #af52de;
                 }
                 
                 .dashboard-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+                    border-color: rgba(0, 0, 0, 0.12);
                 }
                 
                 .dashboard-card-icon {
-                    width: 72px;
-                    height: 72px;
-                    border-radius: 20px;
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 14px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    margin-right: 1.5rem;
+                    margin-right: 1.25rem;
                     flex-shrink: 0;
                 }
                 .dashboard-card-icon.icon-blue {
-                    background: rgba(59, 130, 246, 0.1);
-                    color: #3B82F6;
+                    background: rgba(0, 113, 227, 0.08);
+                    color: #0071e3;
                 }
                 .dashboard-card.status-pending.has-items .dashboard-card-icon.icon-blue {
-                    background: rgba(59, 130, 246, 0.2);
+                    background: rgba(0, 113, 227, 0.15);
                 }
                 .dashboard-card-icon.icon-warning {
-                    background: rgba(245, 158, 11, 0.1);
-                    color: #F59E0B;
+                    background: rgba(255, 149, 0, 0.08);
+                    color: #ff9500;
                 }
                 .dashboard-card.status-audit.has-items .dashboard-card-icon.icon-warning {
-                    background: rgba(245, 158, 11, 0.2);
+                    background: rgba(255, 149, 0, 0.15);
                 }
                 .dashboard-card-icon.icon-success {
-                    background: rgba(16, 185, 129, 0.1);
-                    color: #10B981;
+                    background: rgba(52, 199, 89, 0.08);
+                    color: #34c759;
                 }
                 .dashboard-card.status-user-audit.has-items .dashboard-card-icon.icon-success {
-                    background: rgba(16, 185, 129, 0.2);
+                    background: rgba(52, 199, 89, 0.15);
                 }
                 .dashboard-card-icon.icon-purple {
-                    background: rgba(139, 92, 246, 0.1);
-                    color: #8B5CF6;
+                    background: rgba(175, 82, 222, 0.08);
+                    color: #af52de;
                 }
                 .dashboard-card.status-member-audit.has-items .dashboard-card-icon.icon-purple {
-                    background: rgba(139, 92, 246, 0.2);
+                    background: rgba(175, 82, 222, 0.15);
                 }
                 .dashboard-card-content {
                     flex: 1;
+                    text-align: left;
                 }
                 .dashboard-card-content h3 {
-                    margin: 0 0 0.5rem 0;
-                    font-size: 1.1rem;
-                    color: #4b5563;
+                    margin: 0 0 0.4rem 0;
+                    font-size: 1rem;
+                    color: #86868b;
                     font-weight: 600;
                 }
                 .dashboard-value {
-                    font-size: 2.5rem;
-                    font-weight: 800;
-                    color: #111827;
-                    line-height: 1;
-                    margin-bottom: 0.75rem;
+                    font-size: 2.25rem;
+                    font-weight: 700;
+                    color: #1d1d1f;
+                    line-height: 1.1;
+                    margin-bottom: 0.6rem;
                     display: flex;
                     align-items: baseline;
-                    gap: 0.5rem;
+                    gap: 0.4rem;
+                    font-family: "SF Pro Display", -apple-system, sans-serif;
                 }
                 .dashboard-unit {
-                    font-size: 1rem;
-                    color: #6b7280;
+                    font-size: 0.95rem;
+                    color: #86868b;
                     font-weight: 500;
                 }
                 .status-badge {
-                    font-size: 0.75rem;
-                    padding: 0.25rem 0.6rem;
-                    border-radius: 100px;
-                    background: #3B82F6;
-                    color: white;
+                    font-size: 0.725rem;
+                    padding: 3px 9px;
+                    border-radius: 980px;
+                    background: rgba(0, 113, 227, 0.08);
+                    color: #0071e3;
                     margin-left: 0.5rem;
                     font-weight: 600;
                     vertical-align: middle;
+                    display: inline-block;
                 }
-                .badge-warning { background: #F59E0B; }
-                .badge-success { background: #10B981; }
-                .badge-purple { background: #8B5CF6; }
-
+                .badge-warning {
+                    background: rgba(255, 149, 0, 0.08);
+                    color: #ff9500;
+                }
+                .badge-success {
+                    background: rgba(52, 199, 89, 0.08);
+                    color: #34c759;
+                }
+                .badge-purple {
+                    background: rgba(175, 82, 222, 0.08);
+                    color: #af52de;
+                }
+ 
                 .dashboard-link {
-                    font-size: 0.95rem;
-                    color: #007130;
+                    font-size: 0.875rem;
+                    color: #0071e3;
                     text-decoration: none;
                     font-weight: 600;
                     display: inline-block;
-                    transition: color 0.2s;
+                    transition: all 0.2s ease;
                 }
                 .dashboard-link:hover {
-                    color: #004d20;
-                    text-decoration: underline;
+                    color: #0077ed;
+                    transform: translateX(3px);
                 }
                 
                 @media (max-width: 768px) {
@@ -393,12 +423,13 @@ function StaffDashboardPage() {
                         padding: 1.5rem;
                     }
                     .dashboard-card-icon {
-                        width: 60px;
-                        height: 60px;
-                        border-radius: 16px;
+                        width: 56px;
+                        height: 56px;
+                        border-radius: 12px;
+                        margin-right: 1rem;
                     }
                     .dashboard-value {
-                        font-size: 2.25rem;
+                        font-size: 2rem;
                     }
                 }
             ` }} />

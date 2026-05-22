@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 
 function SmsAdminPage() {
@@ -16,6 +16,7 @@ function SmsAdminPage() {
     const [dragOver, setDragOver] = useState(false);
     const [history, setHistory] = useState([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const [expandedHistoryId, setExpandedHistoryId] = useState(null);
     // const [walletBalance, setWalletBalance] = useState(null); // 已移除餘額顯示
 
     // Excel/CSV 欄位對齊狀態
@@ -551,6 +552,22 @@ function SmsAdminPage() {
         }
     };
 
+    const toggleExpandHistory = (id) => {
+        setExpandedHistoryId(prev => prev === id ? null : id);
+    };
+
+    const formatRecipients = (toStr) => {
+        if (!toStr) return '-';
+        const list = String(toStr).split(',').map(s => s.trim()).filter(Boolean);
+        return (
+            <div className="recipients-badges">
+                {list.map((phone, i) => (
+                    <span key={i} className="recipient-badge">{phone}</span>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div className="admin-page-content sms-admin-page">
             <div className="admin-content-header">
@@ -894,20 +911,50 @@ function SmsAdminPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {history.map((item, idx) => (
-                                            <tr key={item.id || idx}>
-                                                <td className="cell-phone">{item.to_phone || item.to}</td>
-                                                <td className="cell-body" title={item.body}>{item.body}</td>
-                                                <td>
-                                                    <span className={`status-badge-row status-${item.status}`}>
-                                                        {translateStatus(item.status)}
-                                                    </span>
-                                                </td>
-                                                <td className="cell-time">
-                                                    {item.sent_at ? new Date(item.sent_at).toLocaleString() : '-'}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {history.map((item, idx) => {
+                                            const itemId = item.id || `idx-${idx}`;
+                                            const isExpanded = expandedHistoryId === itemId;
+                                            return (
+                                                <React.Fragment key={itemId}>
+                                                    <tr
+                                                        className={`history-row ${isExpanded ? 'is-expanded' : ''}`}
+                                                        onClick={() => toggleExpandHistory(itemId)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        <td className="cell-phone">{item.to_phone || item.to}</td>
+                                                        <td className="cell-body" title={item.body}>{item.body}</td>
+                                                        <td>
+                                                            <span className={`status-badge-row status-${item.status}`}>
+                                                                {translateStatus(item.status)}
+                                                            </span>
+                                                        </td>
+                                                        <td className="cell-time">
+                                                            {item.sent_at ? new Date(item.sent_at).toLocaleString() : '-'}
+                                                        </td>
+                                                    </tr>
+                                                    {isExpanded && (
+                                                        <tr className="history-detail-row">
+                                                            <td colSpan="4" className="history-detail-cell" onClick={e => e.stopPropagation()}>
+                                                                <div className="history-detail-content">
+                                                                    <div className="detail-item">
+                                                                        <strong>完整收件人 ({String(item.to_phone || item.to).split(',').filter(Boolean).length} 筆)：</strong>
+                                                                        <div className="detail-value">
+                                                                            {formatRecipients(item.to_phone || item.to)}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="detail-item">
+                                                                        <strong>完整簡訊內容：</strong>
+                                                                        <div className="detail-value sms-body-full">
+                                                                            {item.body}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </React.Fragment>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             )}
@@ -1646,6 +1693,66 @@ function SmsAdminPage() {
                 .mb-2 { margin-bottom: 0.5rem; }
                 .mb-5 { margin-bottom: 1.25rem; }
                 .w-full { width: 100%; }
+
+                /* 歷史詳情展開樣式 */
+                .history-row.is-expanded {
+                    background-color: #f5f5f7 !important;
+                }
+                .history-detail-row {
+                    background-color: #fafafa;
+                }
+                .history-detail-cell {
+                    padding: 16px 20px !important;
+                    border-bottom: 1px solid #e5e5ea !important;
+                }
+                .history-detail-content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    text-align: left;
+                }
+                .detail-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+                .detail-item strong {
+                    font-size: 0.825rem;
+                    color: #86868b;
+                }
+                .detail-value {
+                    font-size: 0.875rem;
+                    color: #1d1d1f;
+                }
+                .sms-body-full {
+                    background: #ffffff;
+                    border: 1px solid #d2d2d7;
+                    border-radius: 8px;
+                    padding: 10px 12px;
+                    white-space: pre-wrap;
+                    word-break: break-all;
+                    line-height: 1.5;
+                }
+                .recipients-badges {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    max-height: 120px;
+                    overflow-y: auto;
+                    padding: 6px;
+                    background: #ffffff;
+                    border: 1px solid #d2d2d7;
+                    border-radius: 8px;
+                }
+                .recipient-badge {
+                    background: #f5f5f7;
+                    border: 1px solid #d2d2d7;
+                    color: #1d1d1f;
+                    font-size: 0.775rem;
+                    font-weight: 500;
+                    padding: 3px 10px;
+                    border-radius: 980px;
+                }
             ` }} />
         </div>
     );

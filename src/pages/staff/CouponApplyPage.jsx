@@ -224,14 +224,25 @@ function CouponApplyPage() {
                 </div>
             )}
 
-            {hasAuditPermission && (
-                <div className="stats-grid">
-                    <div className="card stat-card">
+            <div className="stats-grid">
+                <div className="card stat-card">
+                    <div className="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 12V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v7" />
+                            <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+                            <path d="M5 12a3 3 0 0 1 0-6" />
+                            <path d="M19 12a3 3 0 0 0 0-6" />
+                            <line x1="9" y1="12" x2="15" y2="12" strokeDasharray="3 3" />
+                        </svg>
+                    </div>
+                    <div className="stat-content">
                         <div className="stat-label">剩餘在庫數量</div>
-                        <div className="stat-value">{couponCount}</div>
+                        <div className="stat-value">
+                            {couponCount} <span style={{ fontSize: '1rem', color: '#86868b', fontWeight: 500 }}>張</span>
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
 
             <div className="edit-section-card apply-form-card">
                 <h3 className="card-title">申請電子券</h3>
@@ -264,9 +275,9 @@ function CouponApplyPage() {
                 </form>
             </div>
 
-            <div className="history-section">
-                <div className="section-header">
-                    <h3 className="section-title">申請紀錄</h3>
+            <div className="history-container">
+                <div className="history-header">
+                    <h3 className="card-subtitle">申請紀錄</h3>
                 </div>
 
                 {/* 手機版：卡片式列表 */}
@@ -377,6 +388,65 @@ function CouponApplyPage() {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
+                .coupon-apply-page .stats-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    margin-bottom: 1.5rem;
+                }
+                .coupon-apply-page .stat-card {
+                    display: flex;
+                    align-items: center;
+                    background: #ffffff;
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    border-radius: 16px;
+                    padding: 1.5rem;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+                    position: relative;
+                }
+                .coupon-apply-page .stat-icon {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 12px;
+                    background: rgba(0, 113, 227, 0.08);
+                    color: #0071e3;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1.25rem;
+                    flex-shrink: 0;
+                }
+                .coupon-apply-page .stat-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .coupon-apply-page .stat-label {
+                    font-size: 0.8rem;
+                    color: #86868b;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.03em;
+                    margin-bottom: 4px;
+                    margin-top: 0;
+                }
+                .coupon-apply-page .stat-value {
+                    font-size: 2rem;
+                    font-weight: 700;
+                    color: #1d1d1f;
+                    line-height: 1.1;
+                    font-family: "SF Pro Display", -apple-system, sans-serif;
+                }
+                .coupon-apply-page .card-subtitle {
+                    font-size: 1.1rem;
+                    margin-bottom: 1rem;
+                    text-align: left;
+                }
+                .coupon-apply-page .history-header {
+                    margin-bottom: 1rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
                 .coupon-apply-page .mobile-only {
                     display: none;
                 }

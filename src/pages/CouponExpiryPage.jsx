@@ -362,13 +362,13 @@ function CouponExpiryPage() {
                                 onChange={(e) => setDays(Math.max(0, parseInt(e.target.value, 10) || 0))}
                                 className="admin-input w-full"
                             />
-                            <div className="text-blue font-medium mt-2" style={{ fontSize: '0.825rem' }}>
+                            <div className="text-blue font-medium mt-2 text-dim">
                                 {dateHint}
                             </div>
                         </div>
 
                         <div className="config-item d-flex align-end">
-                            <label className="cursor-pointer font-bold pb-2" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <label className="cursor-pointer font-bold pb-2 d-flex align-center gap-2">
                                 <input
                                     type="checkbox"
                                     checked={deduplicate}
@@ -435,9 +435,9 @@ function CouponExpiryPage() {
                         </p>
                         <div className="card-stat-row">
                             <span>🟢 綠卡註冊禮：<strong className="text-success">{currentCounts.GREEN50}</strong> 筆</span>
-                            <span>🟡 白金卡升等禮 ：<strong style={{ color: '#f59e0b' }}>{currentCounts.golden100}</strong> 筆</span>
-                            <span>⚫ 黑卡升等禮：<strong style={{ color: '#111827' }}>{currentCounts.black200}</strong> 筆</span>
-                            <span style={{ borderLeft: '1px solid #cbd5e1', paddingLeft: '2rem' }}>總計名單：<strong>{currentCounts.total}</strong> 筆</span>
+                            <span>🟡 白金卡升等禮 ：<strong className="text-warning">{currentCounts.golden100}</strong> 筆</span>
+                            <span>⚫ 黑卡升等禮：<strong className="text-dim font-bold">{currentCounts.black200}</strong> 筆</span>
+                            <span className="total-stat-badge">總計名單：<strong>{currentCounts.total}</strong> 筆</span>
                         </div>
                     </div>
 
@@ -458,7 +458,7 @@ function CouponExpiryPage() {
                     </div>
 
                     {/* 單檔下載 */}
-                    <h4 className="mb-3" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <h4 className="mb-3 sec-title-upper">
                         個別檔案下載：
                     </h4>
                     <div className="converter-btn-group grid-3">
@@ -467,7 +467,7 @@ function CouponExpiryPage() {
                             disabled={currentCounts.GREEN50 === 0}
                             className="converter-btn coupon-btn-green"
                         >
-                            <div className="font-bold" style={{ color: 'var(--text)' }}>綠卡註冊禮 (GREEN50)</div>
+                            <div className="font-bold text-dark">綠卡註冊禮 (GREEN50)</div>
                             <small className="text-dim">符合：{currentCounts.GREEN50} 筆名單</small>
                         </button>
 
@@ -476,7 +476,7 @@ function CouponExpiryPage() {
                             disabled={currentCounts.golden100 === 0}
                             className="converter-btn coupon-btn-gold"
                         >
-                            <div className="font-bold" style={{ color: 'var(--text)' }}>白金卡升等禮 (golden100)</div>
+                            <div className="font-bold text-dark">白金卡升等禮 (golden100)</div>
                             <small className="text-dim">符合：{currentCounts.golden100} 筆名單</small>
                         </button>
 
@@ -485,7 +485,7 @@ function CouponExpiryPage() {
                             disabled={currentCounts.black200 === 0}
                             className="converter-btn coupon-btn-black"
                         >
-                            <div className="font-bold" style={{ color: 'var(--text)' }}>黑卡升等禮 (black200)</div>
+                            <div className="font-bold text-dark">黑卡升等禮 (black200)</div>
                             <small className="text-dim">符合：{currentCounts.black200} 筆名單</small>
                         </button>
                     </div>

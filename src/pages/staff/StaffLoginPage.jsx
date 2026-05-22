@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDocs, collection, query, orderBy } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
 
 function StaffLoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isRegister, setIsRegister] = useState(false);
     const [username, setUsername] = useState(''); // 改用帳號
     const [password, setPassword] = useState('');
@@ -80,10 +81,16 @@ function StaffLoginPage() {
                 }, { merge: true });
 
                 // 註冊後會由 ProtectedRoute 攔截顯示審核中
-                navigate('/staff');
+                const from = location.state?.from
+                    ? (location.state.from.pathname + (location.state.from.search || ''))
+                    : '/staff';
+                navigate(from, { replace: true });
             } else {
                 await signInWithEmailAndPassword(auth, email, password);
-                navigate('/staff');
+                const from = location.state?.from
+                    ? (location.state.from.pathname + (location.state.from.search || ''))
+                    : '/staff';
+                navigate(from, { replace: true });
             }
         } catch (err) {
             console.error(err);
