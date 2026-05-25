@@ -52,6 +52,7 @@ import StoreManagePage from './pages/staff/StoreManagePage';
 import ReportPage from './pages/staff/ReportPage';
 import StaffDashboardPage from './pages/staff/StaffDashboardPage';
 import LineBindPage from './pages/staff/LineBindPage';
+import SqlTestPage from './SQLTEST/SqlTest';
 
 
 function PWAUpdateHandler() {
@@ -94,6 +95,7 @@ function App() {
                     <Route path="/staff/login" element={<><Header /><main className="main-content"><StaffLoginPage /></main><Footer /></>} />
                     <Route path="/form-test" element={<><Header /><main className="main-content"><FormTestPage /></main><Footer /></>} />
                     <Route path="/travel-campaign" element={<main className="campaign-only-content"><TravelCampaignPage /></main>} />
+                    <Route path="/sql-test" element={<><Header /><main className="main-content"><SqlTestPage /></main><Footer /></>} />
 
 
                     {/* 後台頁面 - 側邊欄佈局 */}
