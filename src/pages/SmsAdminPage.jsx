@@ -27,8 +27,6 @@ function SmsAdminPage() {
     const [expandedHistoryId, setExpandedHistoryId] = useState(null);
     const [pendingSend, setPendingSend] = useState(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [isCancelInfoOpen, setIsCancelInfoOpen] = useState(false);
-    const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
     // const [walletBalance, setWalletBalance] = useState(null); // 已移除餘額顯示
 
     // Excel/CSV 欄位對齊狀態
@@ -982,25 +980,6 @@ function SmsAdminPage() {
                                                                             {item.body}
                                                                         </div>
                                                                     </div>
-                                                                    {(item.status === 'reserved' || item.status === 'queued') && (
-                                                                        <div className="detail-action-row" style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-                                                                            <button
-                                                                                type="button"
-                                                                                className="btn-cancel-sms"
-                                                                                onClick={() => {
-                                                                                    setSelectedHistoryItem(item);
-                                                                                    setIsCancelInfoOpen(true);
-                                                                                }}
-                                                                            >
-                                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
-                                                                                    <circle cx="12" cy="12" r="10" />
-                                                                                    <line x1="15" y1="9" x2="9" y2="15" />
-                                                                                    <line x1="9" y1="9" x2="15" y2="15" />
-                                                                                </svg>
-                                                                                取消排程發送
-                                                                            </button>
-                                                                        </div>
-                                                                    )}
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -1021,14 +1000,13 @@ function SmsAdminPage() {
                 <div className="modal-overlay">
                     <div className="confirm-modal">
                         <div className="modal-header">
-                            <span className="modal-icon">✉️</span>
                             <h4 className="modal-title">確認發送簡訊</h4>
                         </div>
                         <div className="modal-body">
                             <div className="info-item">
                                 <div className="info-label">發送模式</div>
                                 <div className="info-value" style={{ color: sendType === 'scheduled' ? '#d76e00' : '#0071e3' }}>
-                                    {sendType === 'scheduled' ? '⏳ 預約排程發送' : '⚡ 立即發送'}
+                                    {sendType === 'scheduled' ? '預約排程發送' : '立即發送'}
                                 </div>
                             </div>
                             {sendType === 'scheduled' && (
@@ -1058,34 +1036,7 @@ function SmsAdminPage() {
                 </div>
             )}
 
-            {/* 2. 取消排程發送說明彈窗 */}
-            {isCancelInfoOpen && selectedHistoryItem && (
-                <div className="modal-overlay">
-                    <div className="confirm-modal" style={{ maxWidth: '450px' }}>
-                        <div className="modal-header" style={{ color: '#ff3b30' }}>
-                            <span className="modal-icon">⚠️</span>
-                            <h4 className="modal-title">取消排程發送指引</h4>
-                        </div>
-                        <div className="modal-body">
-                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 16px 0' }}>
-                                由於 <strong>MAAC Go SMS API</strong> 未開放外部自動取消排程簡訊之權限，本系統無法直接進行線上取消。
-                            </p>
-                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 16px 0', padding: '12px', background: 'rgba(255, 149, 0, 0.06)', borderLeft: '3px solid #ff9500', borderRadius: '4px' }}>
-                                <strong>💡 手動取消步驟：</strong><br />
-                                請您登入 <strong><a href="https://sms.cresclab.com" target="_blank" rel="noopener noreferrer" style={{ color: '#0071e3', textDecoration: 'underline' }}>MAAC Go 官方主控台</a></strong>，進入「簡訊廣播」或「訊息中心」頁面，手動點擊「取消 / 暫停」該筆排程簡訊，以避免額度被扣除。
-                            </p>
-                            <div className="info-item" style={{ marginTop: '14px', fontSize: '0.85rem' }}>
-                                <span style={{ color: '#86868b' }}>簡訊 ID：</span><code>{selectedHistoryItem.id}</code>
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn-modal-confirm" onClick={() => { setIsCancelInfoOpen(false); setSelectedHistoryItem(null); }}>
-                                我知道了
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+
 
             {/* Apple 亮藍簡約風格 CSS 樣式 */}
             <style dangerouslySetInnerHTML={{
