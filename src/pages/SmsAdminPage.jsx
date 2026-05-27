@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 
 function SmsAdminPage() {
+    // 格式化 Date 為本地 datetime-local 輸入框所需的 YYYY-MM-DDTHH:MM 格式
+    const getLocalDatetimeString = (date) => {
+        const tzoffset = date.getTimezoneOffset() * 60000;
+        return (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 16);
+    };
+
     // 專案的內部 API KEY，用於安全校驗後端 API
     const INTERNAL_API_KEY = 'HANDSFORSTAFF2026';
 
@@ -10,7 +16,9 @@ function SmsAdminPage() {
     const [duplicateCount, setDuplicateCount] = useState(0);
     const [smsBody, setSmsBody] = useState('');
     const [sendType, setSendType] = useState('immediate'); // 'immediate' 或 'scheduled'
-    const [scheduledTime, setScheduledTime] = useState('');
+    const [scheduledTime, setScheduledTime] = useState(() => {
+        return getLocalDatetimeString(new Date(Date.now() + 600000));
+    });
     const [isSending, setIsSending] = useState(false);
     const [message, setMessage] = useState(null);
     const [dragOver, setDragOver] = useState(false);
@@ -474,6 +482,17 @@ function SmsAdminPage() {
             recipientsCount = recipients.length;
         }
 
+        // 彈出確認視窗，提醒發送文案與發送時間
+        const sendTimeDesc = sendType === 'scheduled' 
+            ? `預約排程發送\n排程時間：${new Date(scheduledTime).toLocaleString()}`
+            : '立即發送';
+        
+        const confirmMsg = `【簡訊發送確認】\n\n發送模式：${sendTimeDesc}\n發送人數：約 ${recipientsCount} 人\n\n簡訊文案內容：\n------------------------\n${smsBody}\n------------------------\n\n確定要送出嗎？`;
+        
+        if (!window.confirm(confirmMsg)) {
+            return;
+        }
+
         setIsSending(true);
         setMessage(null);
 
@@ -535,7 +554,7 @@ function SmsAdminPage() {
         const stopCount = history.filter(item => item.status === 'stop').length;
         const failedOnly = history.filter(item => item.status === 'failed').length;
         const failed = failedOnly + stopCount;
-        const processing = history.filter(item => item.status === 'sent' || item.status === 'queued').length;
+        const processing = history.filter(item => item.status === 'sent' || item.status === 'queued' || item.status === 'reserved').length;
         return { total, success, failed, stop: stopCount, failedOnly, processing };
     };
 
@@ -552,6 +571,8 @@ function SmsAdminPage() {
                 return '已傳送';
             case 'queued':
                 return '等待發送';
+            case 'reserved':
+                return '已預約排程';
             case 'stop':
                 return '退訂攔截';
             default:
@@ -848,7 +869,7 @@ function SmsAdminPage() {
                                         className="admin-input datetime-input"
                                         value={scheduledTime}
                                         onChange={(e) => setScheduledTime(e.target.value)}
-                                        min={new Date(Date.now() + 600000).toISOString().slice(0, 16)}
+                                        min={getLocalDatetimeString(new Date())}
                                     />
                                     <p className="helper-text">* 建議預約於每日 09:00 - 20:00，避免干擾會員。</p>
                                 </div>
@@ -1667,6 +1688,11 @@ function SmsAdminPage() {
                 .status-delivered {
                     background: rgba(52, 199, 89, 0.08);
                     color: #1a8f30;
+                }
+
+                .status-reserved {
+                    background: rgba(255, 149, 0, 0.08);
+                    color: #d76e00;
                 }
 
                 .status-sent, .status-queued {
