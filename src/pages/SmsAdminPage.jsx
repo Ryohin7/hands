@@ -25,6 +25,10 @@ function SmsAdminPage() {
     const [history, setHistory] = useState([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
     const [expandedHistoryId, setExpandedHistoryId] = useState(null);
+    const [pendingSend, setPendingSend] = useState(null);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isCancelInfoOpen, setIsCancelInfoOpen] = useState(false);
+    const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
     // const [walletBalance, setWalletBalance] = useState(null); // 已移除餘額顯示
 
     // Excel/CSV 欄位對齊狀態
@@ -399,8 +403,8 @@ function SmsAdminPage() {
         }, 0);
     };
 
-    // 提交發送簡訊
-    const handleSend = async (e) => {
+    // 提交發送簡訊 (改用自訂網頁彈窗確認)
+    const handleSend = (e) => {
         e.preventDefault();
 
         const isPersonalizedActive = (smsBody.includes('{{姓名}}') || smsBody.includes('{{點數}}')) && excelRows.length > 0 && columnMapping.phone;
@@ -482,17 +486,17 @@ function SmsAdminPage() {
             recipientsCount = recipients.length;
         }
 
-        // 彈出確認視窗，提醒發送文案與發送時間
-        const sendTimeDesc = sendType === 'scheduled' 
-            ? `預約排程發送\n排程時間：${new Date(scheduledTime).toLocaleString()}`
-            : '立即發送';
-        
-        const confirmMsg = `【簡訊發送確認】\n\n發送模式：${sendTimeDesc}\n發送人數：約 ${recipientsCount} 人\n\n簡訊文案內容：\n------------------------\n${smsBody}\n------------------------\n\n確定要送出嗎？`;
-        
-        if (!window.confirm(confirmMsg)) {
-            return;
-        }
+        // 開啟自訂確認彈窗
+        setPendingSend({ requestData, recipientsCount });
+        setIsConfirmOpen(true);
+    };
 
+    // 真正執行發送的 API 呼叫
+    const executeSend = async () => {
+        if (!pendingSend) return;
+        const { requestData } = pendingSend;
+
+        setIsConfirmOpen(false);
         setIsSending(true);
         setMessage(null);
 
@@ -510,6 +514,8 @@ function SmsAdminPage() {
             const result = await res.json();
 
             if (res.ok && (result.ok || result.success)) {
+                const isPersonalizedActive = (smsBody.includes('{{姓名}}') || smsBody.includes('{{點數}}')) && excelRows.length > 0 && columnMapping.phone;
+                
                 if (isPersonalizedActive) {
                     setMessage({
                         type: 'success',
@@ -524,13 +530,11 @@ function SmsAdminPage() {
                     });
                 }
 
-                // (已移除餘額更新)
-
                 // 清除輸入
                 setRecipientInput('');
                 setSmsBody('');
                 clearImported();
-
+                
                 // 重新整理歷史紀錄
                 setTimeout(fetchHistory, 1000);
             } else {
@@ -544,8 +548,10 @@ function SmsAdminPage() {
             setMessage({ type: 'error', text: '連線後端 API 代理失敗，請稍後再試。' });
         } finally {
             setIsSending(false);
+            setPendingSend(null);
         }
     };
+
 
     // 歷史發送明細統計數據計算
     const getHistoryStats = () => {
@@ -976,6 +982,25 @@ function SmsAdminPage() {
                                                                             {item.body}
                                                                         </div>
                                                                     </div>
+                                                                    {(item.status === 'reserved' || item.status === 'queued') && (
+                                                                        <div className="detail-action-row" style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                                                                            <button
+                                                                                type="button"
+                                                                                className="btn-cancel-sms"
+                                                                                onClick={() => {
+                                                                                    setSelectedHistoryItem(item);
+                                                                                    setIsCancelInfoOpen(true);
+                                                                                }}
+                                                                            >
+                                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
+                                                                                    <circle cx="12" cy="12" r="10" />
+                                                                                    <line x1="15" y1="9" x2="9" y2="15" />
+                                                                                    <line x1="9" y1="9" x2="15" y2="15" />
+                                                                                </svg>
+                                                                                取消排程發送
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -988,8 +1013,78 @@ function SmsAdminPage() {
                             )}
                         </div>
                     </div>
-                </div>
             </div>
+
+            {/* 1. 二次確認彈窗 */}
+            {isConfirmOpen && pendingSend && (
+                <div className="modal-overlay">
+                    <div className="confirm-modal">
+                        <div className="modal-header">
+                            <span className="modal-icon">✉️</span>
+                            <h4 className="modal-title">確認發送簡訊</h4>
+                        </div>
+                        <div className="modal-body">
+                            <div className="info-item">
+                                <div className="info-label">發送模式</div>
+                                <div className="info-value" style={{ color: sendType === 'scheduled' ? '#d76e00' : '#0071e3' }}>
+                                    {sendType === 'scheduled' ? '⏳ 預約排程發送' : '⚡ 立即發送'}
+                                </div>
+                            </div>
+                            {sendType === 'scheduled' && (
+                                <div className="info-item">
+                                    <div className="info-label">排程發送時間</div>
+                                    <div className="info-value">{new Date(scheduledTime).toLocaleString()}</div>
+                                </div>
+                            )}
+                            <div className="info-item">
+                                <div className="info-label">收件人數</div>
+                                <div className="info-value">{pendingSend.recipientsCount} 人</div>
+                            </div>
+                            <div className="info-item">
+                                <div className="info-label">簡訊文案預覽</div>
+                                <div className="sms-preview-card">{smsBody}</div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn-modal-cancel" onClick={() => { setIsConfirmOpen(false); setPendingSend(null); }}>
+                                取消
+                            </button>
+                            <button type="button" className="btn-modal-confirm" onClick={executeSend}>
+                                確定送出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 2. 取消排程發送說明彈窗 */}
+            {isCancelInfoOpen && selectedHistoryItem && (
+                <div className="modal-overlay">
+                    <div className="confirm-modal" style={{ maxWidth: '450px' }}>
+                        <div className="modal-header" style={{ color: '#ff3b30' }}>
+                            <span className="modal-icon">⚠️</span>
+                            <h4 className="modal-title">取消排程發送指引</h4>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 16px 0' }}>
+                                由於 <strong>MAAC Go SMS API</strong> 未開放外部自動取消排程簡訊之權限，本系統無法直接進行線上取消。
+                            </p>
+                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 16px 0', padding: '12px', background: 'rgba(255, 149, 0, 0.06)', borderLeft: '3px solid #ff9500', borderRadius: '4px' }}>
+                                <strong>💡 手動取消步驟：</strong><br />
+                                請您登入 <strong><a href="https://sms.cresclab.com" target="_blank" rel="noopener noreferrer" style={{ color: '#0071e3', textDecoration: 'underline' }}>MAAC Go 官方主控台</a></strong>，進入「簡訊廣播」或「訊息中心」頁面，手動點擊「取消 / 暫停」該筆排程簡訊，以避免額度被扣除。
+                            </p>
+                            <div className="info-item" style={{ marginTop: '14px', fontSize: '0.85rem' }}>
+                                <span style={{ color: '#86868b' }}>簡訊 ID：</span><code>{selectedHistoryItem.id}</code>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn-modal-confirm" onClick={() => { setIsCancelInfoOpen(false); setSelectedHistoryItem(null); }}>
+                                我知道了
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Apple 亮藍簡約風格 CSS 樣式 */}
             <style dangerouslySetInnerHTML={{
@@ -997,6 +1092,148 @@ function SmsAdminPage() {
                 .sms-admin-page {
                     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
                     letter-spacing: -0.01em;
+                }
+                
+                /* 自訂確認與說明彈窗樣式 */
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.4);
+                    backdrop-filter: blur(5px);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                    animation: fadeIn 0.2s ease-out;
+                }
+
+                .confirm-modal {
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 18px;
+                    width: 90%;
+                    max-width: 500px;
+                    padding: 24px;
+                    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    color: #1d1d1f;
+                    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .modal-header {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 16px;
+                }
+
+                .modal-icon {
+                    font-size: 1.5rem;
+                    margin-right: 10px;
+                }
+
+                .modal-title {
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    margin: 0;
+                }
+
+                .modal-body {
+                    margin-bottom: 24px;
+                    text-align: left;
+                }
+
+                .info-item {
+                    margin-bottom: 12px;
+                }
+
+                .info-label {
+                    font-size: 0.85rem;
+                    color: #86868b;
+                    margin-bottom: 4px;
+                }
+
+                .info-value {
+                    font-size: 1rem;
+                    font-weight: 600;
+                }
+
+                .sms-preview-card {
+                    background: #f5f5f7;
+                    border-radius: 12px;
+                    padding: 14px;
+                    font-size: 0.9rem;
+                    line-height: 1.5;
+                    white-space: pre-wrap;
+                    border: 1px solid #e8e8ed;
+                }
+
+                .modal-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                }
+
+                .btn-modal-cancel {
+                    background: #f5f5f7;
+                    color: #1d1d1f;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .btn-modal-cancel:hover {
+                    background: #e8e8ed;
+                }
+
+                .btn-modal-confirm {
+                    background: #0071e3;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .btn-modal-confirm:hover {
+                    background: #0077ed;
+                }
+
+                .btn-cancel-sms {
+                    background: rgba(255, 59, 48, 0.08);
+                    color: #ff3b30;
+                    border: 1px solid rgba(255, 59, 48, 0.2);
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    display: inline-flex;
+                    align-items: center;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .btn-cancel-sms:hover {
+                    background: rgba(255, 59, 48, 0.15);
+                    border-color: rgba(255, 59, 48, 0.3);
+                    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.1);
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+
+                @keyframes slideUp {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
                 }
                 .admin-content-subtitle {
                     font-size: 0.875rem;
