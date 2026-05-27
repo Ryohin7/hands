@@ -59,6 +59,44 @@ export default async function handler(req, res) {
                     // 每次最多發送 100 筆個性化簡訊，防範 Serverless 逾時
                     const listToSend = recipients.slice(0, 100);
 
+                    // 如果有預約排程時間，使用 /api/broadcast 進行排程發送
+                    if (scheduled_at) {
+                        const broadcastRecipients = listToSend.map(item => ({
+                            phone: item.to,
+                            vars: item.variables
+                        }));
+
+                        try {
+                            const response = await fetch('https://sms.cresclab.com/api/broadcast', {
+                                method: 'POST',
+                                headers,
+                                body: JSON.stringify({
+                                    body: template,
+                                    recipients: broadcastRecipients,
+                                    scheduled_at: scheduled_at
+                                })
+                            });
+
+                            const responseData = await response.json();
+                            if (!response.ok) {
+                                return res.status(response.status).json(responseData);
+                            }
+
+                            return res.status(200).json({
+                                ok: true,
+                                success: true,
+                                type: 'personalized',
+                                total: listToSend.length,
+                                successCount: listToSend.length,
+                                failedCount: 0,
+                                balance_cents: responseData.balance_cents,
+                                data: responseData
+                            });
+                        } catch (err) {
+                            return res.status(500).json({ error: '排程廣播發送失敗: ' + err.message });
+                        }
+                    }
+
                     const sendPromises = listToSend.map(async (item) => {
                         const { to: phone, variables } = item;
                         if (!phone) return;

@@ -436,6 +436,13 @@ function SmsAdminPage() {
                 template: smsBody,
                 recipients: pRecipients.slice(0, 100)
             };
+            if (sendType === 'scheduled') {
+                if (!scheduledTime) {
+                    setMessage({ type: 'error', text: '請選擇預約發送的時間' });
+                    return;
+                }
+                requestData.scheduled_at = new Date(scheduledTime).toISOString();
+            }
             recipientsCount = Math.min(pRecipients.length, 100);
 
         } else {
