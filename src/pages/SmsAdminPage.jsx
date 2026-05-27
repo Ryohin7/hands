@@ -23,7 +23,7 @@ function SmsAdminPage() {
     const [excelHeaders, setExcelHeaders] = useState([]);
     const [excelRows, setExcelRows] = useState([]);
     const [columnMapping, setColumnMapping] = useState({ phone: '', name: '', points: '' });
-    
+
     const fileInputRef = useRef(null);
     const textareaRef = useRef(null);
 
@@ -134,7 +134,7 @@ function SmsAdminPage() {
                     const text = e.target.result;
                     const phoneRegex = /(?:\+?886|0)?9\d{8}/g;
                     const matches = text.match(phoneRegex) || [];
-                    
+
                     const validNumbers = [];
                     let duplicates = 0;
                     const uniqueSet = new Set();
@@ -179,7 +179,7 @@ function SmsAdminPage() {
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    
+
                     // 取得二維陣列 (含 header)
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     if (jsonData.length === 0) {
@@ -189,9 +189,9 @@ function SmsAdminPage() {
 
                     // 第一列作為 Header 欄位
                     const headers = jsonData[0].map(h => String(h || '').trim()).filter(Boolean);
-                    
+
                     // 過濾掉完全空的資料行
-                    const rows = jsonData.slice(1).filter(row => 
+                    const rows = jsonData.slice(1).filter(row =>
                         row.some(cell => cell !== null && cell !== undefined && String(cell).trim() !== '')
                     );
 
@@ -271,7 +271,7 @@ function SmsAdminPage() {
     const getSmsMetrics = () => {
         const length = smsBody.length;
         if (length === 0) return { chars: 0, segments: 0, cost: '0.00', isPersonalized: false };
-        
+
         // 判斷是否啟用了個性化發送 (且內文包含 {{姓名}} 或 {{點數}}，並有 Excel 對齊)
         const isPersonalizedActive = (smsBody.includes('{{姓名}}') || smsBody.includes('{{點數}}')) && excelRows.length > 0 && columnMapping.phone;
 
@@ -299,7 +299,7 @@ function SmsAdminPage() {
                 const rowLen = replacedBody.length;
                 const hasChinese = /[\u4e00-\u9fa5]/.test(replacedBody);
                 const limitPerSegment = hasChinese ? 70 : 160;
-                
+
                 let segments = 1;
                 if (rowLen > limitPerSegment) {
                     const splitLimit = hasChinese ? 67 : 153;
@@ -324,13 +324,13 @@ function SmsAdminPage() {
             // 普通發送估算
             const hasChinese = /[\u4e00-\u9fa5]/.test(smsBody);
             const limitPerSegment = hasChinese ? 70 : 160;
-            
+
             let segments = 1;
             if (length > limitPerSegment) {
                 const splitLimit = hasChinese ? 67 : 153;
                 segments = Math.ceil(length / splitLimit);
             }
-            
+
             const costPerSegment = 0.78;
             const totalNumbers = getFinalRecipients().length || 1;
             const totalCost = (segments * costPerSegment * totalNumbers).toFixed(2);
@@ -349,7 +349,7 @@ function SmsAdminPage() {
 
     // 快速插入行銷警語
     const insertMarketingText = () => {
-        const textToInsert = '【HANDS台隆手創館】';
+        const textToInsert = '【台隆手創館】';
         const textarea = textareaRef.current;
         if (textarea) {
             const start = textarea.selectionStart;
@@ -377,12 +377,12 @@ function SmsAdminPage() {
         const text = textarea.value;
         const before = text.substring(0, start);
         const after = text.substring(end, text.length);
-        
+
         const varText = `{{${variableName}}}`;
         const newText = before + varText + after;
-        
+
         setSmsBody(newText);
-        
+
         // 移動游標並重新 focus
         setTimeout(() => {
             textarea.focus();
@@ -394,9 +394,9 @@ function SmsAdminPage() {
     // 提交發送簡訊
     const handleSend = async (e) => {
         e.preventDefault();
-        
+
         const isPersonalizedActive = (smsBody.includes('{{姓名}}') || smsBody.includes('{{點數}}')) && excelRows.length > 0 && columnMapping.phone;
-        
+
         let requestData = {};
         let recipientsCount = 0;
 
@@ -409,7 +409,7 @@ function SmsAdminPage() {
             const pRecipients = excelRows.map(row => {
                 const rawPhone = phoneIdx !== -1 ? row[phoneIdx] : '';
                 const formatted = formatPhoneNumber(String(rawPhone));
-                
+
                 const nameVal = nameIdx !== -1 ? row[nameIdx] : '';
                 const pointsVal = pointsIdx !== -1 ? row[pointsIdx] : '';
 
@@ -441,7 +441,7 @@ function SmsAdminPage() {
         } else {
             // 普通發送模式 (單筆或群發)
             const recipients = getFinalRecipients();
-            
+
             if (recipients.length === 0) {
                 setMessage({ type: 'error', text: '請輸入或匯入至少一個收件人電話號碼' });
                 return;
@@ -483,7 +483,7 @@ function SmsAdminPage() {
 
             const result = await res.json();
 
-            if (res.ok && result.ok) {
+            if (res.ok && (result.ok || result.success)) {
                 if (isPersonalizedActive) {
                     setMessage({
                         type: 'success',
@@ -504,7 +504,7 @@ function SmsAdminPage() {
                 setRecipientInput('');
                 setSmsBody('');
                 clearImported();
-                
+
                 // 重新整理歷史紀錄
                 setTimeout(fetchHistory, 1000);
             } else {
@@ -594,7 +594,7 @@ function SmsAdminPage() {
                 {/* 左邊欄：發送表單 */}
                 <div className="sms-card form-card">
                     <h3 className="card-title">新增簡訊任務</h3>
-                    
+
                     <form onSubmit={handleSend}>
                         {/* 收件人設定 */}
                         <div className="form-group">
@@ -604,7 +604,7 @@ function SmsAdminPage() {
                                     <span className="import-status-text"> (已載入匯入名單)</span>
                                 )}
                             </label>
-                            
+
                             {importedNumbers.length === 0 ? (
                                 <textarea
                                     className="admin-input sms-textarea"
@@ -630,19 +630,19 @@ function SmsAdminPage() {
 
                             {/* Excel / CSV / TXT 上傳 */}
                             {recipientInput.length === 0 && importedNumbers.length === 0 && (
-                                <div 
+                                <div
                                     className={`sms-upload-zone ${dragOver ? 'drag-over' : ''}`}
                                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                                     onDragLeave={() => setDragOver(false)}
                                     onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
                                     onClick={() => fileInputRef.current.click()}
                                 >
-                                    <input 
-                                        ref={fileInputRef} 
-                                        type="file" 
-                                        accept=".xlsx,.xls,.csv,.txt" 
-                                        onChange={(e) => handleFiles(e.target.files)} 
-                                        style={{ display: 'none' }} 
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept=".xlsx,.xls,.csv,.txt"
+                                        onChange={(e) => handleFiles(e.target.files)}
+                                        style={{ display: 'none' }}
                                     />
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="upload-icon">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -732,7 +732,7 @@ function SmsAdminPage() {
                                                             const pointsVal = pointsIdx !== -1 ? row[pointsIdx] : '';
 
                                                             const formattedPhone = formatPhoneNumber(String(phoneVal)) || '格式錯誤';
-                                                            
+
                                                             let previewText = smsBody;
                                                             if (smsBody) {
                                                                 previewText = previewText
@@ -841,7 +841,7 @@ function SmsAdminPage() {
                                         className="admin-input datetime-input"
                                         value={scheduledTime}
                                         onChange={(e) => setScheduledTime(e.target.value)}
-                                        min={new Date(Date.now() + 600000).toISOString().slice(0, 16)} 
+                                        min={new Date(Date.now() + 600000).toISOString().slice(0, 16)}
                                     />
                                     <p className="helper-text">* 建議預約於每日 09:00 - 20:00，避免干擾會員。</p>
                                 </div>
@@ -964,7 +964,8 @@ function SmsAdminPage() {
             </div>
 
             {/* Apple 亮藍簡約風格 CSS 樣式 */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .sms-admin-page {
                     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
                     letter-spacing: -0.01em;

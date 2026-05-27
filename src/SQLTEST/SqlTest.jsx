@@ -12,28 +12,19 @@ export default function SqlTest() {
         password: '• • • • • • • •' // 密碼於介面隱藏以維護安全性
     };
 
-    const [sqlQuery, setSqlQuery] = useState('SELECT TOP 10 * FROM sys.tables;');
+    const [searchKeyword, setSearchKeyword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
 
-    // 常用 SQL 範本一鍵填入 (MSSQL 語法)
-    const applySqlTemplate = (template) => {
-        setSqlQuery(template);
-    };
+    // 新增：連線測試專用狀態
+    const [isTestingConnection, setIsTestingConnection] = useState(false);
+    const [connectionResult, setConnectionResult] = useState(null); // { success: boolean, message: string }
 
-    // 執行查詢主函數
-    const handleExecuteQuery = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-        setResult(null);
-
-        if (!sqlQuery.trim()) {
-            setError('SQL 查詢欄位不可為空。');
-            setIsLoading(false);
-            return;
-        }
+    // 測試資料庫連線主函數
+    const handleTestConnection = async () => {
+        setIsTestingConnection(true);
+        setConnectionResult(null);
 
         try {
             const response = await fetch('/api/sql-test', {
@@ -42,13 +33,56 @@ export default function SqlTest() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    dbType: 'mssql',
-                    host: '192.168.180.21',
-                    port: '1433',
-                    database: 'brms_erp',
-                    user: 'sa',
-                    password: '5/4gj65p',
-                    sql: sqlQuery
+                    sql: 'SELECT 1 as ConnectionTest;'
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.success) {
+                setConnectionResult({
+                    success: true,
+                    message: '連線成功！資料庫運作正常，已成功與內網 SQL Server 建立通訊。'
+                });
+            } else {
+                setConnectionResult({
+                    success: false,
+                    message: data.error || '連線失敗。請確認是否已連線至公司內網、或帳號密碼是否正確。'
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            setConnectionResult({
+                success: false,
+                message: '連線失敗：無法與本地 Vite 代理建立連線，請確保本地 Vite 伺服器正在運作中。'
+            });
+        } finally {
+            setIsTestingConnection(false);
+        }
+    };
+
+    // 執行查詢主函數 (自動產生 INVMB 查詢)
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError(null);
+        setResult(null);
+
+        const escaped = searchKeyword.trim().replace(/'/g, "''");
+        
+        // 自動生成針對 INVMB 商品資料表的查詢
+        // 若無關鍵字，預設列出前 100 筆商品；若有，則進行品號、品名與規格的模糊搜尋
+        const sql = escaped
+            ? `SELECT TOP 100 MB001 as [品號], MB002 as [品名], MB003 as [規格], MB004 as [單位] FROM INVMB WHERE MB001 LIKE '%${escaped}%' OR MB002 LIKE '%${escaped}%' OR MB003 LIKE '%${escaped}%';`
+            : `SELECT TOP 100 MB001 as [品號], MB002 as [品名], MB003 as [規格], MB004 as [單位] FROM INVMB;`;
+
+        try {
+            const response = await fetch('/api/sql-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sql: sql
                 })
             });
 
@@ -59,11 +93,11 @@ export default function SqlTest() {
                     rows: data.rows
                 });
             } else {
-                setError(data.error || 'SQL Server 連線或執行失敗。');
+                setError(data.error || '商品查詢執行失敗。');
             }
         } catch (err) {
             console.error(err);
-            setError('無法連線至 API 代理伺服器，請確認本地 Vite server 正常運作。');
+            setError('無法與資料庫建立連線，請確認您已連接至內網，且已在本地啟動開發伺服器。');
         } finally {
             setIsLoading(false);
         }
@@ -72,8 +106,8 @@ export default function SqlTest() {
     return (
         <div className="sqltest-container">
             <header className="sqltest-header">
-                <h1>SQL Server 資料庫測試工具</h1>
-                <p>針對您的 ERP 資料庫，進行即時 SQL 查詢測試。</p>
+                <h1>ERP 商品資料查詢系統</h1>
+                <p>針對您的 brms_erp 資料庫進行商品資訊檢索，限公司內網使用。</p>
             </header>
 
             <div className="sqltest-grid">
@@ -111,6 +145,33 @@ export default function SqlTest() {
                             <span className="config-value password-masked">{dbConfig.password}</span>
                         </div>
 
+                        {/* 測試連線按鈕區 */}
+                        <div className="connection-actions">
+                            <button
+                                type="button"
+                                className="test-conn-btn"
+                                onClick={handleTestConnection}
+                                disabled={isTestingConnection}
+                            >
+                                {isTestingConnection ? (
+                                    <>
+                                        <span className="spinner mini"></span>
+                                        測試連線中...
+                                    </>
+                                ) : (
+                                    '⚡ 測試資料庫連線'
+                                )}
+                            </button>
+                        </div>
+
+                        {/* 測試連線結果展示 */}
+                        {connectionResult && (
+                            <div className={`connection-alert ${connectionResult.success ? 'success' : 'error'}`}>
+                                <strong>{connectionResult.success ? '✅ 連線成功' : '⚠️ 連線失敗'}</strong>
+                                <p>{connectionResult.message}</p>
+                            </div>
+                        )}
+
                         <div className="connection-status-info">
                             <div className="status-indicator-wrapper">
                                 <span className="status-dot pulsing"></span>
@@ -120,65 +181,42 @@ export default function SqlTest() {
                     </div>
                 </aside>
 
-                {/* 右側：主操作區與查詢結果 */}
+                {/* 右側：主查詢區與商品結果 */}
                 <main className="sqltest-main">
-                    {/* SQL 編輯卡片 */}
+                    {/* 商品搜尋卡片 */}
                     <section className="sqltest-card editor-card">
                         <div className="card-tabs">
                             <button className="tab-btn active">
-                                SQL Server 查詢編輯器
+                                🔍 商品快速檢索 (INVMB)
                             </button>
                         </div>
 
                         <div className="tab-content">
-                            <div className="sql-templates">
-                                <span className="templates-label">MSSQL 範本:</span>
-                                <button
-                                    type="button"
-                                    onClick={() => applySqlTemplate('SELECT TOP 10 * FROM sys.tables;')}
-                                    className="template-badge"
-                                    title="列出此資料庫中所有的資料表"
-                                >
-                                    🔍 探索所有資料表
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => applySqlTemplate('SELECT TOP 100 * FROM [您的資料表名稱];')}
-                                    className="template-badge"
-                                >
-                                    📄 前 100 筆查詢
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => applySqlTemplate('SELECT COUNT(*) as TotalRows FROM [您的資料表名稱];')}
-                                    className="template-badge"
-                                >
-                                    📊 統計資料筆數
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleExecuteQuery}>
-                                <div className="textarea-wrapper">
-                                    <textarea
-                                        value={sqlQuery}
-                                        onChange={(e) => setSqlQuery(e.target.value)}
-                                        placeholder="請輸入 SQL Server 語法，例如：SELECT TOP 10 * FROM sys.tables;"
-                                        rows="8"
+                            <form onSubmit={handleSearch} className="search-form-layout">
+                                <p className="search-intro-text">
+                                    💡 請輸入商品的<strong>品號、品名或規格</strong>關鍵字進行模糊搜尋（留空則預設列出前 100 筆商品）：
+                                </p>
+                                <div className="search-input-group">
+                                    <input
+                                        type="text"
+                                        className="product-search-input"
+                                        placeholder="例如：請輸入品名關鍵字、品號（如 MB001 等）"
+                                        value={searchKeyword}
+                                        onChange={(e) => setSearchKeyword(e.target.value)}
+                                        disabled={isLoading}
                                     />
-                                </div>
-                                <div className="editor-actions">
                                     <button
                                         type="submit"
-                                        className="execute-btn"
+                                        className="product-search-btn"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? (
                                             <>
                                                 <span className="spinner"></span>
-                                                資料庫查詢中...
+                                                查詢中...
                                             </>
                                         ) : (
-                                            '⚡ 執行 SQL 查詢'
+                                            '🔍 開始搜尋商品'
                                         )}
                                     </button>
                                 </div>
@@ -186,13 +224,13 @@ export default function SqlTest() {
                         </div>
                     </section>
 
-                    {/* 查詢結果卡片 */}
+                    {/* 商品查詢結果卡片 */}
                     <section className="sqltest-card result-card">
                         <div className="result-header">
-                            <h2>查詢結果</h2>
+                            <h2>商品列表</h2>
                             {result && (
                                 <span className="rows-count">
-                                    共 {result.rows.length} 筆資料
+                                    共 {result.rows.length} 筆商品資料
                                 </span>
                             )}
                         </div>
@@ -201,19 +239,19 @@ export default function SqlTest() {
                             {isLoading && (
                                 <div className="result-placeholder">
                                     <span className="spinner large"></span>
-                                    <p>正在與 {dbConfig.host} 連線並執行查詢，請稍候...</p>
+                                    <p>正在連線內網資料庫檢索 INVMB 商品表，請稍候...</p>
                                 </div>
                             )}
 
                             {!isLoading && !result && !error && (
                                 <div className="result-placeholder">
-                                    <p className="hint">💡 請在上方輸入 SQL 查詢，並點選「執行 SQL 查詢」按鈕查看結果。</p>
+                                    <p className="hint">💡 請在上方輸入商品關鍵字，並點選「開始搜尋商品」按鈕進行檢索。</p>
                                 </div>
                             )}
 
                             {!isLoading && error && (
                                 <div className="error-alert">
-                                    <h4>⚠️ 查詢執行失敗</h4>
+                                    <h4>⚠️ 商品檢索失敗</h4>
                                     <p>{error}</p>
                                 </div>
                             )}
@@ -222,7 +260,7 @@ export default function SqlTest() {
                                 <div className="table-responsive">
                                     {result.rows.length === 0 ? (
                                         <div className="empty-result">
-                                            <p>查詢成功，但未傳回任何資料列。</p>
+                                            <p>未找到符合關鍵字的商品資料。</p>
                                         </div>
                                     ) : (
                                         <table className="sql-result-table">
@@ -240,7 +278,7 @@ export default function SqlTest() {
                                                             <td key={colIdx}>
                                                                 {row[col] !== undefined && row[col] !== null 
                                                                     ? String(row[col]) 
-                                                                    : <span className="null-val">NULL</span>}
+                                                                    : <span className="null-val">無</span>}
                                                             </td>
                                                         ))}
                                                     </tr>

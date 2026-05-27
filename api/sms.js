@@ -154,7 +154,7 @@ export default async function handler(req, res) {
                     if (!response.ok) {
                         return res.status(response.status).json(responseData);
                     }
-                    return res.status(200).json({ success: true, type: 'broadcast', data: responseData });
+                    return res.status(200).json({ ok: true, success: true, type: 'broadcast', data: responseData });
                 } else {
                     // 單筆立即發送 -> 調用 /sms/send
                     const recipient = typeof to === 'string' ? to.trim() : (Array.isArray(to) ? to[0] : '');
@@ -175,7 +175,7 @@ export default async function handler(req, res) {
                     if (!response.ok) {
                         return res.status(response.status).json(responseData);
                     }
-                    return res.status(200).json({ success: true, type: 'single', data: responseData });
+                    return res.status(200).json({ ok: true, success: true, type: 'single', data: responseData });
                 }
             }
 
