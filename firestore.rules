@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 【1. 權限定義函式】
+    function getRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isStaff() {
+      return request.auth != null && getRole() in ['admin', 'staff'];
+    }
+
+    // 【2. 一般內容：所有人皆可讀取】
+    match /posts/{postId} { allow read: if true; allow write: if isStaff(); }
+    match /stores/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /custom_pages/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /nav_settings/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /settings/{docId} { allow read: if true; allow write: if isStaff(); }
+    match /dms/{docId} { allow read: if true; allow write: if isStaff(); }
+
+    // 【3. 帳號資訊】
+    match /users/{uid} {
+      allow read: if (request.auth != null && request.auth.uid == uid) || isStaff();
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update, delete: if isStaff();
+    }
+
+    // 【4. 實體活動報名】
+    match /event_registrations/{registrationId} {
+      allow create: if true;
+      allow list, get: if true; 
+      allow update, delete: if isStaff();
+    }
+
+    // ✅ 【4-2. 中獎名單寄件資料提交：未登入者可新增，Staff 才能查閱與處理】
+    match /winner_submissions/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+
+    // ✅ 【5. 會員資料變更申請：LIFF / 未登入者可新增，Staff 才能查閱與處理】
+    match /member_actions/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+
+    // 【6. 其他預設限制】
+    match /{document=**} {
+      allow read, write: if isStaff();
+    }
+  }
+}
