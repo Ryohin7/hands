@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import AdminEditPage from './pages/AdminEditPage';
 import DataConverterPage from './pages/DataConverterPage';
+import AudioMergePage from './pages/AudioMergePage';
 import CouponExpiryPage from './pages/CouponExpiryPage';
 import StoreListPage from './pages/StoreListPage';
 import StoreAdminPage from './pages/StoreAdminPage';
@@ -113,6 +114,7 @@ function App() {
                         <Route path="converter" element={<DataConverterPage />} />
                         <Route path="coupon-expiry" element={<CouponExpiryPage />} />
                         <Route path="sms" element={<SmsAdminPage />} />
+                        <Route path="audio-merge" element={<AudioMergePage />} />
 
                         {/* 門市管理 */}
                         <Route path="stores" element={<StoreAdminPage />} />

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP 商品資料查詢系統 - 本機專用</title>
+    <style>
+        /* 頁面質感樣式 - 單一檔案整合 */
+        :root {
+            --sql-primary: #4f46e5;
+            --sql-primary-hover: #4338ca;
+            --sql-bg: #f8fafc;
+            --sql-card-bg: #ffffff;
+            --sql-text: #0f172a;
+            --sql-text-muted: #64748b;
+            --sql-border: #e2e8f0;
+            --sql-success: #10b981;
+            --sql-danger: #ef4444;
+            --sql-accent: #6366f1;
+        }
+
+        body {
+            background-color: var(--sql-bg);
+            color: var(--sql-text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .sqltest-container {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .sqltest-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .sqltest-header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(135deg, var(--sql-primary), var(--sql-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sqltest-header p {
+            color: var(--sql-text-muted);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        /* 網格佈局 */
+        .sqltest-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .sqltest-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 卡片基礎 */
+        .sqltest-card {
+            background: var(--sql-card-bg);
+            border: 1px solid var(--sql-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: box-shadow 0.2s ease;
+            overflow: hidden;
+        }
+
+        .sqltest-card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+        }
+
+        /* 側邊欄唯讀面板 */
+        .sqltest-sidebar {
+            padding: 1.5rem;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--sql-border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .db-type-badge {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .readonly-config-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .config-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--sql-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .config-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+            padding: 0.5rem 0.75rem;
+            background-color: #f8fafc;
+            border: 1px solid var(--sql-border);
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .config-value.highlight-db {
+            background-color: #eef2ff;
+            border-color: #c7d2fe;
+            color: var(--sql-primary);
+        }
+
+        .config-value.password-masked {
+            letter-spacing: 0.2em;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .config-row {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 0.75rem;
+        }
+
+        /* 測試按鈕 */
+        .connection-actions {
+            margin-top: 0.5rem;
+        }
+
+        .test-conn-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #f8fafc;
+            border: 1px solid #334155;
+            padding: 0.625rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .test-conn-btn:hover {
+            background: linear-gradient(135deg, #334155, #1e293b);
+            border-color: #475569;
+        }
+
+        .test-conn-btn:disabled {
+            background: #cbd5e1;
+            border-color: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* 連線 Alert */
+        .connection-alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.825rem;
+            line-height: 1.45;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .connection-alert strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .connection-alert.success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .connection-alert.error {
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #991b1b;
+        }
+
+        .connection-status-info {
+            margin-top: 0.5rem;
+            border-top: 1px solid var(--sql-border);
+            padding-top: 1rem;
+        }
+
+        .status-indicator-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--sql-success);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.pulsing {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: statusPulse 1.6s infinite;
+        }
+
+        @keyframes statusPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .status-text {
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: #0f766e;
+        }
+
+        /* 右側主操作區 */
+        .sqltest-main {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--sql-border);
+            background-color: #f8fafc;
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--sql-text);
+            position: relative;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--sql-primary);
+        }
+
+        .tab-content {
+            padding: 1.5rem;
+        }
+
+        /* 搜尋表單 */
+        .search-form-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .search-intro-text {
+            font-size: 0.9rem;
+            color: var(--sql-text-muted);
+            margin: 0;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .product-search-input {
+            flex: 1;
+            padding: 0.875rem 1.25rem;
+            border: 1px solid var(--sql-border);
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--sql-text);
+            background-color: #f8fafc;
+            transition: all 0.25s ease;
+        }
+
+        .product-search-input:focus {
+            outline: none;
+            border-color: var(--sql-primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+        }
+
+        .product-search-btn {
+            background: linear-gradient(135deg, var(--sql-primary), var(--sql-accent));
+            color: white;
+            border: none;
+            padding: 0 1.75rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+            white-space: nowrap;
+        }
+
+        .product-search-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(79, 70, 229, 0.25);
+        }
+
+        .product-search-btn:active {
+            transform: translateY(0);
+        }
+
+        .product-search-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* 查詢結果卡片 */
+        .result-card {
+            padding: 1.5rem;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--sql-border);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .rows-count {
+            background-color: #f0fdf4;
+            color: #166534;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .result-body {
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            color: var(--sql-text-muted);
+            padding: 2.5rem 1rem;
+            text-align: center;
+        }
+
+        .result-placeholder p.hint {
+            font-size: 0.95rem;
+            max-width: 480px;
+        }
+
+        /* 錯誤提示 */
+        .error-alert {
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #991b1b;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .error-alert h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .error-alert p {
+            margin: 0;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .spinner.mini {
+            width: 14px;
+            height: 14px;
+            border-width: 1.5px;
+        }
+
+        .spinner.large {
+            width: 36px;
+            height: 36px;
+            border-color: rgba(79, 70, 229, 0.1);
+            border-top-color: var(--sql-primary);
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 表格樣式 */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--sql-border);
+            border-radius: 10px;
+        }
+
+        .sql-result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            text-align: left;
+            background-color: white;
+        }
+
+        .sql-result-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--sql-border);
+            white-space: nowrap;
+        }
+
+        .sql-result-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        .sql-result-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .sql-result-table tbody tr:nth-child(even) {
+            background-color: #fcfcfd;
+        }
+
+        .null-val {
+            color: #cbd5e1;
+            font-family: monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .empty-result {
+            padding: 2.5rem;
+            text-align: center;
+            color: var(--sql-text-muted);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sqltest-container">
+    <header className="sqltest-header">
+        <h1 style="margin-bottom: 8px;">ERP 商品資料查詢系統</h1>
+        <p style="color: var(--sql-text-muted); font-size: 1.1rem; margin: 0;">針對您的 brms_erp 資料庫進行商品資訊檢索，限本機內網使用。</p>
+    </header>
+
+    <div class="sqltest-grid">
+        <!-- 左側：唯讀連線資訊卡片 -->
+        <aside class="sqltest-card sqltest-sidebar">
+            <div class="sidebar-header">
+                <h2>連線目標資訊</h2>
+                <span class="db-type-badge">SQL Server</span>
+            </div>
+
+            <div class="readonly-config-panel">
+                <div class="config-item">
+                    <span class="config-label">伺服器主機 (Host)</span>
+                    <span class="config-value">192.168.180.21</span>
+                </div>
+
+                <div class="config-row">
+                    <div class="config-item">
+                        <span class="config-label">連接埠 (Port)</span>
+                        <span class="config-value">1433</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">資料庫名稱</span>
+                        <span class="config-value highlight-db">brms_erp</span>
+                    </div>
+                </div>
+
+                <div class="config-item">
+                    <span class="config-label">登入帳號 (Username)</span>
+                    <span class="config-value">sa</span>
+                </div>
+
+                <div class="config-item">
+                    <span class="config-label">密碼 (Password)</span>
+                    <span class="config-value password-masked">••••••••</span>
+                </div>
+
+                <!-- 測試連線按鈕區 -->
+                <div class="connection-actions">
+                    <button type="button" class="test-conn-btn" id="testConnBtn">
+                        ⚡ 測試資料庫連線
+                    </button>
+                </div>
+
+                <!-- 測試結果提示 -->
+                <div id="connAlertContainer" style="display: none;"></div>
+
+                <div class="connection-status-info">
+                    <div class="status-indicator-wrapper">
+                        <span class="status-dot pulsing"></span>
+                        <span class="status-text">已鎖定為此測試伺服器</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右側：商品快速查詢與結果 -->
+        <main class="sqltest-main">
+            <!-- 商品搜尋卡片 -->
+            <section class="sqltest-card">
+                <div class="card-tabs">
+                    <span class="tab-btn">🔍 商品快速檢索 (INVMB)</span>
+                </div>
+
+                <div class="tab-content">
+                    <form id="searchForm" class="search-form-layout">
+                        <p class="search-intro-text">
+                            💡 請輸入商品的<strong>品號、品名或規格</strong>關鍵字進行模糊搜尋（留空則預設列出前 100 筆商品）：
+                        </p>
+                        <div class="search-input-group">
+                            <input
+                                type="text"
+                                class="product-search-input"
+                                id="searchInput"
+                                placeholder="例如：請輸入品名關鍵字、品號（如 MB001 等）"
+                            />
+                            <button type="submit" class="product-search-btn" id="searchBtn">
+                                🔍 開始搜尋商品
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 商品結果卡片 -->
+            <section class="sqltest-card result-card">
+                <div class="result-header">
+                    <h2>商品列表</h2>
+                    <span class="rows-count" id="rowsCount" style="display: none;"></span>
+                </div>
+
+                <div class="result-body" id="resultBody">
+                    <div class="result-placeholder" id="placeholder">
+                        <p class="hint">💡 請在上方輸入商品關鍵字，並點選「開始搜尋商品」按鈕進行檢索。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script>
+    // 本地 API 連線端點 (Vite 開發伺服器提供的本地攔截器)
+    const API_ENDPOINT = 'http://localhost:5173/api/sql-test';
+
+    const testConnBtn = document.getElementById('testConnBtn');
+    const connAlertContainer = document.getElementById('connAlertContainer');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultBody = document.getElementById('resultBody');
+    const rowsCount = document.getElementById('rowsCount');
+
+    // 測試連線邏輯
+    testConnBtn.addEventListener('click', async () => {
+        testConnBtn.disabled = true;
+        testConnBtn.innerHTML = '<span class="spinner mini"></span> 測試連線中...';
+        connAlertContainer.style.display = 'none';
+
+        try {
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sql: 'SELECT 1 as ConnectionTest;' })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.success) {
+                showConnAlert(true, '連線成功！資料庫運作正常，已成功與內網 SQL Server 建立通訊。');
+            } else {
+                showConnAlert(false, data.error || '連線失敗。請確認是否已連線至公司內網、或帳號密碼是否正確。');
+            }
+        } catch (err) {
+            console.error(err);
+            showConnAlert(false, '連線失敗：無法連通本地 API，請確保您的本地開發伺服器已執行中。');
+        } finally {
+            testConnBtn.disabled = false;
+            testConnBtn.innerHTML = '⚡ 測試資料庫連線';
+        }
+    });
+
+    // 展示連線 Alert
+    function showConnAlert(isSuccess, message) {
+        connAlertContainer.style.display = 'block';
+        connAlertContainer.innerHTML = `
+            <div class="connection-alert ${isSuccess ? 'success' : 'error'}">
+                <strong>${isSuccess ? '✅ 連線成功' : '⚠️ 連線失敗'}</strong>
+                <p style="margin: 0;">${message}</p>
+            </div>
+        `;
+    }
+
+    // 商品檢索邏輯
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const keyword = searchInput.value.trim();
+        const escaped = keyword.replace(/'/g, "''");
+
+        // 後台自動拼接 SQL
+        const sql = escaped
+            ? `SELECT TOP 100 MB001 as [品號], MB002 as [品名], MB003 as [規格], MB004 as [單位] FROM INVMB WHERE MB001 LIKE '%${escaped}%' OR MB002 LIKE '%${escaped}%' OR MB003 LIKE '%${escaped}%';`
+            : `SELECT TOP 100 MB001 as [品號], MB002 as [品名], MB003 as [規格], MB004 as [單位] FROM INVMB;`;
+
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<span class="spinner"></span> 查詢中...';
+        rowsCount.style.display = 'none';
+        
+        // 顯示載入 Spinner
+        resultBody.innerHTML = `
+            <div class="result-placeholder">
+                <span class="spinner large"></span>
+                <p>正在連線內網資料庫檢索 INVMB 商品表，請稍候...</p>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sql })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.success) {
+                renderResultTable(data.columns, data.rows);
+            } else {
+                showSearchError(data.error || '商品查詢執行失敗。');
+            }
+        } catch (err) {
+            console.error(err);
+            showSearchError('連線失敗：無法連通本地開發伺服器，請確保已在終端機啟動本機服務。');
+        } finally {
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '🔍 開始搜尋商品';
+        }
+    });
+
+    // 渲染結果表格
+    function renderResultTable(columns, rows) {
+        if (rows.length === 0) {
+            resultBody.innerHTML = `
+                <div class="empty-result">
+                    <p>未找到符合關鍵字的商品資料。</p>
+                </div>
+            `;
+            return;
+        }
+
+        rowsCount.style.display = 'inline-block';
+        rowsCount.innerText = `共 ${rows.length} 筆商品資料`;
+
+        let theadHtml = columns.map(col => `<th>${col}</th>`).join('');
+        let tbodyHtml = rows.map(row => {
+            let cells = columns.map(col => {
+                let val = row[col];
+                return `<td>${val !== undefined && val !== null ? val : '<span class="null-val">無</span>'}</td>`;
+            }).join('');
+            return `<tr>${cells}</tr>`;
+        }).join('');
+
+        resultBody.innerHTML = `
+            <div class="table-responsive">
+                <table class="sql-result-table">
+                    <thead><tr>${theadHtml}</tr></thead>
+                    <tbody>${tbodyHtml}</tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // 顯示查詢錯誤
+    function showSearchError(message) {
+        resultBody.innerHTML = `
+            <div class="error-alert">
+                <h4>⚠️ 商品檢索失敗</h4>
+                <p>${message}</p>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
