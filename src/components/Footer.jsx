@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 function Footer() {
+    const location = useLocation();
     const [settings, setSettings] = useState({
         fb: '',
         ig: '',
         threads: '',
         footerCopyright: 'Copyright © Tailung Capital Inc. All rights reserved.'
     });
+    const [isKatsuyaMode, setIsKatsuyaMode] = useState(false);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -24,8 +27,24 @@ function Footer() {
         fetchSettings();
     }, []);
 
+    useEffect(() => {
+        if (location.pathname === '/katsuya') {
+            setIsKatsuyaMode(true);
+        } else if (!location.pathname.startsWith('/post/')) {
+            setIsKatsuyaMode(false);
+        }
+    }, [location.pathname]);
+
+    useEffect(() => {
+        const handleKatsuyaEvent = (e) => {
+            setIsKatsuyaMode(!!e.detail);
+        };
+        window.addEventListener('katsuyaModeChange', handleKatsuyaEvent);
+        return () => window.removeEventListener('katsuyaModeChange', handleKatsuyaEvent);
+    }, []);
+
     return (
-        <footer className="footer">
+        <footer className="footer" style={isKatsuyaMode ? { backgroundColor: '#e47f21' } : undefined}>
             <div className="footer-inner">
                 <div className="footer-copyright">
                     {settings.footerCopyright}

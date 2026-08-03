@@ -71,6 +71,7 @@ function HomePage() {
             const data = snapshot.docs
                 .map((doc) => ({ id: doc.id, ...doc.data() }))
                 .filter((post) => {
+                    if (post.category === '吉豚屋中獎公告') return false;
                     if (post.scheduledAt) {
                         const schedDate = post.scheduledAt.toDate ? post.scheduledAt.toDate() : new Date(post.scheduledAt);
                         return schedDate <= now;
@@ -92,7 +93,7 @@ function HomePage() {
                 where('status', '==', 'published')
             );
             const snapshot = await getDocs(q);
-            const count = snapshot.docs.filter(doc => doc.data().category !== '實體活動').length;
+            const count = snapshot.docs.filter(doc => doc.data().category !== '實體活動' && doc.data().category !== '吉豚屋中獎公告').length;
             setTotalCount(count);
         } catch (err) {
             console.error('取得公告數量失敗:', err);
@@ -132,8 +133,8 @@ function HomePage() {
             const data = snapshot.docs
                 .map((doc) => ({ id: doc.id, ...doc.data() }))
                 .filter((post) => {
-                    // 排除實體活動
-                    if (post.category === '實體活動') return false;
+                    // 排除實體活動與吉豚屋中獎公告
+                    if (post.category === '實體活動' || post.category === '吉豚屋中獎公告') return false;
                     // 排除置頂文章（已在上方顯示）
                     if (post.pinned && pinnedIds.has(post.id)) return false;
                     // 過濾掉尚未到排程時間的文章

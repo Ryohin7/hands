@@ -129,6 +129,10 @@
     margin-bottom: 0.75rem;
 }
 
+.post-detail-category.katsuya-tag {
+    background: #e47f21 !important;
+}
+
 .post-detail-content {
     padding: 2.5rem 0;
     overflow-wrap: break-word;
@@ -241,22 +245,140 @@
     font-weight: 600;
 }
 
-/* Tiptap 編輯器內容區 (所見即所得) */
+/* Tiptap 編輯器內容區 (所見即所得 A4 紙張佈局) */
 .editor-content-area {
     overflow-x: auto;
     overflow-y: auto;
-    max-height: 600px; /* 固定最大高度，防止內容過長導致整個頁面被撐大 */
+    max-height: 800px; /* 增加最大高度，使 A4 長頁預覽更舒適 */
     width: 100%;
     box-sizing: border-box;
-    background: #fff;
+    background: #f0f2f5; /* 淺灰色背景，襯托白色 A4 紙張 */
+    padding: 30px 15px;
 }
 
 .editor-content-area .ProseMirror {
-    min-height: 400px;
-    padding: 40px; /* 統一與 post-detail-content 的留白感 */
+    width: 210mm; /* A4 標準寬度 */
+    min-height: 297mm; /* A4 標準最小高度 */
+    margin: 0 auto 30px auto;
+    background: #ffffff;
+    padding: 20mm; /* 標準邊界留白 */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
     outline: none;
     box-sizing: border-box;
 }
+
+/* Tiptap 分頁符號樣式 */
+.editor-content-area .ProseMirror .page-break-divider {
+    border: none;
+    border-top: 2px dashed #007130;
+    margin: 40px 0;
+    position: relative;
+    text-align: center;
+    height: 1px;
+    overflow: visible;
+    user-select: none;
+}
+
+.editor-content-area .ProseMirror .page-break-divider::after {
+    content: "✂️ 分頁符號 (列印時在此斷頁)";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffffff;
+    padding: 2px 12px;
+    font-size: 0.75rem;
+    color: #007130;
+    font-weight: 600;
+    border: 1px dashed #007130;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* 列印與匯出 PDF 斷頁樣式 */
+@media print {
+    .tiptap-toolbar,
+    .editor-bubble-menu,
+    .editor-floating-menu {
+        display: none !important;
+    }
+    .editor-content-area {
+        background: none !important;
+        padding: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    .editor-content-area .ProseMirror {
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .editor-content-area .ProseMirror .page-break-divider {
+        page-break-after: always !important;
+        break-after: page !important;
+        height: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        visibility: hidden !important;
+    }
+}
+
+
+/* Tiptap 表格樣式與拖曳欄寬 (Resizable) */
+.editor-content-area .ProseMirror table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.editor-content-area .ProseMirror td,
+.editor-content-area .ProseMirror th {
+    min-width: 1em;
+    border: 2px solid #ced4da;
+    padding: 8px 12px;
+    vertical-align: top;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.editor-content-area .ProseMirror th {
+    font-weight: bold;
+    text-align: left;
+    background-color: #f8f9fa;
+}
+
+/* 儲存格選取高亮 */
+.editor-content-area .ProseMirror .selectedCell:after {
+    z-index: 2;
+    position: absolute;
+    content: "";
+    left: 0; right: 0; top: 0; bottom: 0;
+    background: rgba(0, 113, 48, 0.08); /* 配合品牌色(綠色) */
+    pointer-events: none;
+}
+
+/* 表格欄寬調整把手 (column-resize-handle) */
+.editor-content-area .ProseMirror table .column-resize-handle {
+    position: absolute;
+    right: -2px;
+    top: 0;
+    bottom: -2px;
+    width: 4px;
+    background-color: #007130; /* 配合品牌色(深綠色) */
+    pointer-events: none;
+    z-index: 20;
+}
+
+.editor-content-area .ProseMirror table .resize-cursor {
+    cursor: col-resize;
+}
+
 
 /* === 登入頁 (Modern Upgrade) === */
 .login-page {

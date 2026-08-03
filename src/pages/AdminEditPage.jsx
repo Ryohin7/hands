@@ -33,13 +33,13 @@ function AdminEditPage() {
     const [isOnsiteRegistration, setIsOnsiteRegistration] = useState(false);
     const [isNoFormNeeded, setIsNoFormNeeded] = useState(false);
 
-    const categories = ['公告', '檔期活動', '新聞發佈', '中獎名單公告', '實體活動'];
+    const categories = ['公告', '檔期活動', '新聞發佈', '中獎名單公告', '吉豚屋中獎公告', '實體活動'];
 
     // 處理分類切換
     const handleCategoryChange = (e) => {
         const selected = e.target.value;
         setCategory(selected);
-        if ((selected === '中獎名單公告' || selected === '實體活動') && !formDeadline && !isEdit) {
+        if ((selected === '中獎名單公告' || selected === '吉豚屋中獎公告' || selected === '實體活動') && !formDeadline && !isEdit) {
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
@@ -106,7 +106,7 @@ function AdminEditPage() {
             alert('請選擇排程時間');
             return;
         }
-        if ((category === '中獎名單公告' || category === '實體活動') && !formDeadline && !isOnsiteRegistration && !isNoFormNeeded) {
+        if ((category === '中獎名單公告' || category === '吉豚屋中獎公告' || category === '實體活動') && !formDeadline && !isOnsiteRegistration && !isNoFormNeeded) {
             alert('請選擇表單填寫截止時間');
             return;
         }
@@ -128,7 +128,7 @@ function AdminEditPage() {
                 allowWaitlist: category === '實體活動' ? !!allowWaitlist : false,
                 waitlistLimit: (category === '實體活動' && allowWaitlist) ? (waitlistLimit === '' ? 0 : parseInt(waitlistLimit, 10)) : 0,
                 isOnsiteRegistration: category === '實體活動' ? !!isOnsiteRegistration : false,
-                isNoFormNeeded: (category === '中獎名單公告' || category === '實體活動') ? !!isNoFormNeeded : false,
+                isNoFormNeeded: (category === '中獎名單公告' || category === '吉豚屋中獎公告' || category === '實體活動') ? !!isNoFormNeeded : false,
             };
 
             if (useSchedule && scheduledAt) {
@@ -137,7 +137,7 @@ function AdminEditPage() {
                 postData.scheduledAt = null;
             }
 
-            if ((category === '中獎名單公告' || category === '實體活動') && formDeadline) {
+            if ((category === '中獎名單公告' || category === '吉豚屋中獎公告' || category === '實體活動') && formDeadline) {
                 postData.formDeadline = Timestamp.fromDate(new Date(formDeadline));
             } else {
                 postData.formDeadline = null;
@@ -335,7 +335,7 @@ function AdminEditPage() {
                             </div>
                         </div>
 
-                        {(category === '中獎名單公告' || category === '實體活動') && (
+                        {(category === '中獎名單公告' || category === '吉豚屋中獎公告' || category === '實體活動') && (
                             <div className="edit-section-card">
                                 <h3 className="edit-section-title">特殊設定</h3>
                                  <div className="form-group">

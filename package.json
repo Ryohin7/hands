@@ -10,6 +10,7 @@
     "maac-mcp": "node run-maac-mcp.js"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.7.6",
     "@hello-pangea/dnd": "^18.0.1",
     "@tiptap/extension-color": "^3.20.0",
     "@tiptap/extension-highlight": "^3.20.0",
@@ -32,6 +33,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.0",
     "jszip": "^3.10.1",
+    "mssql": "^11.0.1",
     "quill-better-table": "^1.2.10",
     "quill-image-resize-module-react": "^3.0.0",
     "react": "^18.3.1",
@@ -39,8 +41,7 @@
     "react-google-recaptcha": "^3.1.0",
     "react-quill-new": "^3.3.4",
     "react-router-dom": "^6.28.0",
-    "xlsx": "^0.18.5",
-    "mssql": "^11.0.1"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

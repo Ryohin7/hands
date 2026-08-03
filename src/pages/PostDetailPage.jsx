@@ -30,10 +30,15 @@ function PostDetailPage() {
         fetchPost();
     }, [id]);
 
-    // 動態更新頁面標題與 meta description（SEO）
+    // 動態更新頁面標題與 meta description（SEO）及通知 Header 品牌模式
     useEffect(() => {
         if (post) {
-            document.title = `${post.title} — 台隆手創館公告`;
+            const isKatsuya = post.category === '吉豚屋中獎公告';
+            document.title = isKatsuya ? `${post.title} — 吉豚屋中獎公告` : `${post.title} — 台隆手創館公告`;
+            
+            // 發送自訂事件通知 Header
+            window.dispatchEvent(new CustomEvent('katsuyaModeChange', { detail: isKatsuya }));
+
             // 更新 meta description
             let metaDesc = document.querySelector('meta[name="description"]');
             if (metaDesc) {
@@ -45,6 +50,7 @@ function PostDetailPage() {
             }
         }
         return () => {
+            window.dispatchEvent(new CustomEvent('katsuyaModeChange', { detail: false }));
             document.title = '台隆手創館公告';
             const metaDesc = document.querySelector('meta[name="description"]');
             if (metaDesc) {
@@ -116,20 +122,23 @@ function PostDetailPage() {
         );
     }
 
+    const isKatsuyaPost = post.category === '吉豚屋中獎公告';
+    const backPath = isKatsuyaPost ? '/katsuya' : '/';
+
     return (
         <div className="page-container post-detail-container">
-            <Link to="/" className="back-link">
+            <Link to={backPath} className="back-link" style={isKatsuyaPost ? { color: '#e47f21' } : undefined}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="15 18 9 12 15 6" />
                 </svg>
-                返回公告列表
+                {isKatsuyaPost ? '返回吉豚屋公告' : '返回公告列表'}
             </Link>
 
             <article className="post-detail">
                 <div className="post-detail-header">
                     <div className="post-detail-meta-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                         {post.category ? (
-                            <span className="post-detail-category">{post.category}</span>
+                            <span className={`post-detail-category ${isKatsuyaPost ? 'katsuya-tag' : ''}`}>{post.category}</span>
                         ) : (
                             <span /> /* spacer */
                         )}
@@ -147,7 +156,7 @@ function PostDetailPage() {
                     dangerouslySetInnerHTML={{ __html: autoSpace(sanitizeHtml(post.content)) }}
                 />
 
-                {post.category === '中獎名單公告' && !post.isNoFormNeeded && <WinnerForm post={post} />}
+                {(post.category === '中獎名單公告' || post.category === '吉豚屋中獎公告') && !post.isNoFormNeeded && <WinnerForm post={post} />}
                 {post.category === '實體活動' && !post.isOnsiteRegistration && !post.isNoFormNeeded && <EventRegistrationForm post={post} />}
             </article>
         </div>

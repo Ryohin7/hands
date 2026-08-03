@@ -28,7 +28,7 @@ function WinnerAdminPage() {
             // 所以加上 fallback 邏輯
             let q = query(
                 collection(db, 'posts'),
-                where('category', '==', '中獎名單公告'),
+                where('category', 'in', ['中獎名單公告', '吉豚屋中獎公告']),
                 orderBy('createdAt', 'desc')
             );
 
@@ -42,7 +42,7 @@ function WinnerAdminPage() {
                 const snapshot = await getDocs(fallbackQ);
                 const data = snapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(p => p.category === '中獎名單公告');
+                    .filter(p => p.category === '中獎名單公告' || p.category === '吉豚屋中獎公告');
                 setPosts(data);
             }
         } catch (err) {

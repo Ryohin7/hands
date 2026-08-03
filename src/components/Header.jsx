@@ -15,6 +15,8 @@ function Header() {
         seoDescription: '最新消息與通知'
     });
 
+    const [isKatsuyaMode, setIsKatsuyaMode] = useState(false);
+
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (u) => setUser(u));
         fetchNav();
@@ -22,21 +24,37 @@ function Header() {
         return unsub;
     }, []);
 
+    useEffect(() => {
+        if (location.pathname === '/katsuya') {
+            setIsKatsuyaMode(true);
+        } else if (!location.pathname.startsWith('/post/')) {
+            setIsKatsuyaMode(false);
+        }
+    }, [location.pathname]);
+
+    useEffect(() => {
+        const handleKatsuyaEvent = (e) => {
+            setIsKatsuyaMode(!!e.detail);
+        };
+        window.addEventListener('katsuyaModeChange', handleKatsuyaEvent);
+        return () => window.removeEventListener('katsuyaModeChange', handleKatsuyaEvent);
+    }, []);
+
     // 當路徑改變時，自動關閉手機版選單
     useEffect(() => {
         setMenuOpen(false);
     }, [location.pathname]);
 
-    // 更新 SEO 標記 (若非後台頁面)
+    // 更新 SEO 標記 (若非後台頁面且非吉豚屋頁面)
     useEffect(() => {
-        if (!location.pathname.startsWith('/admin')) {
+        if (!location.pathname.startsWith('/admin') && !isKatsuyaMode) {
             document.title = siteSettings.seoTitle;
             const metaDesc = document.querySelector('meta[name="description"]');
             if (metaDesc) {
                 metaDesc.setAttribute('content', siteSettings.seoDescription);
             }
         }
-    }, [location.pathname, siteSettings]);
+    }, [location.pathname, siteSettings, isKatsuyaMode]);
 
     async function fetchSettings() {
         try {
@@ -76,11 +94,11 @@ function Header() {
     return (
         <header className="header">
             <div className="header-inner">
-                <Link to="/" className="header-logo">
-                    <span>{siteSettings.siteName}</span>
+                <Link to={isKatsuyaMode ? "/katsuya" : "/"} className="header-logo" style={isKatsuyaMode ? { color: '#e47f21' } : undefined}>
+                    <span>{isKatsuyaMode ? '吉豚屋' : siteSettings.siteName}</span>
                 </Link>
 
-                {!isAdmin && (
+                {!isAdmin && !isKatsuyaMode && (
                     <button 
                         className="mobile-menu-toggle" 
                         onClick={() => setMenuOpen(!menuOpen)}
@@ -94,43 +112,45 @@ function Header() {
                     </button>
                 )}
 
-                <nav className={`header-nav ${menuOpen ? 'mobile-open' : ''}`}>
-                    {!isAdmin && navItems.map(item => (
-                        <div key={item.id} className={`nav-item-wrapper ${item.children && item.children.length > 0 ? 'has-dropdown' : ''}`}>
-                            {item.path ? (
-                                <Link
-                                    to={item.path}
-                                    className={`header-link ${location.pathname === item.path ? 'active' : ''}`}
-                                >
-                                    {item.label}
-                                    {item.children && item.children.length > 0 && (
-                                        <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: '4px' }}>
-                                            <polyline points="6 9 12 15 18 9" />
-                                        </svg>
-                                    )}
-                                </Link>
-                            ) : (
-                                <span className="header-link" style={{ cursor: 'default' }}>
-                                    {item.label}
-                                    {item.children && item.children.length > 0 && (
-                                        <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: '4px' }}>
-                                            <polyline points="6 9 12 15 18 9" />
-                                        </svg>
-                                    )}
-                                </span>
-                            )}
-                            {item.children && item.children.length > 0 && (
-                                <div className="header-dropdown">
-                                    {item.children.filter(c => c.visible).map(child => (
-                                        <Link key={child.id} to={child.path} className="dropdown-link">
-                                            {child.label}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </nav>
+                {!isKatsuyaMode && (
+                    <nav className={`header-nav ${menuOpen ? 'mobile-open' : ''}`}>
+                        {!isAdmin && navItems.map(item => (
+                            <div key={item.id} className={`nav-item-wrapper ${item.children && item.children.length > 0 ? 'has-dropdown' : ''}`}>
+                                {item.path ? (
+                                    <Link
+                                        to={item.path}
+                                        className={`header-link ${location.pathname === item.path ? 'active' : ''}`}
+                                    >
+                                        {item.label}
+                                        {item.children && item.children.length > 0 && (
+                                            <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: '4px' }}>
+                                                <polyline points="6 9 12 15 18 9" />
+                                            </svg>
+                                        )}
+                                    </Link>
+                                ) : (
+                                    <span className="header-link" style={{ cursor: 'default' }}>
+                                        {item.label}
+                                        {item.children && item.children.length > 0 && (
+                                            <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginLeft: '4px' }}>
+                                                <polyline points="6 9 12 15 18 9" />
+                                            </svg>
+                                        )}
+                                    </span>
+                                )}
+                                {item.children && item.children.length > 0 && (
+                                    <div className="header-dropdown">
+                                        {item.children.filter(c => c.visible).map(child => (
+                                            <Link key={child.id} to={child.path} className="dropdown-link">
+                                                {child.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </nav>
+                )}
             </div>
             {menuOpen && <div className="header-overlay" onClick={() => setMenuOpen(false)}></div>}
         </header>

@@ -4,6 +4,7 @@ import Header from './components/Header';
 import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import WinnersPage from './pages/WinnersPage';
+import KatsuyaPage from './pages/KatsuyaPage';
 import PostDetailPage from './pages/PostDetailPage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
@@ -53,7 +54,6 @@ import StoreManagePage from './pages/staff/StoreManagePage';
 import ReportPage from './pages/staff/ReportPage';
 import StaffDashboardPage from './pages/staff/StaffDashboardPage';
 import LineBindPage from './pages/staff/LineBindPage';
-import SqlTestPage from './SQLTEST/SqlTest';
 
 
 function PWAUpdateHandler() {
@@ -83,6 +83,7 @@ function App() {
                     {/* 前台頁面 - 帶 Header & Footer */}
                     <Route path="/" element={<><Header /><main className="main-content"><HomePage /></main><Footer /></>} />
                     <Route path="/winners" element={<><Header /><main className="main-content"><WinnersPage /></main><Footer /></>} />
+                    <Route path="/katsuya" element={<><Header /><main className="main-content"><KatsuyaPage /></main><Footer /></>} />
                     <Route path="/post/:id" element={<><Header /><main className="main-content"><PostDetailPage /></main><Footer /></>} />
                     <Route path="/login" element={<><Header /><main className="main-content"><LoginPage /></main><Footer /></>} />
                     <Route path="/stores" element={<><Header /><main className="main-content"><StoreListPage /></main><Footer /></>} />
@@ -96,7 +97,6 @@ function App() {
                     <Route path="/staff/login" element={<><Header /><main className="main-content"><StaffLoginPage /></main><Footer /></>} />
                     <Route path="/form-test" element={<><Header /><main className="main-content"><FormTestPage /></main><Footer /></>} />
                     <Route path="/travel-campaign" element={<main className="campaign-only-content"><TravelCampaignPage /></main>} />
-                    <Route path="/sql-test" element={<><Header /><main className="main-content"><SqlTestPage /></main><Footer /></>} />
 
 
                     {/* 後台頁面 - 側邊欄佈局 */}
