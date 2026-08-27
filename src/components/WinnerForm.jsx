@@ -136,7 +136,7 @@ function WinnerForm({ post }) {
     if (submitted) {
         return (
             <div className="winner-form-container success-form">
-                <h3>得獎者寄件資料填寫</h3>
+                <h3>收件資料填寫</h3>
                 <div className="empty-state" style={{ padding: '2rem', border: '1px solid #007130', borderRadius: '8px', marginTop: '1rem', textAlign: 'center', background: '#e8f5e9' }}>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#007130" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '1rem' }}>
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -164,7 +164,7 @@ function WinnerForm({ post }) {
 
             <div className="winner-form-card">
                 <div className="winner-form-header">
-                    <h3>{isReviewing ? '確認資料是否正確' : '得獎者寄件資料填寫'}</h3>
+                    <h3>{isReviewing ? '確認資料是否正確' : '收件資料填寫'}</h3>
                 </div>
 
                 {!isReviewing && post?.formDeadline && (
@@ -218,7 +218,7 @@ function WinnerForm({ post }) {
                                     required
                                     value={communityName}
                                     onChange={e => setCommunityName(e.target.value)}
-                                    placeholder="請輸入您的FB名稱 (IG抽獎填IG帳號)"
+                                    placeholder="請輸入您的FB名稱 (IG則填IG帳號)"
                                 />
                             </div>
 
